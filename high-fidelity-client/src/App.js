@@ -1,19 +1,19 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import {
+  BrowserRouter as Router,
+  Route,
+  Link
+} from 'react-router-dom';
 
-class App extends Component {
+class Home extends Component {
   render() {
     return (
       <div className="App">
         <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
-        </div>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-        <div>
+          <h2>Welcome to High Fidelity</h2>
+          <div>Click the button to logg in</div>
           <button onClick={this.handlelogin}>login</button>
         </div>
       </div>
@@ -31,11 +31,28 @@ class App extends Component {
            + '&scope=' + encodeURIComponent(scopes.join(' '))
            + '&response_type=code';
 
-    var w = window.open(url);
+    var w = window.location.href = url;
     return false;
   };
 }
 
+const LoggedInHome = ({match}) => (
+  <div className="App">
+    <div className="App-header">
+      <h2>Welcome to High Fidelity</h2>
+      <div>You are logged in as {match.params.userid}</div>
+    </div>
+  </div>
+)
+
+const MainRouter = () => (
+  <Router>
+    <div>
+      <Route exact path="/" component={Home}/>
+      <Route path="/logged-in/:userid" component={LoggedInHome}/>
+    </div>
+  </Router>
+)
 
 
-export default App;
+export default MainRouter;

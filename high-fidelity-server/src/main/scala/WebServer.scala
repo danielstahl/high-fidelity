@@ -46,7 +46,7 @@ object WebServer extends Directives with UserJsonSupport {
             val redirectHtml =
               userFuture.map(currentUser =>
                 HttpEntity(ContentTypes.`text/html(UTF-8)`,
-                  "<meta http-equiv=\"refresh\" content=\"0; url=http://localhost:3000/logged-in?username=" + currentUser.privateUser.id + "\" />"))
+                  "<meta http-equiv=\"refresh\" content=\"0; url=http://localhost:3000/logged-in/" + currentUser.privateUser.id + "\" />"))
 
             complete(redirectHtml)
 
