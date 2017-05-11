@@ -1,0 +1,34 @@
+# See https://help.github.com/ignore-files/ for more about ignoring files.
+
+# dependencies
+/high-fidelity-client/node_modules
+
+# testing
+/high-fidelity-client/coverage
+
+# production
+/high-fidelity-client/build
+
+# misc
+.DS_Store
+.env
+/high-fidelity-client/npm-debug.log*
+/high-fidelity-client/yarn-debug.log*
+/high-fidelity-client/yarn-error.log*
+
+/high-fidelity-server/logs
+/high-fidelity-server/dist
+/high-fidelity-server/project/project
+/high-fidelity-server/project/target
+/high-fidelity-server/target
+/high-fidelity-server/tmp
+/high-fidelity-server/.cache
+/high-fidelity-server/.classpath
+/high-fidelity-server/.project
+/high-fidelity-server/.settings
+/high-fidelity-server/.target
+/high-fidelity-server/.worksheet
+/high-fidelity-server/.idea
+/high-fidelity-server/.idea_modules
+/high-fidelity-server/*.iml
+/high-fidelity-server/bin
