@@ -10,13 +10,13 @@ import {
 class Home extends Component {
   render() {
     return (
-      <div className="App">
-        <div className="App-header">
-          <h2>Welcome to High Fidelity</h2>
-          <div>Click the button to logg in</div>
-          <button onClick={this.handlelogin}>login</button>
+        <div class="container">
+          <div class="starter-template">
+            <h2>Welcome to High Fidelity</h2>
+            <div>Click the button to logg in</div>
+            <button onClick={this.handlelogin}>login</button>
+          </div>
         </div>
-      </div>
     );
   }
 
@@ -37,17 +37,15 @@ class Home extends Component {
 }
 
 const LoggedInHome = ({match}) => (
-  <div className="App">
-    <div className="App-header">
+    <div class="container">
       <h2>Welcome to High Fidelity</h2>
       <div>You are logged in as {match.params.userid}</div>
     </div>
-  </div>
 )
 
 const MainRouter = () => (
   <Router>
-    <div>
+    <div class="containter">
       <Route exact path="/" component={Home}/>
       <Route path="/logged-in/:userid" component={LoggedInHome}/>
     </div>
