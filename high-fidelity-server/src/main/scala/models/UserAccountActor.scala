@@ -20,8 +20,8 @@ class UserAccountActor extends Actor with ActorLogging with UserJsonSupport {
   import akka.pattern.pipe
   import context.dispatcher
 
-  private val clientId = "1b24de0b94324459b855aa136d301949"
-  private val clientSecret = "010207693b134a4691b6dff1d53061e1"
+  private val clientId = context.system.settings.config.getString("services.user-account.spotify-client-id")
+  private val clientSecret = context.system.settings.config.getString("services.user-account.spotify-client-secret")
   private val spotifyAccountsAuth = Base64.getEncoder.encodeToString(s"$clientId:$clientSecret".getBytes)
 
   final implicit val materializer: ActorMaterializer = ActorMaterializer(ActorMaterializerSettings(context.system))
