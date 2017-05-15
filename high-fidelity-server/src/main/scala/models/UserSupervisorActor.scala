@@ -6,7 +6,7 @@ import akka.stream.{ActorMaterializer, ActorMaterializerSettings}
 
 case class AccessTokenRequest(userId: String)
 
-class UserActor(user: User) extends Actor {
+class UserActor(user: User, userToken: String) extends Actor {
 
   def receive = {
     case accessTokenRequest: AccessTokenRequest =>
@@ -20,17 +20,21 @@ class UserSupervisorActor extends Actor {
 
   final implicit val materializer: ActorMaterializer = ActorMaterializer(ActorMaterializerSettings(context.system))
 
-  val userLoginActor = context.actorOf(Props[UserAccountActor], "userLoginActor")
+  val userAccountActor = context.actorOf(Props[UserAccountActor], "userLoginActor")
   val userProfileActor = context.actorOf(Props[UserProfileActor], "userProfileActor")
+  val userTokenActor = context.actorOf(Props[UserTokenActor], "userTokenActor")
 
   val http = Http(context.system)
 
   def receive = {
     case LoginRequest(code) =>
-      userLoginActor ! UserAccountRequest(code, sender())
-    case UserAccountResponse(accessToken, requestor) =>
-      userProfileActor ! UserProfileRequest(accessToken, requestor)
+      userAccountActor ! UserAccountRequest(code, sender())
+    case UserAccountResponse(accessToken, requester) =>
+      userProfileActor ! UserProfileRequest(accessToken, requester)
     case UserProfileResponse(user, requester) =>
-      requester ! user
+      userTokenActor ! UserTokenRequest(requester, user)
+    case UserTokenResponse(userToken, user, requester) =>
+      context.actorOf(Props[UserActor](new UserActor(user, userToken)))
+      requester ! userToken
     }
 }

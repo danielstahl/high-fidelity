@@ -8,6 +8,8 @@ import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import models._
+import pdi.jwt.{Jwt, JwtAlgorithm, JwtClaim}
+import spray.json.{JsObject, JsString}
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -25,6 +27,8 @@ object WebServer extends Directives with UserJsonSupport {
   val clientSecret = "010207693b134a4691b6dff1d53061e1"
   val spotifyAccountsAuth = Base64.getEncoder.encodeToString(s"$clientId:$clientSecret".getBytes)
 
+  val secret = "thesecret"
+
   implicit val system = ActorSystem("high-fidelity-system")
   implicit val materializer = ActorMaterializer()
 
@@ -40,13 +44,13 @@ object WebServer extends Directives with UserJsonSupport {
       path("spotify-login-callback") {
         get {
           parameters('code) { (code) => {
-            val userFuture: Future[User] =
-              (userSupervisorActor ? LoginRequest(code)).mapTo[User]
+            val userTokenFuture: Future[String] =
+              (userSupervisorActor ? LoginRequest(code)).mapTo[String]
 
             val redirectHtml =
-              userFuture.map(currentUser =>
+              userTokenFuture.map(token =>
                 HttpEntity(ContentTypes.`text/html(UTF-8)`,
-                  "<meta http-equiv=\"refresh\" content=\"0; url=http://localhost:3000/logged-in/" + currentUser.privateUser.id + "\" />"))
+                  "<meta http-equiv=\"refresh\" content=\"0; url=http://localhost:3000/logged-in/" + token + "\" />"))
 
             complete(redirectHtml)
 
