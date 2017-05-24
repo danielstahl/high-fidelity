@@ -2,14 +2,13 @@ import java.util.Base64
 
 import akka.actor.{ActorSystem, Props}
 import akka.http.scaladsl.Http
+import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives
 import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import models._
-import pdi.jwt.{Jwt, JwtAlgorithm, JwtClaim}
-import spray.json.{JsObject, JsString}
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -21,7 +20,7 @@ import scala.io.StdIn
   */
 
 
-object WebServer extends Directives with UserJsonSupport {
+object WebServer extends Directives with UserJsonSupport with MediaItemJsonSupport {
 
   val clientId = "1b24de0b94324459b855aa136d301949"
   val clientSecret = "010207693b134a4691b6dff1d53061e1"
@@ -35,6 +34,8 @@ object WebServer extends Directives with UserJsonSupport {
   implicit val executionContext = system.dispatcher
 
   val userSupervisorActor = system.actorOf(Props[UserSupervisorActor], "userSupervisorActor")
+
+  val tagTreeActor = system.actorOf(Props[TagTreeActor], "tagTreeActor")
 
   implicit val timeout = Timeout(5 seconds) // needed for `?` below
 
@@ -56,6 +57,19 @@ object WebServer extends Directives with UserJsonSupport {
 
             }
           }
+        }
+      } ~ path("composer" / Segment / Segment) { (currentType, current)=>
+        get {
+          val tagTreeFuture = tagTreeActor ? TagTreeRequest(Database.typeTrees("composer"), currentType, current)
+
+          val response = tagTreeFuture.flatMap {
+            case tagTree: TagTree =>
+              Marshal(StatusCodes.OK -> tagTree).to[HttpResponse]
+            case error: FailureResponse =>
+              Marshal(StatusCodes.BadRequest -> error).to[HttpResponse]
+          }
+          complete(response)
+
         }
       }
     val bindingFuture = Http().bindAndHandle(route, "localhost", 8080)
