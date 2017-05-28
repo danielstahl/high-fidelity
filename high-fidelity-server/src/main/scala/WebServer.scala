@@ -13,6 +13,7 @@ import models._
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.io.StdIn
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 
 
 /**
@@ -60,16 +61,17 @@ object WebServer extends Directives with UserJsonSupport with MediaItemJsonSuppo
         }
       } ~ path("composer" / Segment / Segment) { (currentType, current)=>
         get {
-          val tagTreeFuture = tagTreeActor ? TagTreeRequest(Database.typeTrees("composer"), currentType, current)
+          cors() {
+            val tagTreeFuture = tagTreeActor ? TagTreeRequest(Database.typeTrees("composer"), currentType, current)
 
-          val response = tagTreeFuture.flatMap {
-            case tagTree: TagTree =>
-              Marshal(StatusCodes.OK -> tagTree).to[HttpResponse]
-            case error: FailureResponse =>
-              Marshal(StatusCodes.BadRequest -> error).to[HttpResponse]
+            val response = tagTreeFuture.flatMap {
+              case tagTree: TagTree =>
+                Marshal(StatusCodes.OK -> tagTree).to[HttpResponse]
+              case error: FailureResponse =>
+                Marshal(StatusCodes.BadRequest -> error).to[HttpResponse]
+            }
+            complete(response)
           }
-          complete(response)
-
         }
       }
     val bindingFuture = Http().bindAndHandle(route, "localhost", 8080)
