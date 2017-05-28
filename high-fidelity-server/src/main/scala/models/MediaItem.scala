@@ -19,11 +19,11 @@ case class MediaItem(slugs: String, name: String, uris: Map[String, Seq[String]]
   }
 }
 
-case class TagTree(typeTree: Seq[String], currentItem: MediaItem, children: Seq[MediaItem])
+case class TagTree(typeTree: Seq[String], currentItem: MediaItem, children: Seq[MediaItem], parent: Option[MediaItem])
 
 trait MediaItemJsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val mediaItemFormat = jsonFormat4(MediaItem)
-  implicit val tagTreeFormat = jsonFormat3(TagTree)
+  implicit val tagTreeFormat = jsonFormat4(TagTree)
   implicit val tagFormat = jsonFormat3(Tag)
   implicit val failureResponseFormat =  jsonFormat1(FailureResponse)
 }
@@ -221,6 +221,19 @@ class TagTreeActor extends Actor with ActorLogging {
           case theIndex => Success(theIndex)
         }
 
+      val parentTypeTry = currentIndexTry.map(
+        curr =>
+          if(curr > 0) Some(tags(curr - 1))
+          else None)
+
+      val parentTry = for {
+        parentTypeOption <- parentTypeTry
+        item <- currentMediaItemTry
+      } yield
+        parentTypeOption.flatMap(
+          parentType => Database.mediaItems
+            .find(mediaItem => item.getTag(parentType).contains(mediaItem.slugs)))
+
       val childTypeTry = currentIndexTry.map(
         curr =>
           if(tags.size > curr + 1) Some(tags(curr + 1))
@@ -241,8 +254,9 @@ class TagTreeActor extends Actor with ActorLogging {
 
       val tagTreeTry = for {
         currentMediaItem <- currentMediaItemTry
+        parent <- parentTry
         children <- childrenTry
-      } yield TagTree(tags, currentMediaItem, children)
+      } yield TagTree(tags, currentMediaItem, children, parent)
 
       tagTreeTry match {
         case Success(tagTree) => sender() ! tagTree
