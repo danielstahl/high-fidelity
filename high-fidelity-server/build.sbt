@@ -1,4 +1,4 @@
-name := "hello-akka"
+name := "high-fidelity-server"
 
 version := "1.0"
 

@@ -7,8 +7,17 @@ import {
   Link
 } from 'react-router-dom';
 import {
-  Label
+  Label,
+  FormGroup, ControlLabel, FormControl,
+  Table, Button, Modal, Glyphicon,
+  Row, Col, Grid, Panel
 } from 'react-bootstrap';
+import {
+  Typeahead
+} from 'react-bootstrap-typeahead';
+
+var slug = require('slug');
+slug.defaults.mode = 'rfc3986';
 
 class TreeTest extends Component {
   constructor(props) {
@@ -38,6 +47,118 @@ class TreeTest extends Component {
         <CurrentItem item={this.state.item} onItemClick={this.onItemClick}/>
         <ChildrenItem children={this.state.children} onItemClick={this.onItemClick}/>
       </div>
+    );
+  }
+}
+
+class GenreForm extends Component {
+
+  constructor(props) {
+    super(props);
+    this.state = { text: '', slug: '', showModal: false };
+    this.handleNameChange = this.handleNameChange.bind(this);
+    this.open = this.open.bind(this);
+    this.close = this.close.bind(this);
+    this.createGenre = this.createGenre.bind(this);
+  }
+
+  handleNameChange(e) {
+    this.setState({ text: e.target.value, slug: slug(e.target.value) });
+  }
+
+  close() {
+    this.setState({ showModal: false });
+  }
+
+  open() {
+    this.setState({ showModal: true });
+  }
+
+  createGenre(event) {
+    event.preventDefault();
+    this.close();
+  }
+
+  render() {
+    return(
+      <div>
+          <h2><small>Add Genre</small></h2>
+          <Button bsStyle="link" onClick={this.open}><Glyphicon glyph="plus" /></Button>
+
+          <Modal show={this.state.showModal} onHide={this.close}>
+            <Modal.Header closeButton>
+              <Modal.Title>New Genre</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <h1>Create new Genre</h1>
+              <form onSubmit={this.createGenre}>
+                <FormGroup controlId="slugsField">
+                  <ControlLabel>Slugs</ControlLabel>
+                  <FormControl type="text" value={this.state.slug}></FormControl>
+                </FormGroup>
+                <FormGroup controlId="nameField">
+                  <ControlLabel>Name</ControlLabel>
+                  <FormControl type="text" onChange={this.handleNameChange} value={this.state.text}></FormControl>
+                </FormGroup>
+                <Button type="submit">Create</Button>
+              </form>
+          </Modal.Body>
+
+        </Modal>
+    </div>
+
+    );
+  }
+}
+
+class MainTest extends Component {
+  render() {
+    return(
+      <Grid>
+        <Row>
+          <Col md={10}></Col>
+          <Col md={2}>Player</Col>
+        </Row>
+        <Row>
+          <Col md={10}>
+              <Row>
+                <Col md={4}>
+                  <Panel>
+                    <h2>Classical</h2>
+                    <ul className="list-unstyled">
+                      <li><a href="#">Artists</a></li>
+                      <li><a href="#">Composers</a></li>
+                    </ul>
+                  </Panel>
+                </Col>
+                <Col md={4}>
+                  <Panel>
+                    <h2>Jazz</h2>
+                    <ul className="list-unstyled">
+                      <li><a href="#">Artists</a></li>
+                    </ul>
+                  </Panel>
+                </Col>
+                <Col md={4}>
+                  <Panel>
+                    <h2>Ambient</h2>
+                    <ul className="list-unstyled">
+                      <li><a href="#">Artists</a></li>
+                    </ul>
+                  </Panel>
+                </Col>
+              </Row>
+          </Col>
+          <Col md={2}></Col>
+        </Row>
+        <Row>
+          <Col md={4}>
+            <GenreForm/>
+            </Col>
+          <Col md={8}></Col>
+        </Row>
+      </Grid>
+
     );
   }
 }
@@ -132,7 +253,7 @@ class ChildItem extends Component {
 }
 
 class ChildrenItem extends Component {
-  
+
   render() {
     let childrenItems;
     if(this.props.children) {
@@ -193,6 +314,7 @@ const MainRouter = () => (
       <Route exact path="/" component={Home}/>
       <Route path="/logged-in/:userid" component={LoggedInHome}/>
       <Route path="/tree-test" component={TreeTest}/>
+      <Route path="/main" component={MainTest}/>
     </div>
   </Router>
 )
