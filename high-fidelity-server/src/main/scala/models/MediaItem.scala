@@ -26,6 +26,7 @@ trait MediaItemJsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val tagTreeFormat = jsonFormat4(TagTree)
   implicit val tagFormat = jsonFormat3(Tag)
   implicit val failureResponseFormat =  jsonFormat1(FailureResponse)
+  implicit val mediItemQueryTagResponseFormat = jsonFormat1(MediItemQueryTagResponse)
 }
 
 object Database {
@@ -51,22 +52,45 @@ object Database {
   )
 
   val mediaItems = Seq(
+
     MediaItem(
       "classical",
       "Classical music",
       Map(),
       Map("type" -> Seq("genre"))),
+
+    MediaItem(
+      "jazz",
+      "Jazz music",
+      Map(),
+      Map("type" -> Seq("genre"))),
+
+    MediaItem(
+      "ambient",
+      "Ambient music",
+      Map(),
+      Map("type" -> Seq("genre"))),
+
+    MediaItem(
+      "electronica",
+      "Electronica music",
+      Map(),
+      Map("type" -> Seq("genre"))),
+
     MediaItem(
       "classical-era",
       "Classical Era",
       Map(),
       Map("type" -> Seq("era"),
           "genre" -> Seq("classical"))),
+
     MediaItem(
       "piano",
       "Piano",
       Map(),
-      Map("type" -> Seq("instrument"))),
+      Map("type" -> Seq("instrument"),
+          "genre" -> Seq("classical"))),
+
     MediaItem(
       "ludwig-van-beethoven",
       "Ludwig van Beethoven",
@@ -199,6 +223,18 @@ class TagActor extends Actor with ActorLogging {
       sender() ! TagResponse(Database.tags.filter(tag => tag.category == category))
   }
 
+}
+
+case class MediaItemQueryTagRequest(tag: String, value: String)
+
+case class MediItemQueryTagResponse(mediaItems: Seq[MediaItem])
+
+class MediaItemQueryTagActor extends Actor with ActorLogging {
+  def receive = {
+    case MediaItemQueryTagRequest(tag, value) =>
+      sender() ! MediItemQueryTagResponse(
+        Database.mediaItems.filter(mediaItem => mediaItem.hasTag(tag, value)))
+  }
 }
 
 case class TagTreeRequest(tags: Seq[String], currentType: String, currentItem: String)

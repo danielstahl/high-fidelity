@@ -38,6 +38,8 @@ object WebServer extends Directives with UserJsonSupport with MediaItemJsonSuppo
 
   val tagTreeActor = system.actorOf(Props[TagTreeActor], "tagTreeActor")
 
+  val mediaItemQueryTagActor = system.actorOf(Props[MediaItemQueryTagActor], "mediaItemQueryTagActor")
+
   implicit val timeout = Timeout(5 seconds) // needed for `?` below
 
   def main(args: Array[String]) = {
@@ -59,10 +61,10 @@ object WebServer extends Directives with UserJsonSupport with MediaItemJsonSuppo
             }
           }
         }
-      } ~ path("composer" / Segment / Segment) { (currentType, current)=>
+      } ~ path("genre-tree" / Segment / Segment / Segment) { (treeType, currentType, current) =>
         get {
           cors() {
-            val tagTreeFuture = tagTreeActor ? TagTreeRequest(Database.typeTrees("composer"), currentType, current)
+            val tagTreeFuture = tagTreeActor ? TagTreeRequest(Database.typeTrees(treeType), currentType, current)
 
             val response = tagTreeFuture.flatMap {
               case tagTree: TagTree =>
@@ -73,6 +75,14 @@ object WebServer extends Directives with UserJsonSupport with MediaItemJsonSuppo
             complete(response)
           }
         }
+      } ~ path("media-items" / Segment / Segment) { (tag, value) =>
+        get {
+          cors() {
+            val mediaItemsResponse = (mediaItemQueryTagActor ? MediaItemQueryTagRequest(tag, value)).mapTo[MediItemQueryTagResponse]
+            complete(mediaItemsResponse)
+          }
+        }
+
       }
     val bindingFuture = Http().bindAndHandle(route, "localhost", 8080)
 
