@@ -21,12 +21,7 @@ import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
   */
 
 
-object WebServer extends Directives with UserJsonSupport with MediaItemJsonSupport {
-
-  val clientId = "1b24de0b94324459b855aa136d301949"
-  val clientSecret = "010207693b134a4691b6dff1d53061e1"
-  val spotifyAccountsAuth = Base64.getEncoder.encodeToString(s"$clientId:$clientSecret".getBytes)
-
+object WebServer extends Directives with UserJsonSupport with MediaItemJsonSupport with MediaItemTreeJsonSupport {
   val secret = "thesecret"
 
   implicit val system = ActorSystem("high-fidelity-system")
@@ -36,9 +31,9 @@ object WebServer extends Directives with UserJsonSupport with MediaItemJsonSuppo
 
   val userSupervisorActor = system.actorOf(Props[UserSupervisorActor], "userSupervisorActor")
 
-  val tagTreeActor = system.actorOf(Props[TagTreeActor], "tagTreeActor")
-
   val mediaItemQueryTagActor = system.actorOf(Props[MediaItemQueryTagActor], "mediaItemQueryTagActor")
+
+  val mediItemTreeActor = system.actorOf(Props[MediaItemTreeActor], "mediItemTreeActor")
 
   implicit val timeout = Timeout(5 seconds) // needed for `?` below
 
@@ -64,21 +59,20 @@ object WebServer extends Directives with UserJsonSupport with MediaItemJsonSuppo
       } ~ path("genre-tree" / Segment / Segment / Segment) { (treeType, currentType, current) =>
         get {
           cors() {
-            val tagTreeFuture = tagTreeActor ? TagTreeRequest(Database.typeTrees(treeType), currentType, current)
-
-            val response = tagTreeFuture.flatMap {
-              case tagTree: TagTree =>
-                Marshal(StatusCodes.OK -> tagTree).to[HttpResponse]
+            val mediaItemTreeFuture = mediItemTreeActor ? MediaItemTreeRequest(current, currentType, treeType)
+            val response = mediaItemTreeFuture.flatMap {
+              case mediItemTree: MediaItemTree =>
+                Marshal(StatusCodes.OK -> mediItemTree).to[HttpResponse]
               case error: FailureResponse =>
                 Marshal(StatusCodes.BadRequest -> error).to[HttpResponse]
             }
             complete(response)
           }
         }
-      } ~ path("media-items" / Segment / Segment) { (tag, value) =>
+      } ~ path("media-items" / Segment ) { (theType) =>
         get {
           cors() {
-            val mediaItemsResponse = (mediaItemQueryTagActor ? MediaItemQueryTagRequest(tag, value)).mapTo[MediItemQueryTagResponse]
+            val mediaItemsResponse = (mediaItemQueryTagActor ? MediaItemQueryTagRequest(theType)).mapTo[MediItemQueryTagResponse]
             complete(mediaItemsResponse)
           }
         }

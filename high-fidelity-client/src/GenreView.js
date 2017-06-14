@@ -7,7 +7,6 @@ import {
 import GenreForm from './GenreForm.js';
 
 class GenreView extends Component {
-
   constructor(props) {
     super(props);
     this.state = {main: true, genres: []};
@@ -16,7 +15,7 @@ class GenreView extends Component {
   }
 
   componentDidMount() {
-    fetch('http://localhost:8080/media-items/type/genre')
+    fetch('http://localhost:8080/media-items/genre')
     .then((result) => {
       return result.json();
     })
@@ -34,9 +33,9 @@ class GenreView extends Component {
       this.setState({
         main: false,
         tree: tree,
-        item: result.currentItem,
+        item: result.mediaItem,
         children: result.children,
-        parent: result.parent})
+        breadCrumbs: result.breadCrumbs})
     });
   }
 
@@ -49,7 +48,7 @@ class GenreView extends Component {
       if(this.state.main) {
         page = (<GenreMain genres={this.state.genres} onItemClick={this.onItemClick}/>);
       } else {
-        page = (<GenreTree tree={this.state.tree} item={this.state.item} children={this.state.children} parent={this.state.parent} onItemClick={this.onItemClick} onGenreMainClick={this.onGenreMainClick}/>)
+        page = (<GenreTree tree={this.state.tree} item={this.state.item} children={this.state.children} breadCrumbs={this.state.breadCrumbs} onItemClick={this.onItemClick} onGenreMainClick={this.onGenreMainClick}/>)
       }
     return (page);
   }
@@ -141,7 +140,7 @@ class GenreTree extends Component {
   render() {
     return(
       <div className="container">
-        <ParentItem tree={this.props.tree} parent={this.props.parent} item={this.props.item} onItemClick={this.props.onItemClick} onGenreMainClick={this.props.onGenreMainClick}/>
+        <BreadCrumbsItems tree={this.props.tree} breadCrumbs={this.props.breadCrumbs} item={this.props.item} onItemClick={this.props.onItemClick} onGenreMainClick={this.props.onGenreMainClick}/>
         <CurrentItem tree={this.props.tree} item={this.props.item} onItemClick={this.props.onItemClick}/>
         <ChildrenItem tree={this.props.tree} children={this.props.children} onItemClick={this.props.onItemClick}/>
       </div>
@@ -158,7 +157,7 @@ class CurrentItem extends Component {
   handleClick(e) {
     e.preventDefault();
     if(this.props.item) {
-      this.props.onItemClick(this.props.tree, this.props.item.tags.type[0], this.props.item.slugs);
+      this.props.onItemClick(this.props.tree, this.props.item.types[0].slug, this.props.item.slugs);
     }
   }
 
@@ -167,7 +166,7 @@ class CurrentItem extends Component {
 
     if(this.props.item) {
       item = (
-        <h1><small>{this.props.item.tags.type[0]}</small> {this.props.item.name}</h1>
+        <h1><small>{this.props.item.types[0].name}</small> {this.props.item.name}</h1>
       );
     }
 
@@ -179,7 +178,7 @@ class CurrentItem extends Component {
   }
 }
 
-class ParentItem extends Component {
+class BreadCrumbItem extends Component {
   constructor(props) {
     super(props);
     this.handleClick = this.handleClick.bind(this);
@@ -188,20 +187,27 @@ class ParentItem extends Component {
   handleClick(e) {
     e.preventDefault();
     if(this.props.item) {
-      this.props.onItemClick(this.props.tree, this.props.parent.tags.type[0], this.props.parent.slugs);
+      this.props.onItemClick(this.props.tree, this.props.item.theType.slug, this.props.item.slugs);
     }
   }
 
   render() {
-    let parent;
+    return(
+      <li><a href="#" onClick={this.handleClick}>{this.props.item.name}</a></li>
+    );
+  }
+}
+
+class BreadCrumbsItems extends Component {
+
+  render() {
+    let breadCrumbs;
+
+    breadCrumbs = (this.props.breadCrumbs.links.map((crumb) =>
+      <BreadCrumbItem tree={this.props.tree} item={crumb} onItemClick={this.props.onItemClick}/>
+    ));
+
     let currentItem;
-
-    if(this.props.parent) {
-      parent = (<li><a href="#" onClick={this.handleClick}>{this.props.parent.name}</a></li>);
-    } else {
-      parent = (<li><a href="#" onClick={this.props.onGenreMainClick}>All genres</a></li>);
-    }
-
     if(this.props.item) {
       currentItem = (<li className="active">{this.props.item.name}</li>);
     }
@@ -209,7 +215,8 @@ class ParentItem extends Component {
     return (
       <div className="row">
         <ol className="breadcrumb">
-          {parent}
+          <li><a href="#" onClick={this.props.onGenreMainClick}>All genres</a></li>
+          {breadCrumbs}
           {currentItem}
         </ol>
       </div>
@@ -226,7 +233,8 @@ class ChildItem extends Component {
   handleClick(e) {
     e.preventDefault();
     if(this.props.item) {
-      this.props.onItemClick(this.props.tree, this.props.item.tags.type[0], this.props.item.slugs);
+      console.log(this.props.item);
+      this.props.onItemClick(this.props.tree, this.props.item.theType.slug, this.props.item.slugs);
     }
   }
 
@@ -234,7 +242,7 @@ class ChildItem extends Component {
     return(
       <div>
         <dt><a href="#" onClick={this.handleClick}>{this.props.item.name}</a></dt>
-        <dd>{this.props.item.tags.type[0]}</dd>
+        <dd>{this.props.item.theType.name}</dd>
       </div>
     );
   }
@@ -245,7 +253,7 @@ class ChildrenItem extends Component {
   render() {
     let childrenItems;
     if(this.props.children) {
-      childrenItems = (this.props.children.map((childItem) =>
+      childrenItems = (this.props.children.children.map((childItem) =>
         <ChildItem tree={this.props.tree} item={childItem} onItemClick={this.props.onItemClick}/>
       ));
     }
