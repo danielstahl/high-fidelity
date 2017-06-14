@@ -4,11 +4,7 @@ import akka.actor.{Actor, ActorLogging}
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import spray.json.DefaultJsonProtocol
 
-import scala.util.{Failure, Success, Try}
-
-case class Tag(slug: String, name: String, category: String)
-
-case class MediaItem(slugs: String, name: String, uris: Map[String, Seq[String]], tags: Map[String, Seq[String]]) {
+case class MediaItem(slugs: String, name: String, types: Seq[String], uris: Map[String, Seq[String]], tags: Map[String, Seq[String]]) {
 
   def hasTag(category: String, tag: String): Boolean = {
     getTag(category).contains(tag)
@@ -19,133 +15,131 @@ case class MediaItem(slugs: String, name: String, uris: Map[String, Seq[String]]
   }
 }
 
+case class TypeDescription(slug: String, name: String, metaType: String)
+
 case class TagTree(typeTree: Seq[String], currentItem: MediaItem, children: Seq[MediaItem], parent: Option[MediaItem])
 
 trait MediaItemJsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
-  implicit val mediaItemFormat = jsonFormat4(MediaItem)
+  implicit val mediaItemFormat = jsonFormat5(MediaItem)
   implicit val tagTreeFormat = jsonFormat4(TagTree)
-  implicit val tagFormat = jsonFormat3(Tag)
   implicit val failureResponseFormat =  jsonFormat1(FailureResponse)
   implicit val mediItemQueryTagResponseFormat = jsonFormat1(MediItemQueryTagResponse)
 }
 
 object Database {
 
-  val typeTrees = Map(
-    "composer" -> Seq("genre", "era", "composer", "piece", "recording"),
-    "artist" -> Seq("genre", "instrument", "artist", "album")
-  )
-
-  val tags = Seq(
-    Tag("spotify-uri", "Spotify URI", "uri-type"),
-    Tag("composer", "Composer", "type"),
-    Tag("piece", "Piece", "type"),
-    Tag("artist", "Artist", "artist"),
-    Tag("album", "Album", "type"),
-    Tag("recording", "Recording", "type"),
-    Tag("classical", "Classical", "genre"),
-    Tag("classical-era", "Classical Era", "era"),
-    Tag("piano", "Piano", "instrument"),
-    Tag("genre", "Genre", "type"),
-    Tag("era", "Era", "type"),
-    Tag("instrument", "Instrument", "type")
-  )
+  val typeDescriptions = Seq(
+    TypeDescription("spotify-uri", "Spotify URI", "uri-type"),
+    TypeDescription("composer", "Composer", "type"),
+    TypeDescription("artist", "Artist", "type"),
+    TypeDescription("piece", "Piece", "type"),
+    TypeDescription("album", "Album", "type"),
+    TypeDescription("recording", "Recording", "type"),
+    TypeDescription("genre", "Genre", "type"),
+    TypeDescription("era", "Era", "type"),
+    TypeDescription("instrument", "Instrument", "type")
+  ).map(desc => desc.slug -> desc).toMap
 
   val mediaItems = Seq(
 
     MediaItem(
-      "classical",
-      "Classical music",
-      Map(),
-      Map("type" -> Seq("genre"))),
+      slugs = "classical",
+      name = "Classical music",
+      types = Seq("genre"),
+      uris = Map(),
+      tags = Map()),
 
     MediaItem(
-      "jazz",
-      "Jazz music",
-      Map(),
-      Map("type" -> Seq("genre"))),
+      slugs = "jazz",
+      name = "Jazz music",
+      types = Seq("genre"),
+      uris = Map(),
+      tags = Map()),
 
     MediaItem(
-      "ambient",
-      "Ambient music",
+      slugs = "ambient",
+      name = "Ambient music",
+      types = Seq("genre"),
       Map(),
-      Map("type" -> Seq("genre"))),
+      Map()),
 
     MediaItem(
-      "electronica",
-      "Electronica music",
-      Map(),
-      Map("type" -> Seq("genre"))),
+      slugs = "electronica",
+      name = "Electronica music",
+      types = Seq("genre"),
+      uris = Map(),
+      tags = Map()),
 
     MediaItem(
-      "classical-era",
-      "Classical Era",
-      Map(),
-      Map("type" -> Seq("era"),
-          "genre" -> Seq("classical"))),
+      slugs = "classical-era",
+      name = "Classical Era",
+      types = Seq("era"),
+      uris = Map(),
+      tags = Map("genre" -> Seq("classical"))),
 
     MediaItem(
-      "piano",
-      "Piano",
-      Map(),
-      Map("type" -> Seq("instrument"),
-          "genre" -> Seq("classical"))),
+      slugs = "piano",
+      name = "Piano",
+      types = Seq("instrument"),
+      uris = Map(),
+      tags = Map("genre" -> Seq("classical"))),
 
     MediaItem(
-      "ludwig-van-beethoven",
-      "Ludwig van Beethoven",
-      Map("spotify-uri" -> Seq("spotify:artist:2wOqMjp9TyABvtHdOSOTUS")),
-      Map(
-        "type" -> Seq("composer"),
+      slugs = "ludwig-van-beethoven",
+      name = "Ludwig van Beethoven",
+      types = Seq("composer"),
+      uris = Map("spotify-uri" -> Seq("spotify:artist:2wOqMjp9TyABvtHdOSOTUS")),
+      tags = Map(
         "genre" -> Seq("classical"),
         "era" -> Seq("classical-era"))),
 
     MediaItem(
-      "ludwig-van-beethoven:bagatelles-op-119",
-      "Bagatelles Op 119",
-      Map(),
-      Map(
-        "type" -> Seq("piece"),
-        "genre" -> Seq("classical"),
-        "era" -> Seq("classical"),
-        "instrument" -> Seq("piano"),
-        "composer" -> Seq("ludwig-van-beethoven"))),
-
-    MediaItem(
-      "ludwig-van-beethoven:diabelli-variations-op-120",
-      "Diabelli Variations Op 120",
-      Map(),
-      Map(
-        "type" -> Seq("piece"),
+      slugs = "ludwig-van-beethoven:bagatelles-op-119",
+      name = "Bagatelles Op 119",
+      types = Seq("piece"),
+      uris = Map(),
+      tags = Map(
         "genre" -> Seq("classical"),
         "era" -> Seq("classical-era"),
         "instrument" -> Seq("piano"),
         "composer" -> Seq("ludwig-van-beethoven"))),
 
     MediaItem(
-      "paul-lewis",
-      "Paul Lewis",
-      Map("spotify-uri" -> Seq("spotify:artist:4LYCuV8d6rylb6zjv2k03l")),
-      Map(
+      slugs = "ludwig-van-beethoven:diabelli-variations-op-120",
+      name = "Diabelli Variations Op 120",
+      types = Seq("piece"),
+      uris = Map(),
+      tags = Map(
+        "genre" -> Seq("classical"),
+        "era" -> Seq("classical-era"),
+        "instrument" -> Seq("piano"),
+        "composer" -> Seq("ludwig-van-beethoven"))),
+
+    MediaItem(
+      slugs = "paul-lewis",
+      name = "Paul Lewis",
+      types = Seq("artist"),
+      uris = Map("spotify-uri" -> Seq("spotify:artist:4LYCuV8d6rylb6zjv2k03l")),
+      tags = Map(
+        "genre" -> Seq("classical"),
+        "instrument" -> Seq("piano"))),
+
+    MediaItem(
+      slugs = "igor-levit",
+      name = "Igor Levit",
+      types = Seq("artist"),
+      uris = Map("spotify-uri" -> Seq("spotify:album:4293SPqEXe9mFXt5Wb1k6U")),
+      tags = Map(
         "type" -> Seq("artist"),
         "genre" -> Seq("classical"),
         "instrument" -> Seq("piano"))),
 
     MediaItem(
-      "igor-levit",
-      "Igor Levit",
-      Map("spotify-uri" -> Seq("spotify:album:4293SPqEXe9mFXt5Wb1k6U")),
-      Map(
-        "type" -> Seq("artist"),
-        "genre" -> Seq("classical"),
-        "instrument" -> Seq("piano"))),
-
-    MediaItem(
-      "ludwig-van-beethoven:paul-lewis:diabelli-variations-op-120",
-      "Beethoven: Diabelli Variations, Op. 120",
-      Map("spotify-uri" -> Seq("spotify:album:0us4zAnvnsqwFpcjsAefAK")),
-      Map(
-        "type" -> Seq("recording"),
+      slugs = "ludwig-van-beethoven:paul-lewis:diabelli-variations-op-120",
+      name = "Beethoven: Diabelli Variations, Op. 120",
+      types = Seq("recording"),
+      uris = Map("spotify-uri" -> Seq("spotify:album:0us4zAnvnsqwFpcjsAefAK")),
+      tags = Map(
         "genre" -> Seq("classical"),
         "era" -> Seq("classical-era"),
         "instrument" -> Seq("piano"),
@@ -154,11 +148,11 @@ object Database {
         "piece" -> Seq("ludwig-van-beethoven:diabelli-variations-op-120"))),
 
     MediaItem(
-      "ludwig-van-beethoven:igor-levit:diabelli-variations-op-120",
-      "Beethoven: Diabelli Variations, Op. 120",
-      Map("spotify-uri" -> Seq("spotify:album:4293SPqEXe9mFXt5Wb1k6U")),
-      Map(
-        "type" -> Seq("recording"),
+      slugs = "ludwig-van-beethoven:igor-levit:diabelli-variations-op-120",
+      name = "Beethoven: Diabelli Variations, Op. 120",
+      types = Seq("recording"),
+      uris = Map("spotify-uri" -> Seq("spotify:album:4293SPqEXe9mFXt5Wb1k6U")),
+      tags = Map(
         "genre" -> Seq("classical"),
         "era" -> Seq("classical-era"),
         "instrument" -> Seq("piano"),
@@ -167,9 +161,10 @@ object Database {
         "piece" -> Seq("ludwig-van-beethoven:diabelli-variations-op-120"))),
 
     MediaItem(
-      "ludwig-van-beethoven:alfred-brendel:bagatelles-op-119",
-      "Bagatelles Op 119",
-      Map("spotify-uri" -> Seq(
+      slugs = "ludwig-van-beethoven:alfred-brendel:bagatelles-op-119",
+      name = "Bagatelles Op 119",
+      types = Seq("recording"),
+      uris = Map("spotify-uri" -> Seq(
         "spotify:track:0CXtZJQxyMmBqltrLhWwUs",
         "spotify:track:4izRq5WJZow7KU18I10CSn",
         "spotify:track:4ITBfdOkDIHfAcreXSbeM6",
@@ -181,8 +176,7 @@ object Database {
         "spotify:track:1l1qRR6Sq9MW20g2C8OSDN",
         "spotify:track:0xakt5qbgqy7bny5atiQNV",
         "spotify:track:7HgniLM418Ao2e3pmw2Wa1")),
-      Map(
-        "type" -> Seq("recording"),
+      tags = Map(
         "genre" -> Seq("classical"),
         "era" -> Seq("classical-era"),
         "instrument" -> Seq("piano"),
@@ -191,115 +185,42 @@ object Database {
         "piece" -> Seq("ludwig-van-beethoven:bagatelles-op-119"))),
 
     MediaItem(
-      "alfred-brendel",
-      "Alfred Brendel",
-      Map("spotify-uri" -> Seq("spotify:artist:5vBh0nve44zwwVF5KWtCwA")),
-      Map(
-        "type" -> Seq("artist"),
+      slugs = "alfred-brendel",
+      name = "Alfred Brendel",
+      types = Seq("artist"),
+      uris = Map("spotify-uri" -> Seq("spotify:artist:5vBh0nve44zwwVF5KWtCwA")),
+      tags = Map(
         "genre" -> Seq("classical"),
         "instrument" -> Seq("piano"))),
 
     MediaItem(
-      "alfred-brendel:ludwig-van-beethoven:beethoven-bagatelles",
-      "Beethoven Bagatelles",
-      Map("spotify-uri" -> Seq("spotify:album:3SFC4Aeqmqm4R7bQeujK2o")),
-      Map(
-        "type" -> Seq("album"),
+      slugs = "alfred-brendel:ludwig-van-beethoven:beethoven-bagatelles",
+      name = "Beethoven Bagatelles",
+      types = Seq("album"),
+      uris = Map("spotify-uri" -> Seq("spotify:album:3SFC4Aeqmqm4R7bQeujK2o")),
+      tags = Map(
         "genre" -> Seq("classical"),
         "era" -> Seq("classical-era"),
         "instrument" -> Seq("piano"),
         "artist" -> Seq("alfred-brendel"),
-        "composer" -> Seq("ludwig-van-beethoven"))))
+        "composer" -> Seq("ludwig-van-beethoven")))
+  ).map(item => item.slugs -> item).toMap
+
+  Database.mediaItems.get("sune")
 }
 
-case class TagRequest(category: String)
 
-case class TagResponse(tags: Seq[Tag])
-
-class TagActor extends Actor with ActorLogging {
-
-  def receive = {
-    case TagRequest(category) =>
-      sender() ! TagResponse(Database.tags.filter(tag => tag.category == category))
-  }
-
-}
-
-case class MediaItemQueryTagRequest(tag: String, value: String)
+case class MediaItemQueryTagRequest(theType: String)
 
 case class MediItemQueryTagResponse(mediaItems: Seq[MediaItem])
 
 class MediaItemQueryTagActor extends Actor with ActorLogging {
   def receive = {
-    case MediaItemQueryTagRequest(tag, value) =>
+    case MediaItemQueryTagRequest(theType) =>
       sender() ! MediItemQueryTagResponse(
-        Database.mediaItems.filter(mediaItem => mediaItem.hasTag(tag, value)))
+        Database.mediaItems.values.filter(mediaItem => mediaItem.types.contains(theType)).toSeq)
   }
 }
-
-case class TagTreeRequest(tags: Seq[String], currentType: String, currentItem: String)
 
 case class FailureResponse(cause: String)
-
-class TagTreeActor extends Actor with ActorLogging {
-
-  def receive = {
-    case TagTreeRequest(tags, currentType, currentItem) => {
-
-      val currentMediaItemTry =
-        Database.mediaItems.find(item => item.slugs == currentItem) match {
-          case Some(mediaItem) => Success(mediaItem)
-          case None => Failure(new IllegalArgumentException("No current mediaItem found"))
-        }
-
-      val currentIndexTry = tags.indexOf(currentType) match {
-          case -1 => Failure(new IllegalArgumentException(currentType + " not found in tags"))
-          case theIndex => Success(theIndex)
-        }
-
-      val parentTypeTry = currentIndexTry.map(
-        curr =>
-          if(curr > 0) Some(tags(curr - 1))
-          else None)
-
-      val parentTry = for {
-        parentTypeOption <- parentTypeTry
-        item <- currentMediaItemTry
-      } yield
-        parentTypeOption.flatMap(
-          parentType => Database.mediaItems
-            .find(mediaItem => item.getTag(parentType).contains(mediaItem.slugs)))
-
-      val childTypeTry = currentIndexTry.map(
-        curr =>
-          if(tags.size > curr + 1) Some(tags(curr + 1))
-          else None)
-
-      val childrenTry = for {
-        childOption <- childTypeTry
-        item <- currentMediaItemTry
-      } yield
-        childOption match {
-          case Some(child) =>
-            Database.mediaItems
-              .filter(mediaItem =>
-                mediaItem.getTag(currentType).contains(item.slugs) &&
-                  mediaItem.getTag("type").contains(child))
-          case None => Seq.empty
-        }
-
-      val tagTreeTry = for {
-        currentMediaItem <- currentMediaItemTry
-        parent <- parentTry
-        children <- childrenTry
-      } yield TagTree(tags, currentMediaItem, children, parent)
-
-      tagTreeTry match {
-        case Success(tagTree) => sender() ! tagTree
-        case Failure(cause) => sender() ! FailureResponse(cause.toString)
-      }
-    }
-
-  }
-}
 
