@@ -15,7 +15,7 @@ case class UserAccountRequest(code: String, requester: ActorRef)
 
 case class UserAccountResponse(accessToken: AccessToken, requester: ActorRef)
 
-class UserAccountActor extends Actor with ActorLogging with UserJsonSupport {
+class SpotifyUserAccountActor extends Actor with ActorLogging with SpotifyUserJsonSupport {
 
   import akka.pattern.pipe
   import context.dispatcher

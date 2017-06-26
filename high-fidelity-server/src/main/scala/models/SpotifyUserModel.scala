@@ -22,11 +22,11 @@ case class PrivateUser(birthdate: Option[String],
                        `type`: String,
                        uri: String)
 
-case class User(accessToken: AccessToken, privateUser: PrivateUser)
+case class SpotifyUser(accessToken: AccessToken, privateUser: PrivateUser)
 
 
 
-trait UserJsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
+trait SpotifyUserJsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val followersFormat = jsonFormat2(Followers)
   implicit val imageFormat = jsonFormat3(Image)
   implicit val accountFormat = jsonFormat5(AccessToken)

@@ -12,9 +12,9 @@ import scala.concurrent.Future
 
 case class UserProfileRequest(accessToken: AccessToken, requestor: ActorRef)
 
-case class UserProfileResponse(user: User, requester: ActorRef)
+case class UserProfileResponse(user: SpotifyUser, requester: ActorRef)
 
-class UserProfileActor extends Actor with ActorLogging with UserJsonSupport {
+class SpotifyUserProfileActor extends Actor with ActorLogging with SpotifyUserJsonSupport {
 
   import akka.pattern.pipe
   import context.dispatcher
@@ -26,7 +26,7 @@ class UserProfileActor extends Actor with ActorLogging with UserJsonSupport {
   def receive = {
     case UserProfileRequest(accessToken, requester) =>
       currentUserProfile(accessToken)
-        .map(user => UserProfileResponse(User(accessToken, user), requester))
+        .map(user => UserProfileResponse(SpotifyUser(accessToken, user), requester))
         .pipeTo(sender())
   }
 
