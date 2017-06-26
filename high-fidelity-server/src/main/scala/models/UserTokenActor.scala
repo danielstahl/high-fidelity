@@ -5,9 +5,9 @@ import pdi.jwt.{Jwt, JwtAlgorithm}
 import spray.json.{JsObject, JsString}
 
 
-case class UserTokenRequest(requester: ActorRef, user: User)
+case class UserTokenRequest(requester: ActorRef, user: SpotifyUser)
 
-case class UserTokenResponse(userToken: String, user: User, requestor: ActorRef)
+case class UserTokenResponse(userToken: String, user: SpotifyUser, requestor: ActorRef)
 
 class UserTokenActor extends Actor {
 

@@ -15,3 +15,4 @@ tmp
 *.iml
 bin
 .DS_Store
+firebase-service-account.json

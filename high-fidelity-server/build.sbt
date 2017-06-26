@@ -13,7 +13,8 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
   "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion,
   "ch.megard" %% "akka-http-cors" % "0.2.1",
-"com.pauldijou" %% "jwt-core" % "0.12.1",
+  "com.pauldijou" %% "jwt-core" % "0.12.1",
+  "com.google.firebase" % "firebase-admin" % "5.2.0",
   "org.scalatest" %% "scalatest" % "3.0.1" % "test",
   "junit" % "junit" % "4.12" % "test",
   "com.novocode" % "junit-interface" % "0.11" % "test"

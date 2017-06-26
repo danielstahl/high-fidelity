@@ -1,10 +1,10 @@
-package models
+package models.mediaitem
 
 import akka.actor.{Actor, ActorLogging}
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import spray.json.DefaultJsonProtocol
 
-case class MediaItem(slugs: String, name: String, types: Seq[String], uris: Map[String, Seq[String]], tags: Map[String, Seq[String]]) {
+case class MediaItem(uid: String, slugs: String, name: String, types: Seq[String], uris: Map[String, Seq[String]], tags: Map[String, Seq[String]]) {
 
   def hasTag(category: String, tag: String): Boolean = {
     getTag(category).contains(tag)
@@ -20,7 +20,7 @@ case class TypeDescription(slug: String, name: String, metaType: String)
 case class TagTree(typeTree: Seq[String], currentItem: MediaItem, children: Seq[MediaItem], parent: Option[MediaItem])
 
 trait MediaItemJsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
-  implicit val mediaItemFormat = jsonFormat5(MediaItem)
+  implicit val mediaItemFormat = jsonFormat6(MediaItem)
   implicit val tagTreeFormat = jsonFormat4(TagTree)
   implicit val failureResponseFormat =  jsonFormat1(FailureResponse)
   implicit val mediItemQueryTagResponseFormat = jsonFormat1(MediItemQueryTagResponse)
@@ -40,9 +40,10 @@ object Database {
     TypeDescription("instrument", "Instrument", "type")
   ).map(desc => desc.slug -> desc).toMap
 
-  val mediaItems = Seq(
+  val originalMediaItems = Seq(
 
     MediaItem(
+      uid = "ZlnnPfqyyYZqDxGDAKTPV5yRuBF3",
       slugs = "classical",
       name = "Classical music",
       types = Seq("genre"),
@@ -50,6 +51,7 @@ object Database {
       tags = Map()),
 
     MediaItem(
+      uid = "ZlnnPfqyyYZqDxGDAKTPV5yRuBF3",
       slugs = "jazz",
       name = "Jazz music",
       types = Seq("genre"),
@@ -57,6 +59,7 @@ object Database {
       tags = Map()),
 
     MediaItem(
+      uid = "ZlnnPfqyyYZqDxGDAKTPV5yRuBF3",
       slugs = "ambient",
       name = "Ambient music",
       types = Seq("genre"),
@@ -64,6 +67,7 @@ object Database {
       Map()),
 
     MediaItem(
+      uid = "ZlnnPfqyyYZqDxGDAKTPV5yRuBF3",
       slugs = "electronica",
       name = "Electronica music",
       types = Seq("genre"),
@@ -71,6 +75,7 @@ object Database {
       tags = Map()),
 
     MediaItem(
+      uid = "ZlnnPfqyyYZqDxGDAKTPV5yRuBF3",
       slugs = "classical-era",
       name = "Classical Era",
       types = Seq("era"),
@@ -78,6 +83,7 @@ object Database {
       tags = Map("genre" -> Seq("classical"))),
 
     MediaItem(
+      uid = "ZlnnPfqyyYZqDxGDAKTPV5yRuBF3",
       slugs = "piano",
       name = "Piano",
       types = Seq("instrument"),
@@ -85,6 +91,7 @@ object Database {
       tags = Map("genre" -> Seq("classical"))),
 
     MediaItem(
+      uid = "ZlnnPfqyyYZqDxGDAKTPV5yRuBF3",
       slugs = "ludwig-van-beethoven",
       name = "Ludwig van Beethoven",
       types = Seq("composer"),
@@ -94,6 +101,7 @@ object Database {
         "era" -> Seq("classical-era"))),
 
     MediaItem(
+      uid = "ZlnnPfqyyYZqDxGDAKTPV5yRuBF3",
       slugs = "ludwig-van-beethoven:bagatelles-op-119",
       name = "Bagatelles Op 119",
       types = Seq("piece"),
@@ -105,6 +113,7 @@ object Database {
         "composer" -> Seq("ludwig-van-beethoven"))),
 
     MediaItem(
+      uid = "ZlnnPfqyyYZqDxGDAKTPV5yRuBF3",
       slugs = "ludwig-van-beethoven:diabelli-variations-op-120",
       name = "Diabelli Variations Op 120",
       types = Seq("piece"),
@@ -116,6 +125,7 @@ object Database {
         "composer" -> Seq("ludwig-van-beethoven"))),
 
     MediaItem(
+      uid = "ZlnnPfqyyYZqDxGDAKTPV5yRuBF3",
       slugs = "paul-lewis",
       name = "Paul Lewis",
       types = Seq("artist"),
@@ -125,6 +135,7 @@ object Database {
         "instrument" -> Seq("piano"))),
 
     MediaItem(
+      uid = "ZlnnPfqyyYZqDxGDAKTPV5yRuBF3",
       slugs = "igor-levit",
       name = "Igor Levit",
       types = Seq("artist"),
@@ -135,6 +146,7 @@ object Database {
         "instrument" -> Seq("piano"))),
 
     MediaItem(
+      uid = "ZlnnPfqyyYZqDxGDAKTPV5yRuBF3",
       slugs = "ludwig-van-beethoven:paul-lewis:diabelli-variations-op-120",
       name = "Beethoven: Diabelli Variations, Op. 120",
       types = Seq("recording"),
@@ -148,6 +160,7 @@ object Database {
         "piece" -> Seq("ludwig-van-beethoven:diabelli-variations-op-120"))),
 
     MediaItem(
+      uid = "ZlnnPfqyyYZqDxGDAKTPV5yRuBF3",
       slugs = "ludwig-van-beethoven:igor-levit:diabelli-variations-op-120",
       name = "Beethoven: Diabelli Variations, Op. 120",
       types = Seq("recording"),
@@ -161,6 +174,7 @@ object Database {
         "piece" -> Seq("ludwig-van-beethoven:diabelli-variations-op-120"))),
 
     MediaItem(
+      uid = "ZlnnPfqyyYZqDxGDAKTPV5yRuBF3",
       slugs = "ludwig-van-beethoven:alfred-brendel:bagatelles-op-119",
       name = "Bagatelles Op 119",
       types = Seq("recording"),
@@ -185,6 +199,7 @@ object Database {
         "piece" -> Seq("ludwig-van-beethoven:bagatelles-op-119"))),
 
     MediaItem(
+      uid = "ZlnnPfqyyYZqDxGDAKTPV5yRuBF3",
       slugs = "alfred-brendel",
       name = "Alfred Brendel",
       types = Seq("artist"),
@@ -194,6 +209,7 @@ object Database {
         "instrument" -> Seq("piano"))),
 
     MediaItem(
+      uid = "ZlnnPfqyyYZqDxGDAKTPV5yRuBF3",
       slugs = "alfred-brendel:ludwig-van-beethoven:beethoven-bagatelles",
       name = "Beethoven Bagatelles",
       types = Seq("album"),
@@ -204,21 +220,22 @@ object Database {
         "instrument" -> Seq("piano"),
         "artist" -> Seq("alfred-brendel"),
         "composer" -> Seq("ludwig-van-beethoven")))
-  ).map(item => item.slugs -> item).toMap
+  )
 
-  Database.mediaItems.get("sune")
+  val mediaItems = originalMediaItems.groupBy(mediaItem => mediaItem.uid)
+    .mapValues(mediaItems => mediaItems.map(mediaItem => (mediaItem.slugs, mediaItem)).toMap)
 }
 
 
-case class MediaItemQueryTagRequest(theType: String)
+case class MediaItemQueryTagRequest(uid: String, theType: String)
 
 case class MediItemQueryTagResponse(mediaItems: Seq[MediaItem])
 
 class MediaItemQueryTagActor extends Actor with ActorLogging {
   def receive = {
-    case MediaItemQueryTagRequest(theType) =>
+    case MediaItemQueryTagRequest(uid, theType) =>
       sender() ! MediItemQueryTagResponse(
-        Database.mediaItems.values.filter(mediaItem => mediaItem.types.contains(theType)).toSeq)
+        Database.mediaItems(uid).values.filter(mediaItem => mediaItem.types.contains(theType)).toSeq)
   }
 }
 

@@ -14,29 +14,40 @@ class GenreView extends Component {
     this.onGenreMainClick = this.onGenreMainClick.bind(this);
   }
 
+  fetchGenres(token) {
+    let that = this;
+    fetch('http://localhost:8080/media-items/' + token + '/genre')
+      .then((genresResult) => {
+        return genresResult.json();
+      }).then((genresJson) => {
+        that.setState({genres: genresJson.mediaItems});
+      });
+  }
+
   componentDidMount() {
-    fetch('http://localhost:8080/media-items/genre')
-    .then((result) => {
-      return result.json();
-    })
-    .then((result) => {
-      this.setState({genres: result.mediaItems})
-    });
+    console.log("component mount");
+    this.props.user.firebaseUser.getIdToken(false)
+      .then((token) => {
+        this.fetchGenres(token);
+      });
   }
 
   onItemClick(tree, type, slugs) {
-    fetch('http://localhost:8080/genre-tree/' + tree + '/' + type + '/' + slugs)
-    .then((result) => {
-      return result.json();
-    })
-    .then((result) => {
-      this.setState({
-        main: false,
-        tree: tree,
-        item: result.mediaItem,
-        children: result.children,
-        breadCrumbs: result.breadCrumbs})
-    });
+    this.props.user.firebaseUser.getIdToken(false)
+      .then((token) => {
+        fetch('http://localhost:8080/genre-tree/' + token + '/' + tree + '/' + type + '/' + slugs)
+        .then((result) => {
+          return result.json();
+        })
+        .then((result) => {
+          this.setState({
+            main: false,
+            tree: tree,
+            item: result.mediaItem,
+            children: result.children,
+            breadCrumbs: result.breadCrumbs})
+        });
+      });
   }
 
   onGenreMainClick() {
@@ -233,7 +244,6 @@ class ChildItem extends Component {
   handleClick(e) {
     e.preventDefault();
     if(this.props.item) {
-      console.log(this.props.item);
       this.props.onItemClick(this.props.tree, this.props.item.theType.slug, this.props.item.slugs);
     }
   }

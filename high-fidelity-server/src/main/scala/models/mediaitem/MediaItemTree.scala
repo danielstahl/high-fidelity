@@ -1,8 +1,7 @@
-package models
+package models.mediaitem
 
 import akka.actor.{Actor, ActorLogging}
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import models.MediaItemActor.mediaItemTree
 import spray.json.DefaultJsonProtocol
 
 
@@ -43,7 +42,7 @@ object MediaItemActor {
     Type(typeDescription.slug, typeDescription.name)
   }
 
-  private def makeTreeLink(tagName: String, tagValue: String, typeTree: String): TreeLink = {
+  private def makeTreeLink(userMediaItems: Map[String, MediaItem], tagName: String, tagValue: String, typeTree: String): TreeLink = {
     val preferedTree = typeTrees(typeTree)
 
     val choosenTypeTree: Option[String] = if(preferedTree.contains(tagName)) Option(typeTree) else
@@ -54,12 +53,12 @@ object MediaItemActor {
 
     val typeDescription = Database.typeDescriptions(tagName)
 
-    val mediaItem = Database.mediaItems(tagValue)
+    val mediaItem = userMediaItems(tagValue)
 
     TreeLink(Tag(tagValue, mediaItem.name, toType(typeDescription)), choosenTypeTree)
   }
 
-  def decorate(mediaItem: MediaItem, typeTree: String): DecoratedMediaItem = {
+  def decorate(userMediaItems: Map[String, MediaItem], mediaItem: MediaItem, typeTree: String): DecoratedMediaItem = {
     DecoratedMediaItem(
       slugs = mediaItem.slugs,
       name = mediaItem.name,
@@ -70,20 +69,20 @@ object MediaItemActor {
       tags = mediaItem.tags.map {
         case (tagName, tagValues) =>
           tagName -> tagValues.map(tagValue =>
-            makeTreeLink(tagName, tagValue, typeTree))}
+            makeTreeLink(userMediaItems, tagName, tagValue, typeTree))}
     )
   }
 
-  def mediaItemTree(slugs: String, theType: String, theTypeTree: String): MediaItemTree = {
+  def mediaItemTree(userMediaItems: Map[String, MediaItem], slugs: String, theType: String, theTypeTree: String): MediaItemTree = {
     val typeTree = typeTrees(theTypeTree)
     val currenTypeTreeIndex = typeTree.indexOf(theType)
-    val mediaItem = Database.mediaItems(slugs)
-    val decoratedMediaItem = decorate(mediaItem, theTypeTree)
+    val mediaItem = userMediaItems(slugs)
+    val decoratedMediaItem = decorate(userMediaItems, mediaItem, theTypeTree)
 
     val breadCrumbsTypes = typeTree.slice(0, typeTree.indexOf(theType))
     val breadCrumbsLinks = breadCrumbsTypes
         .map(crumbItemType =>
-          Database.mediaItems.values.find(
+          userMediaItems.values.find(
             crumbCandidate =>
               mediaItem.getTag(crumbItemType).contains(crumbCandidate.slugs) &&
                 crumbCandidate.types.contains(crumbItemType))
@@ -101,7 +100,7 @@ object MediaItemActor {
 
     val childrenItems = optionalChidrenType match {
       case Some(childrenType) =>
-        Database.mediaItems.values
+        userMediaItems.values
             .filter(childItem =>
               childItem.getTag(theType).contains(slugs) &&
                 childItem.types.contains(childrenType.slug))
@@ -118,11 +117,11 @@ object MediaItemActor {
   }
 }
 
-case class MediaItemTreeRequest(slugs: String, theType: String, theTypeTree: String)
+case class MediaItemTreeRequest(uid: String, slugs: String, theType: String, theTypeTree: String)
 
 class MediaItemTreeActor extends Actor with ActorLogging {
   def receive = {
-    case MediaItemTreeRequest(slugs, theType, theTypeTree) =>
-      sender() ! mediaItemTree(slugs, theType, theTypeTree)
+    case MediaItemTreeRequest(uid, slugs, theType, theTypeTree) =>
+      sender() ! MediaItemActor.mediaItemTree(Database.mediaItems(uid), slugs, theType, theTypeTree)
   }
 }

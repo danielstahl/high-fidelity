@@ -13,6 +13,26 @@ import {
 
 import GenreView from './GenreView.js';
 
+import LoginHandler from './LoginHandler.js';
+
+import * as firebase from 'firebase';
+
+import {
+  Row, Col, Grid, Panel, Jumbotron
+} from 'react-bootstrap';
+
+class Home2 extends Component {
+  render() {
+    return(
+      <div className="container">
+        <div>
+          <LoginHandler/>
+        </div>
+      </div>
+    );
+  }
+}
+
 class Home extends Component {
   render() {
     return (
@@ -49,12 +69,57 @@ const LoggedInHome = ({match}) => (
     </div>
 )
 
+class NotLoggedInView extends Component {
+  render() {
+    return(
+      <Row>
+        <h1>Welcome to High Fidelity</h1>
+        <p>Please login to continue.</p>
+      </Row>
+    );
+  }
+}
+
+class Main extends Component {
+
+  constructor(props) {
+      super(props);
+      // uid, email, spotify, loggedin
+      this.state = {user: undefined, loggedIn: false};
+      this.setUser = this.setUser.bind(this);
+  }
+
+  setUser(user) {
+    this.setState({user: user, loggedIn: user.loggedIn});
+  }
+
+  render() {
+    let mainView;
+
+    if(this.state.loggedIn) {
+      mainView = (<GenreView user={this.state.user}/>)
+    } else {
+      mainView = (<NotLoggedInView/>);
+    }
+    return(
+      <div className="container">
+        <Row>
+          <Col md={10}/>
+          <Col md={2}>
+            <LoginHandler setUser={this.setUser} loggedIn={this.state.loggedIn} user={this.state.user}/>
+          </Col>
+        </Row>
+        {mainView}
+      </div>
+    );
+  }
+}
+
 const MainRouter = () => (
   <Router>
     <div className="containter">
-      <Route exact path="/" component={Home}/>
+      <Route exact path="/" component={Main}/>
       <Route path="/logged-in/:userid" component={LoggedInHome}/>
-      <Route path="/genre-main" component={GenreView}/>
     </div>
   </Router>
 )
