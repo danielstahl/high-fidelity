@@ -3,20 +3,22 @@ package models.user
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import akka.stream.{ActorMaterializer, ActorMaterializerSettings}
 import com.google.firebase.auth.FirebaseToken
-import models.mediaitem.{UserMediaItemActor, UserMediaItemsActorRequest}
+import models.mediaitem.{ADD, UpdateMediaItem, UserMediaItemActor, UserMediaItemsActorRequest}
 import service.Firebase
 
 case class UserRequest(uid: String, requester: ActorRef)
 
 class UserActor(user: User, firebase: Firebase) extends Actor with ActorLogging {
 
-  val userMediaItemActor = context.actorOf(Props[UserMediaItemActor](new UserMediaItemActor(firebase)), "userMediaItemActor")
+  val userMediaItemActor = context.actorOf(Props[UserMediaItemActor](new UserMediaItemActor(user, firebase)), "userMediaItemActor")
 
   def receive = {
     case UserRequest(uid, requester) =>
       requester ! user
     case userMediaItemRequest: UserMediaItemsActorRequest =>
       userMediaItemActor ! userMediaItemRequest
+    case updateMediaItem: UpdateMediaItem =>
+      userMediaItemActor ! updateMediaItem
   }
 }
 
@@ -52,5 +54,15 @@ class UserSupervisorActor(firebase: Firebase) extends Actor with ActorLogging {
             val userActor = makeUserActor(firebaseToken)
             userActor ! UserMediaItemsActorRequest(firebaseToken.getUid, requestor)
           })
+
+    case UpdateMediaItem(token, mediaItem, operation, _) =>
+      val requestor = sender()
+      firebase.verifyIdToken(token)
+        .foreach(firebaseToken => {
+          val userActor = makeUserActor(firebaseToken)
+          userActor ! UpdateMediaItem(token, mediaItem, operation, requestor)
+        })
+
+
   }
 }

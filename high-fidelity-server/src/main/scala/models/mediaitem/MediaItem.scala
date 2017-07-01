@@ -1,10 +1,16 @@
 package models.mediaitem
 
+import java.util
+
 import akka.actor.{Actor, ActorLogging}
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import spray.json.DefaultJsonProtocol
+import spray.json.{DefaultJsonProtocol, NullOptions}
 
-case class MediaItem(uid: String, slugs: String, name: String, types: Seq[String], uris: Map[String, Seq[String]], tags: Map[String, Seq[String]]) {
+import scala.beans.BeanProperty
+
+import scala.collection.JavaConverters._
+
+case class MediaItem(uid: String, slugs: String, name: String, types: List[String], uris: Map[String, List[String]], tags: Map[String, List[String]]) {
 
   def hasTag(category: String, tag: String): Boolean = {
     getTag(category).contains(tag)
@@ -13,13 +19,48 @@ case class MediaItem(uid: String, slugs: String, name: String, types: Seq[String
   def getTag(category: String): Seq[String] = {
     tags.getOrElse(category, Seq.empty)
   }
+
+  def scalaMapToJavaMap(theMap: Map[String, Seq[String]]): util.Map[String, util.List[String]] = {
+    theMap.map {
+      case (k, v) => (k, seqAsJavaList(v))
+    }.asJava
+  }
+
+  def toBean(): MediaItemBean = {
+    val bean = new MediaItemBean()
+    bean.uid = uid
+    bean.slugs = slugs
+    bean.name = name
+    bean.types = types.asJava
+    bean.uris = scalaMapToJavaMap(uris)
+    bean.tags = scalaMapToJavaMap(tags)
+    bean
+  }
+}
+
+class MediaItemBean() {
+  @BeanProperty var uid: String = ""
+  @BeanProperty var slugs: String = ""
+  @BeanProperty var name: String = ""
+  @BeanProperty var types: util.List[String] = new util.ArrayList()
+  @BeanProperty var uris: util.Map[String, util.List[String]] = new java.util.HashMap()
+  @BeanProperty var tags: util.Map[String, util.List[String]] = new java.util.HashMap()
+
+  def javaMapToScalaMap(theMap: util.Map[String, util.List[String]]): Map[String, List[String]] = {
+    theMap.asScala.map {
+      case (k, v) => (k, v.asScala.toList)
+    }.toMap
+  }
+
+  def toCase(): MediaItem =
+    MediaItem(uid, slugs, name, types.asScala.toList, javaMapToScalaMap(uris), javaMapToScalaMap(tags))
 }
 
 case class TypeDescription(slug: String, name: String, metaType: String)
 
 case class TagTree(typeTree: Seq[String], currentItem: MediaItem, children: Seq[MediaItem], parent: Option[MediaItem])
 
-trait MediaItemJsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
+trait MediaItemJsonSupport extends SprayJsonSupport with DefaultJsonProtocol with NullOptions {
   implicit val mediaItemFormat = jsonFormat6(MediaItem)
   implicit val tagTreeFormat = jsonFormat4(TagTree)
   implicit val failureResponseFormat =  jsonFormat1(FailureResponse)
@@ -41,7 +82,7 @@ object Database {
   ).map(desc => desc.slug -> desc).toMap
 
   val originalMediaItems = Seq(
-
+/*
     MediaItem(
       uid = "ZlnnPfqyyYZqDxGDAKTPV5yRuBF3",
       slugs = "classical",
@@ -220,10 +261,11 @@ object Database {
         "instrument" -> Seq("piano"),
         "artist" -> Seq("alfred-brendel"),
         "composer" -> Seq("ludwig-van-beethoven")))
+        */
   )
 
-  val mediaItems = originalMediaItems.groupBy(mediaItem => mediaItem.uid)
-    .mapValues(mediaItems => mediaItems.map(mediaItem => (mediaItem.slugs, mediaItem)).toMap)
+  //val mediaItems = originalMediaItems.groupBy(mediaItem => mediaItem.uid)
+  //  .mapValues(mediaItems => mediaItems.map(mediaItem => (mediaItem.slugs, mediaItem)).toMap)
 }
 
 
@@ -235,7 +277,8 @@ class MediaItemQueryTagActor extends Actor with ActorLogging {
   def receive = {
     case MediaItemQueryTagRequest(uid, theType) =>
       sender() ! MediItemQueryTagResponse(
-        Database.mediaItems(uid).values.filter(mediaItem => mediaItem.types.contains(theType)).toSeq)
+        Seq())
+        //Database.mediaItems(uid).values.filter(mediaItem => mediaItem.types.contains(theType)).toSeq)
   }
 }
 
