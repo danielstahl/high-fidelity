@@ -1,6 +1,5 @@
 package models.mediaitem
 
-import akka.actor.{Actor, ActorLogging}
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import spray.json.DefaultJsonProtocol
 
@@ -31,7 +30,7 @@ trait MediaItemTreeJsonSupport extends SprayJsonSupport with DefaultJsonProtocol
   implicit val mediaItemTreeFormat = jsonFormat3(MediaItemTree)
 }
 
-object MediaItemActor {
+object MediaItemTreeService {
 
   val typeTrees = Map(
     "composer" -> Seq("genre", "era", "composer", "piece", "recording"),
@@ -114,14 +113,5 @@ object MediaItemActor {
       childrenType => Children(childrenType, theTypeTree, childrenItems.toSeq))
 
     MediaItemTree(decoratedMediaItem, breadCrumbs, optionalChildren)
-  }
-}
-
-case class MediaItemTreeRequest(uid: String, slugs: String, theType: String, theTypeTree: String)
-
-class MediaItemTreeActor extends Actor with ActorLogging {
-  def receive = {
-    case MediaItemTreeRequest(uid, slugs, theType, theTypeTree) =>
-      sender() ! MediaItemActor.mediaItemTree(Database.mediaItems(uid), slugs, theType, theTypeTree)
   }
 }

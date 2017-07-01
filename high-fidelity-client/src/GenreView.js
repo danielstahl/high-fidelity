@@ -12,6 +12,7 @@ class GenreView extends Component {
     this.state = {main: true, genres: []};
     this.onItemClick = this.onItemClick.bind(this);
     this.onGenreMainClick = this.onGenreMainClick.bind(this);
+    this.fetchGenres = this.fetchGenres.bind(this);
   }
 
   fetchGenres(token) {
@@ -25,7 +26,6 @@ class GenreView extends Component {
   }
 
   componentDidMount() {
-    console.log("component mount");
     this.props.user.firebaseUser.getIdToken(false)
       .then((token) => {
         this.fetchGenres(token);
@@ -57,7 +57,7 @@ class GenreView extends Component {
   render() {
       let page;
       if(this.state.main) {
-        page = (<GenreMain genres={this.state.genres} onItemClick={this.onItemClick}/>);
+        page = (<GenreMain user={this.props.user} genres={this.state.genres} onItemClick={this.onItemClick} fetchGenres={this.fetchGenres} />);
       } else {
         page = (<GenreTree tree={this.state.tree} item={this.state.item} children={this.state.children} breadCrumbs={this.state.breadCrumbs} onItemClick={this.onItemClick} onGenreMainClick={this.onGenreMainClick}/>)
       }
@@ -104,7 +104,7 @@ class GenreMain extends Component {
         {genreGroups}
         <Row>
           <Col md={4}>
-            <GenreForm/>
+            <GenreForm user={this.props.user} fetchGenres={this.props.fetchGenres} />
             </Col>
           <Col md={8}></Col>
         </Row>
@@ -135,7 +135,7 @@ class GenrePanel extends Component {
       <h2>{this.props.genre.name}</h2>
       <ul className="list-unstyled">
         <li><a href="#" onClick={this.handleArtistClick}>Artists</a></li>
-        {this.props.genre.slugs === 'classical' &&
+        {this.props.genre.slugs === 'classical-music' &&
         <li><a href="#" onClick={this.handleComposerClick}>Composers</a></li>
         }
       </ul>

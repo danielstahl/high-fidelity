@@ -11,7 +11,7 @@ class GenreForm extends Component {
 
   constructor(props) {
     super(props);
-    this.state = { text: '', slug: '', showModal: false };
+    this.state = { name: '', slug: '', showModal: false };
     this.handleNameChange = this.handleNameChange.bind(this);
     this.open = this.open.bind(this);
     this.close = this.close.bind(this);
@@ -19,7 +19,7 @@ class GenreForm extends Component {
   }
 
   handleNameChange(e) {
-    this.setState({ text: e.target.value, slug: slug(e.target.value) });
+    this.setState({ name: e.target.value, slug: slug(e.target.value) });
   }
 
   close() {
@@ -32,6 +32,34 @@ class GenreForm extends Component {
 
   createGenre(event) {
     event.preventDefault();
+
+
+    this.props.user.firebaseUser.getIdToken(false)
+      .then((token) => {
+        let newMediaItem = {
+          uid: '',
+          slugs: this.state.slug,
+          name: this.state.name,
+          types: ['genre'],
+          uris: {},
+          tags: {}
+        };
+        fetch('http://localhost:8080/media-items/' + token, {
+          method: 'post',
+          headers: {
+            'Accept': 'application/json, text/plain, */*',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(newMediaItem)
+        }).then(res => res.json())
+        .then(postResult => {
+          console.log("Post result");
+          console.log(postResult);
+          this.props.fetchGenres(token);
+        });
+      });
+
+
     this.close();
   }
 
@@ -54,7 +82,7 @@ class GenreForm extends Component {
                 </FormGroup>
                 <FormGroup controlId="nameField">
                   <ControlLabel>Name</ControlLabel>
-                  <FormControl type="text" onChange={this.handleNameChange} value={this.state.text}></FormControl>
+                  <FormControl type="text" onChange={this.handleNameChange} value={this.state.name}></FormControl>
                 </FormGroup>
                 <Button type="submit">Create</Button>
               </form>

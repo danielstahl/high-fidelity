@@ -1,7 +1,8 @@
 package service
 
 import com.google.firebase.{FirebaseApp, FirebaseOptions}
-import com.google.firebase.auth.{FirebaseAuth, FirebaseCredential, FirebaseCredentials, FirebaseToken}
+import com.google.firebase.auth.{FirebaseAuth, FirebaseCredentials, FirebaseToken}
+import com.google.firebase.database.{DatabaseReference, FirebaseDatabase}
 import com.typesafe.config.Config
 
 import scala.concurrent.{Future, Promise}
@@ -13,6 +14,7 @@ import scala.util.Try
 case class Firebase(config: Config) {
 
   def initializeFirebase(): Unit = {
+
     val serviceAccount = getClass.getResourceAsStream("/firebase-service-account.json")
 
     val options = new FirebaseOptions.Builder()
@@ -36,4 +38,8 @@ case class Firebase(config: Config) {
         })
     promise.future
   }
+
+  def getDatebaseReference(path: String): DatabaseReference =
+    FirebaseDatabase.getInstance()
+        .getReference(path)
 }
