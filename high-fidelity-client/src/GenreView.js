@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 
 import {
-  Row, Col, Grid, Panel
+  Row, Col, Grid, Panel, Glyphicon, Button
 } from 'react-bootstrap';
 
 import GenreForm from './GenreForm.js';
+import EraForm from './EraForm.js';
 
 class GenreView extends Component {
   constructor(props) {
@@ -59,7 +60,7 @@ class GenreView extends Component {
       if(this.state.main) {
         page = (<GenreMain user={this.props.user} genres={this.state.genres} onItemClick={this.onItemClick} fetchGenres={this.fetchGenres} />);
       } else {
-        page = (<GenreTree tree={this.state.tree} item={this.state.item} children={this.state.children} breadCrumbs={this.state.breadCrumbs} onItemClick={this.onItemClick} onGenreMainClick={this.onGenreMainClick}/>)
+        page = (<GenreTree user={this.props.user} tree={this.state.tree} item={this.state.item} children={this.state.children} breadCrumbs={this.state.breadCrumbs} onItemClick={this.onItemClick} onGenreMainClick={this.onGenreMainClick}/>)
       }
     return (page);
   }
@@ -105,7 +106,7 @@ class GenreMain extends Component {
         <Row>
           <Col md={4}>
             <GenreForm user={this.props.user} fetchGenres={this.props.fetchGenres} />
-            </Col>
+          </Col>
           <Col md={8}></Col>
         </Row>
       </Grid>
@@ -152,8 +153,8 @@ class GenreTree extends Component {
     return(
       <div className="container">
         <BreadCrumbsItems tree={this.props.tree} breadCrumbs={this.props.breadCrumbs} item={this.props.item} onItemClick={this.props.onItemClick} onGenreMainClick={this.props.onGenreMainClick}/>
-        <CurrentItem tree={this.props.tree} item={this.props.item} onItemClick={this.props.onItemClick}/>
-        <ChildrenItem tree={this.props.tree} children={this.props.children} onItemClick={this.props.onItemClick}/>
+        <CurrentItem user={this.props.user} tree={this.props.tree} item={this.props.item} onItemClick={this.props.onItemClick}/>
+        <ChildrenItem user={this.props.user} tree={this.props.tree} item={this.props.item} children={this.props.children} onItemClick={this.props.onItemClick}/>
       </div>
     );
   }
@@ -177,7 +178,11 @@ class CurrentItem extends Component {
 
     if(this.props.item) {
       item = (
-        <h1><small>{this.props.item.types[0].name}</small> {this.props.item.name}</h1>
+        <div>
+          <h1><small>{this.props.item.types[0].name}</small> {this.props.item.name}</h1>
+          <h2><small>Edit {this.props.item.name}</small></h2>
+          <Button bsStyle="link"><Glyphicon glyph="edit"/></Button>
+        </div>
       );
     }
 
@@ -260,7 +265,16 @@ class ChildItem extends Component {
 
 class ChildrenItem extends Component {
 
+  getCreateChildForm() {
+    let childForm;
+    if(this.props.children.theType.slug == 'era') {
+      childForm = (<EraForm tree={this.props.tree} user={this.props.user} genre={this.props.item} refresh={this.props.onItemClick}/>);
+    }
+    return childForm;
+  }
+
   render() {
+    let childForm = this.getCreateChildForm();
     let childrenItems;
     if(this.props.children) {
       childrenItems = (this.props.children.children.map((childItem) =>
@@ -269,10 +283,12 @@ class ChildrenItem extends Component {
     }
 
     return(
+
       <div className="row">
         <dl>
           {childrenItems}
         </dl>
+        {childForm}
       </div>
     );
   }
