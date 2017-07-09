@@ -11,9 +11,12 @@ import {
   Typeahead
 } from 'react-bootstrap-typeahead';
 
+
 import GenreView from './GenreView.js';
 
 import LoginHandler from './LoginHandler.js';
+
+import SpotifyLoginHandler from './SpotifyLoginHandler.js';
 
 import * as firebase from 'firebase';
 
@@ -21,53 +24,6 @@ import {
   Row, Col, Grid, Panel, Jumbotron
 } from 'react-bootstrap';
 
-class Home2 extends Component {
-  render() {
-    return(
-      <div className="container">
-        <div>
-          <LoginHandler/>
-        </div>
-      </div>
-    );
-  }
-}
-
-class Home extends Component {
-  render() {
-    return (
-        <div className="container">
-          <div>
-            <h2>Welcome to High Fidelity</h2>
-            <div>Click the button to login</div>
-            <button onClick={this.handlelogin}>login</button>
-          </div>
-        </div>
-    );
-  }
-
-  handlelogin() {
-    var ACCOUNTS_BASE_URL = 'https://accounts.spotify.com';
-    var CLIENT_ID = '1b24de0b94324459b855aa136d301949';
-    var REDIRECT_URI = 'http://localhost:8080/spotify-login-callback';
-
-    var scopes = [];
-    var url = ACCOUNTS_BASE_URL + '/authorize?client_id=' + CLIENT_ID
-           + '&redirect_uri=' + encodeURIComponent(REDIRECT_URI)
-           + '&scope=' + encodeURIComponent(scopes.join(' '))
-           + '&response_type=code';
-
-    var w = window.location.href = url;
-    return false;
-  };
-}
-
-const LoggedInHome = ({match}) => (
-    <div className="container">
-      <h2>Welcome to High Fidelity</h2>
-      <div>You are logged in as {match.params.userid}</div>
-    </div>
-)
 
 class NotLoggedInView extends Component {
   render() {
@@ -103,12 +59,17 @@ class Main extends Component {
     }
     return(
       <div className="container">
-        <Row>
-          <Col md={10}/>
-          <Col md={2}>
-            <LoginHandler setUser={this.setUser} loggedIn={this.state.loggedIn} user={this.state.user}/>
-          </Col>
-        </Row>
+        <Grid>
+          <Row>
+            <Col md={8}/>
+            <Col md={2}>
+              <LoginHandler setUser={this.setUser} loggedIn={this.state.loggedIn} user={this.state.user}/>
+            </Col>
+            <Col md={2}>
+              <SpotifyLoginHandler user={this.state.user}/>
+            </Col>
+          </Row>
+        </Grid>
         {mainView}
       </div>
     );
@@ -119,7 +80,6 @@ const MainRouter = () => (
   <Router>
     <div className="containter">
       <Route exact path="/" component={Main}/>
-      <Route path="/logged-in/:userid" component={LoggedInHome}/>
     </div>
   </Router>
 )

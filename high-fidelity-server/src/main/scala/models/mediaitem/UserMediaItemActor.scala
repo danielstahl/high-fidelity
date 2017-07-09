@@ -9,7 +9,7 @@ import spray.json.DefaultJsonProtocol
 
 import scala.collection.JavaConverters._
 
-case class UserMediaItemsActorRequest(uid: String, requester: ActorRef)
+case class UserMediaItemsActorRequest(uid: String, requestor: ActorRef)
 
 case class UserMediaItemsActorResponse(mediaItems: Map[String, MediaItem])
 
@@ -18,8 +18,8 @@ case object CHANGE extends DatabaseOperation
 case object ADD extends DatabaseOperation
 case object REMOVE extends DatabaseOperation
 
-case class UpdateMediaItem(token: String, mediaItem: MediaItem, operation: DatabaseOperation, requester: ActorRef)
-case class RemoveMediaItem(token: String, slugs: String, requester: ActorRef)
+case class UpdateMediaItem(token: String, mediaItem: MediaItem, operation: DatabaseOperation, requestor: ActorRef)
+case class RemoveMediaItem(token: String, slugs: String, requestor: ActorRef)
 case class MediaItemEvent(mediaItem: MediaItem, operation: DatabaseOperation)
 case class MediaItemUpdateSuccess(slugs: String,/*mediaItem: MediaItem, */operation: String)
 case class MediaItemUpdateError(slugs: String,/*mediaItem: MediaItem, */operation: String, cause: String)
@@ -34,7 +34,7 @@ trait UserMediaItemJsonSupport extends SprayJsonSupport with DefaultJsonProtocol
 }
 
 
-class UserMediaItemActor(user: User, firebase: Firebase) extends Actor with ActorLogging {
+class UserMediaItemActor(uid: String, firebase: Firebase) extends Actor with ActorLogging {
 
   var userMediaItems: Map[String, MediaItem] = Map()
 
@@ -76,7 +76,7 @@ class UserMediaItemActor(user: User, firebase: Firebase) extends Actor with Acto
   }
 
   override def preStart() = {
-    databaseReference = firebase.getDatebaseReference(s"media-items/${user.uid}")
+    databaseReference = firebase.getDatebaseReference(s"media-items/${uid}")
     databaseReference.addChildEventListener(mediaItemsEventListener)
   }
 
@@ -85,39 +85,39 @@ class UserMediaItemActor(user: User, firebase: Firebase) extends Actor with Acto
       .foreach(ref => ref.removeEventListener(mediaItemsEventListener))
   }
 
-  def addMediaItem(mediaItem: MediaItem, requester: ActorRef) = {
+  def addMediaItem(mediaItem: MediaItem, requestor: ActorRef) = {
     databaseReference.child(mediaItem.slugs).setValue(mediaItem.toBean(),
       (error: DatabaseError, ref: DatabaseReference) => {
         Option(error) match {
-          case Some(databaseError) => requester ! MediaItemUpdateError(mediaItem.slugs, "ADD", databaseError.getMessage)
-          case None => requester ! MediaItemUpdateSuccess(mediaItem.slugs, "ADD")
+          case Some(databaseError) => requestor ! MediaItemUpdateError(mediaItem.slugs, "ADD", databaseError.getMessage)
+          case None => requestor ! MediaItemUpdateSuccess(mediaItem.slugs, "ADD")
         }
       })
   }
 
-  def updatedMediaItem(mediaItem: MediaItem, requester: ActorRef) = {
+  def updatedMediaItem(mediaItem: MediaItem, requestor: ActorRef) = {
     val updates: Map[String, AnyRef] = Map(mediaItem.slugs -> mediaItem.toBean())
     databaseReference.updateChildren(updates.asJava,
       (error: DatabaseError, ref: DatabaseReference) => {
         Option(error) match {
-          case Some(databaseError) => requester ! MediaItemUpdateError(mediaItem.slugs, "CHANGE", databaseError.getMessage)
-          case None => requester ! MediaItemUpdateSuccess(mediaItem.slugs, "CHANGE")
+          case Some(databaseError) => requestor ! MediaItemUpdateError(mediaItem.slugs, "CHANGE", databaseError.getMessage)
+          case None => requestor ! MediaItemUpdateSuccess(mediaItem.slugs, "CHANGE")
         }
       })
   }
 
-  def removeMediaItem(slugs: String, requester: ActorRef) = {
+  def removeMediaItem(slugs: String, requestor: ActorRef) = {
     databaseReference.child(slugs).setValue(null,
       (error: DatabaseError, ref: DatabaseReference) => {
         Option(error) match {
-          case Some(databaseError) => requester ! MediaItemRemoveError(slugs, databaseError.getMessage)
-          case None => requester ! MediaItemRemoveSuccess(slugs)
+          case Some(databaseError) => requestor ! MediaItemRemoveError(slugs, databaseError.getMessage)
+          case None => requestor ! MediaItemRemoveSuccess(slugs)
         }
       })
   }
 
   def withUid(mediaItem: MediaItem): MediaItem = {
-    MediaItem(uid = user.uid,
+    MediaItem(uid = uid,
       slugs = mediaItem.slugs,
       name = mediaItem.name,
       types = mediaItem.types,
@@ -126,8 +126,8 @@ class UserMediaItemActor(user: User, firebase: Firebase) extends Actor with Acto
   }
 
   def receive = {
-    case UserMediaItemsActorRequest(uid, requester) =>
-      requester ! UserMediaItemsActorResponse(userMediaItems)
+    case UserMediaItemsActorRequest(uid, requestor) =>
+      requestor ! UserMediaItemsActorResponse(userMediaItems)
     case MediaItemEvent(mediaItem, ADD) =>
       userMediaItems += (mediaItem.slugs -> mediaItem)
     case MediaItemEvent(mediaItem, CHANGE) =>
@@ -135,12 +135,12 @@ class UserMediaItemActor(user: User, firebase: Firebase) extends Actor with Acto
     case MediaItemEvent(mediaItem, REMOVE) =>
       userMediaItems -= mediaItem.slugs
 
-    case UpdateMediaItem(_, mediaItem, ADD, requester) =>
-      addMediaItem(withUid(mediaItem), requester)
-    case UpdateMediaItem(_, mediaItem, CHANGE, requester) =>
-      updatedMediaItem(withUid(mediaItem), requester)
-    case RemoveMediaItem(_, slugs, requester) =>
-      removeMediaItem(slugs, requester)
+    case UpdateMediaItem(_, mediaItem, ADD, requestor) =>
+      addMediaItem(withUid(mediaItem), requestor)
+    case UpdateMediaItem(_, mediaItem, CHANGE, requestor) =>
+      updatedMediaItem(withUid(mediaItem), requestor)
+    case RemoveMediaItem(_, slugs, requestor) =>
+      removeMediaItem(slugs, requestor)
 
   }
 }
