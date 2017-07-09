@@ -90,7 +90,9 @@ class LoginHandler extends Component {
 
       let theComponent;
       if(this.props.loggedIn) {
-        theComponent = (<div>{this.props.user.email}</div>);
+        theComponent = (
+          <Button bsStyle="link" disabled>{this.props.user.email}</Button>
+        );
       } else {
         theComponent = (<div>
           <Button bsStyle="link" onClick={this.open}><Glyphicon glyph="log-in" /></Button>

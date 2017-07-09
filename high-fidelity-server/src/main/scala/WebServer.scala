@@ -13,8 +13,8 @@ import scala.concurrent.duration._
 import scala.io.StdIn
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import ch.megard.akka.http.cors.scaladsl.settings.CorsSettings
-import models.{SpotifyLoginRequest, SpotifyUserJsonSupport, SpotifyUserSupervisorActor}
 import models.mediaitem._
+import models.spotify.{SpotifyLoginCallback, SpotifyStatus, SpotifyUserJsonSupport}
 import models.user._
 import service.Firebase
 
@@ -33,8 +33,6 @@ object WebServer extends Directives
   implicit val materializer = ActorMaterializer()
 
   implicit val executionContext = system.dispatcher
-
-  val spotifyUserSupervisorActor = system.actorOf(Props[SpotifyUserSupervisorActor], "spotifyUserSupervisorActor")
 
   val mediaItemQueryTagActor = system.actorOf(Props[MediaItemQueryTagActor], "mediaItemQueryTagActor")
 
@@ -62,14 +60,14 @@ object WebServer extends Directives
     val route: Route =
       path("spotify-login-callback") {
         get {
-          parameters('code) { (code) => {
-            val userTokenFuture: Future[String] =
-              (spotifyUserSupervisorActor ? SpotifyLoginRequest(code)).mapTo[String]
+          parameters('code, 'state) { (code, state) => {
+            val spotifyUserLogin: Future[SpotifyStatus] =
+              (userSupervisorActor ? SpotifyLoginCallback(state, code, null)).mapTo[SpotifyStatus]
 
             val redirectHtml =
-              userTokenFuture.map(token =>
+              spotifyUserLogin.map(loginStatus =>
                 HttpEntity(ContentTypes.`text/html(UTF-8)`,
-                  "<meta http-equiv=\"refresh\" content=\"0; url=http://localhost:3000/logged-in/" + token + "\" />"))
+                  "<meta http-equiv=\"refresh\" content=\"0; url=http://localhost:3000?spotify=" + loginStatus.loggedIn+ "\" />"))
 
             complete(redirectHtml)
 
@@ -88,7 +86,7 @@ object WebServer extends Directives
             case mediItemTree: MediaItemTree =>
               Marshal(StatusCodes.OK -> mediItemTree).to[HttpResponse]
             //case error: FailureResponse =>
-            //  Marshal(StatusCodes.BadRequest -> error).to[HttpResponse]
+            //  Marshal(StatusCodes.InternalServerError -> error).to[HttpResponse]
           }
           complete(response)
         }
@@ -152,19 +150,6 @@ object WebServer extends Directives
         }
 
       }
-
-    // POST create
-    // media-items/<user-token>
-    // POST body
-    // http://doc.akka.io/docs/akka-http/current/scala/http/common/json-support.html
-    // PUT update
-    // media-items/<user-token>/<slugs>
-    // PUT body
-    // GET get
-    // media-items/<user-token>/<slugs>
-    // We should have a separate object for the official media-items where we don't expose
-    // the userid
-
 
     val fullRoute = handleErrors {
       cors(corsSettings) {

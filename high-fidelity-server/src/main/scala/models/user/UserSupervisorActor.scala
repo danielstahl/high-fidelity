@@ -4,21 +4,27 @@ import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import akka.stream.{ActorMaterializer, ActorMaterializerSettings}
 import com.google.firebase.auth.FirebaseToken
 import models.mediaitem.{ADD, UpdateMediaItem, UserMediaItemActor, UserMediaItemsActorRequest}
+import models.spotify.{SpotifyLoginCallback, SpotifyStatus, SpotifyUserActor}
 import service.Firebase
 
-case class UserRequest(uid: String, requester: ActorRef)
+case class UserRequest(uid: String, requestor: ActorRef)
 
-class UserActor(user: User, firebase: Firebase) extends Actor with ActorLogging {
+class UserActor(var user: User, firebase: Firebase) extends Actor with ActorLogging {
 
-  val userMediaItemActor = context.actorOf(Props[UserMediaItemActor](new UserMediaItemActor(user, firebase)), "userMediaItemActor")
+  val userMediaItemActor = context.actorOf(Props[UserMediaItemActor](new UserMediaItemActor(user.uid, firebase)), "userMediaItemActor")
+  val spotifyUserActor = context.actorOf(Props[SpotifyUserActor](new SpotifyUserActor(self, Option.empty)), "spotifyUserActor")
 
   def receive = {
-    case UserRequest(uid, requester) =>
-      requester ! user
+    case UserRequest(uid, requestor) =>
+      requestor ! user
     case userMediaItemRequest: UserMediaItemsActorRequest =>
       userMediaItemActor ! userMediaItemRequest
     case updateMediaItem: UpdateMediaItem =>
       userMediaItemActor ! updateMediaItem
+    case SpotifyStatus(loggedIn) =>
+      this.user = user.copy(spotify = loggedIn)
+    case spotifyLoginCallback: SpotifyLoginCallback =>
+      spotifyUserActor ! spotifyLoginCallback
   }
 }
 
@@ -61,6 +67,13 @@ class UserSupervisorActor(firebase: Firebase) extends Actor with ActorLogging {
         .foreach(firebaseToken => {
           val userActor = makeUserActor(firebaseToken)
           userActor ! UpdateMediaItem(token, mediaItem, operation, requestor)
+        })
+    case SpotifyLoginCallback(token, code, _) =>
+      val requestor = sender()
+      firebase.verifyIdToken(token)
+        .foreach(firebaseToken => {
+          val userActor = makeUserActor(firebaseToken)
+          userActor ! SpotifyLoginCallback(token, code, requestor)
         })
 
 
