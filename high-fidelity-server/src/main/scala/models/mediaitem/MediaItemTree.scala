@@ -108,7 +108,6 @@ object MediaItemTreeService {
       case None => Seq.empty
     }
 
-
     val optionalChildren = optionalChidrenType.map(
       childrenType => Children(childrenType, theTypeTree, childrenItems.toSeq))
 

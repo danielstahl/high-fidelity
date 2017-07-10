@@ -55,7 +55,7 @@ class UserMediaItemActor(uid: String, firebase: Firebase) extends Actor with Act
     }
 
     override def onChildChanged(snapshot: DataSnapshot, previousChildName: String) = {
-      println(s"child chagned $snapshot")
+      println(s"child changed $snapshot")
       getMediaItem(snapshot)
         .foreach(record =>
           self ! MediaItemEvent(record, CHANGE))
@@ -76,7 +76,7 @@ class UserMediaItemActor(uid: String, firebase: Firebase) extends Actor with Act
   }
 
   override def preStart() = {
-    databaseReference = firebase.getDatebaseReference(s"media-items/${uid}")
+    databaseReference = firebase.getDatebaseReference(s"media-items/$uid")
     databaseReference.addChildEventListener(mediaItemsEventListener)
   }
 

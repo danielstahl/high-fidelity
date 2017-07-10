@@ -3,14 +3,8 @@ import logo from './logo.svg';
 import './App.css';
 import {
   BrowserRouter as Router,
-  Route,
-  Link
+  Route
 } from 'react-router-dom';
-
-import {
-  Typeahead
-} from 'react-bootstrap-typeahead';
-
 
 import GenreView from './GenreView.js';
 
@@ -18,10 +12,8 @@ import LoginHandler from './LoginHandler.js';
 
 import SpotifyLoginHandler from './SpotifyLoginHandler.js';
 
-import * as firebase from 'firebase';
-
 import {
-  Row, Col, Grid, Panel, Jumbotron
+  Row, Col, Grid
 } from 'react-bootstrap';
 
 

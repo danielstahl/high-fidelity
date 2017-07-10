@@ -65,7 +65,6 @@ class LoginHandler extends Component {
           this.setState({showModal: false});
         },
         error => {
-          console.log("Handling errors")
           var errorCode = error.code;
           var errorMessage = error.message;
           this.setState({errorCode: errorCode, errorMessage: errorMessage});
