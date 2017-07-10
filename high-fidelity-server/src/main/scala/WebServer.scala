@@ -14,7 +14,7 @@ import scala.io.StdIn
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import ch.megard.akka.http.cors.scaladsl.settings.CorsSettings
 import models.mediaitem._
-import models.spotify.{SpotifyLoginCallback, SpotifyStatus, SpotifyUserJsonSupport}
+import models.spotify._
 import models.user._
 import service.Firebase
 
@@ -148,7 +148,19 @@ object WebServer extends Directives
           }
           complete(response)
         }
-
+      } ~ path("search" / "artist" / Segment ) { (theToken) =>
+        get {
+          parameters('query) { (query) =>
+            val artistSearchResult = userSupervisorActor ? SearchArtists(theToken, query, null)
+            val response = artistSearchResult.flatMap {
+              case searchArtistResult: ArtistSearchResult =>
+                Marshal(StatusCodes.OK -> searchArtistResult).to[HttpResponse]
+              case searchError: SearchError =>
+                Marshal(StatusCodes.InternalServerError -> searchError).to[HttpResponse]
+            }
+            complete(response)
+          }
+        }
       }
 
     val fullRoute = handleErrors {

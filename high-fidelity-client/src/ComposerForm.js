@@ -7,15 +7,19 @@ import {
 var slug = require('slug');
 slug.defaults.mode = 'rfc3986';
 
-class EraForm extends Component {
+import {
+  AsyncTypeahead
+} from 'react-bootstrap-typeahead';
 
+class ComposerForm extends Component {
   constructor(props) {
     super(props);
-    this.state = { name: '', slug: '', showModal: false };
+    this.state = { name: '', slug: '', spotifyUri: '', showModal: false };
     this.handleNameChange = this.handleNameChange.bind(this);
     this.open = this.open.bind(this);
     this.close = this.close.bind(this);
-    this.createGenre = this.createGenre.bind(this);
+    this.createComposer = this.createComposer.bind(this);
+    this.selectArtist = this.selectArtist.bind(this);
   }
 
   handleNameChange(e) {
@@ -30,7 +34,7 @@ class EraForm extends Component {
     this.setState({ showModal: true });
   }
 
-  createGenre(event) {
+  createComposer(event) {
     event.preventDefault();
 
     this.props.user.firebaseUser.getIdToken(false)
@@ -39,9 +43,9 @@ class EraForm extends Component {
           uid: '',
           slugs: this.state.slug,
           name: this.state.name,
-          types: ['era'],
-          uris: {},
-          tags: {genre: [this.props.genre.slugs]}
+          types: ['composer'],
+          uris: {spotifyUri: [this.state.spotifyUri]},
+          tags: {genre: [this.props.era.tags.genre[0].tag.slugs], era: [this.props.era.slugs]}
         };
         fetch('http://localhost:8080/media-items/' + token, {
           method: 'post',
@@ -52,7 +56,7 @@ class EraForm extends Component {
           body: JSON.stringify(newMediaItem)
         }).then(res => res.json())
         .then(postResult => {
-          this.props.refresh(this.props.tree, "genre", this.props.genre.slugs);
+          this.props.refresh(this.props.tree, "era", this.props.era.slugs);
           this.setState({ name: '', slug: ''});
         });
       });
@@ -60,19 +64,51 @@ class EraForm extends Component {
     this.close();
   }
 
+  remoteSearch(query) {
+    let that = this;
+    return this.props.user.firebaseUser.getIdToken(false)
+      .then((token) => {
+        fetch('http://localhost:8080/search/artist/' + token + '?query=' + query)
+        .then((result) => {
+          return result.json();
+        })
+        .then((json) => {
+          that.setState({options: json.result});
+        });
+      });
+
+  }
+
+  selectArtist(artist) {
+    if(artist[0]) {
+      this.setState({ name: artist[0].name, slug: slug(artist[0].name), spotifyUri: artist[0].spotifyUri });
+    }
+  }
+
   render() {
     return (
       <div>
-          <h2><small>Add Era</small></h2>
+          <h2><small>Add Composer</small></h2>
           <Button bsStyle="link" onClick={this.open}><Glyphicon glyph="plus" /></Button>
 
           <Modal show={this.state.showModal} onHide={this.close}>
             <Modal.Header closeButton>
-              <Modal.Title>New Era for {this.props.genre.name}</Modal.Title>
+              <Modal.Title>New Composer for {this.props.era.name}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-              <h1>Create new Era</h1>
-              <form onSubmit={this.createGenre}>
+              <h1>Create new Composer</h1>
+              <form onSubmit={this.createComposer}>
+                <FormGroup controlId="searchField">
+                  <ControlLabel>Search</ControlLabel>
+                  <AsyncTypeahead
+                    onChange={this.selectArtist}
+                    onSearch={query => (
+                      this.remoteSearch(query)
+                    )}
+                    labelKey={option => `${option.name}`}
+                    options={this.state.options}
+                  />
+                </FormGroup>
                 <FormGroup controlId="slugsField">
                   <ControlLabel>Slugs</ControlLabel>
                   <FormControl type="text" value={this.state.slug}></FormControl>
@@ -90,4 +126,4 @@ class EraForm extends Component {
   }
 }
 
-export default EraForm;
+export default ComposerForm;

@@ -6,6 +6,7 @@ import {
 
 import GenreForm from './GenreForm.js';
 import EraForm from './EraForm.js';
+import ComposerForm from './ComposerForm.js';
 
 class GenreView extends Component {
   constructor(props) {
@@ -263,8 +264,10 @@ class ChildrenItem extends Component {
 
   getCreateChildForm() {
     let childForm;
-    if(this.props.children.theType.slug == 'era') {
+    if(this.props.children.theType.slug === 'era') {
       childForm = (<EraForm tree={this.props.tree} user={this.props.user} genre={this.props.item} refresh={this.props.onItemClick}/>);
+    } else if(this.props.children.theType.slug === 'composer') {
+      childForm = (<ComposerForm tree={this.props.tree} user={this.props.user} era={this.props.item} refresh={this.props.onItemClick}/>);
     }
     return childForm;
   }
