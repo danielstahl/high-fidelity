@@ -32,6 +32,12 @@ trait MediaItemTreeJsonSupport extends SprayJsonSupport with DefaultJsonProtocol
 
 object MediaItemTreeService {
 
+  /*
+  genre -> era -> composer -> (
+    album
+    piece(form) -> recording
+  )
+  * */
   val typeTrees = Map(
     "composer" -> Seq("genre", "era", "composer", "piece", "recording"),
     "artist" -> Seq("genre", "instrument", "artist", "album")

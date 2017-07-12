@@ -32,7 +32,6 @@ class Main extends Component {
 
   constructor(props) {
       super(props);
-      // uid, email, spotify, loggedin
       this.state = {user: undefined, loggedIn: false};
       this.setUser = this.setUser.bind(this);
   }

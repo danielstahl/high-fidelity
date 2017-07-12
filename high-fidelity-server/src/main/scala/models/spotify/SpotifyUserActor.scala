@@ -76,7 +76,6 @@ class SpotifyUserActor(userActor: ActorRef, var accessToken: Option[AccessToken]
   }
 
   def searchArtists(query: String): Future[ArtistSearchResult] = {
-    val params = Seq(("foo", "bar"))
 
     val uri = Uri("https://api.spotify.com/v1/search")
         .withQuery(Uri.Query(("query", query), ("market", "SE"), ("type", "artist")))
@@ -89,7 +88,6 @@ class SpotifyUserActor(userActor: ActorRef, var accessToken: Option[AccessToken]
 
     val responseFuture: Future[HttpResponse] =
       http.singleRequest(request)
-
 
     val spotifySearchFuture =
       responseFuture.flatMap(response =>

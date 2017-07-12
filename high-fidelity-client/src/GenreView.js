@@ -1,12 +1,14 @@
 import React, { Component } from 'react';
 
 import {
-  Row, Col, Grid, Panel, Glyphicon, Button
+  Row, Col, Grid, Panel
 } from 'react-bootstrap';
 
 import GenreForm from './GenreForm.js';
 import EraForm from './EraForm.js';
 import ComposerForm from './ComposerForm.js';
+import InstrumentForm from './InstrumentForm.js';
+import MusicalFormForm from './MusicalFormForm.js';
 
 class GenreView extends Component {
   constructor(props) {
@@ -83,7 +85,7 @@ class GenreMain extends Component {
 
   makeGenreRow(genres) {
     let genresCols = (genres.map((genre) => {
-      return (<Col md={4}>
+      return (<Col key={genre.slugs} md={4}>
         <GenrePanel onItemClick={this.props.onItemClick} genre={genre}/>
       </Col>);
     }));
@@ -170,17 +172,33 @@ class CurrentItem extends Component {
     }
   }
 
+  getCurrentItemDetails() {
+    let childForm;
+    if(this.props.item.types[0].slug === 'genre') {
+      childForm = (
+        <Panel>
+          <h1><small>{this.props.item.types[0].name}</small> {this.props.item.name}</h1>
+          <ul className="list-unstyled">
+            <li><InstrumentForm genre={this.props.item} user={this.props.user}/></li>
+            <li><MusicalFormForm genre={this.props.item} user={this.props.user}/></li>
+          </ul>
+        </Panel>
+      );
+    } else {
+      childForm = (
+        <Panel>
+          <h1><small>{this.props.item.types[0].name}</small> {this.props.item.name}</h1>
+        </Panel>
+      );
+    }
+    return childForm;
+  }
+
   render() {
     let item;
 
     if(this.props.item) {
-      item = (
-        <div>
-          <h1><small>{this.props.item.types[0].name}</small> {this.props.item.name}</h1>
-          <h2><small>Edit {this.props.item.name}</small></h2>
-          <Button bsStyle="link"><Glyphicon glyph="edit"/></Button>
-        </div>
-      );
+      item = this.getCurrentItemDetails();
     }
 
     return(
@@ -206,7 +224,7 @@ class BreadCrumbItem extends Component {
 
   render() {
     return(
-      <li><a href="#" onClick={this.handleClick}>{this.props.item.name}</a></li>
+      <li key={this.props.item.theType.slug}><a href="#" onClick={this.handleClick}>{this.props.item.name}</a></li>
     );
   }
 }
@@ -252,10 +270,7 @@ class ChildItem extends Component {
 
   render() {
     return(
-      <div>
-        <dt><a href="#" onClick={this.handleClick}>{this.props.item.name}</a></dt>
-        <dd>{this.props.item.theType.name}</dd>
-      </div>
+      <li><a href="#" onClick={this.handleClick}>{this.props.item.name}</a></li>
     );
   }
 }
@@ -284,9 +299,10 @@ class ChildrenItem extends Component {
     return(
 
       <div className="row">
-        <dl>
+        <h2><small>{this.props.children.theType.name}</small></h2>
+        <ul className="list-unstyled">
           {childrenItems}
-        </dl>
+        </ul>
         {childForm}
       </div>
     );
