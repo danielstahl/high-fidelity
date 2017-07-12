@@ -73,13 +73,13 @@ class EraForm extends Component {
             <Modal.Body>
               <h1>Create new Era</h1>
               <form onSubmit={this.createGenre}>
-                <FormGroup controlId="slugsField">
-                  <ControlLabel>Slugs</ControlLabel>
-                  <FormControl type="text" value={this.state.slug}></FormControl>
-                </FormGroup>
                 <FormGroup controlId="nameField">
                   <ControlLabel>Name</ControlLabel>
                   <FormControl type="text" onChange={this.handleNameChange} value={this.state.name}></FormControl>
+                </FormGroup>
+                <FormGroup controlId="slugsField">
+                  <ControlLabel>Slugs</ControlLabel>
+                  <FormControl type="text" value={this.state.slug}></FormControl>
                 </FormGroup>
                 <Button type="submit">Create</Button>
               </form>

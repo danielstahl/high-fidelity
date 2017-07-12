@@ -92,14 +92,23 @@ object WebServer extends Directives
         }
       } ~ path("media-items" / Segment / Segment ) { (theToken, theType) =>
         get {
-          val userMediaItemsFuture = (userSupervisorActor ? UserMediaItemsRequest(theToken)).mapTo[UserMediaItemsActorResponse]
-          val mediaItemsResponse = userMediaItemsFuture.map(
-            userMediaItems =>
-              MediItemQueryTagResponse(
-                userMediaItems.mediaItems.values.filter(mediaItem => mediaItem.types.contains(theType)).toSeq)
-          )
+          parameters('tag.*) { (tags) =>
+            val splitTags = tags.map(tag => tag.split(":", 2))
+            val userMediaItemsFuture = (userSupervisorActor ? UserMediaItemsRequest(theToken)).mapTo[UserMediaItemsActorResponse]
+            val mediaItemsResponse = userMediaItemsFuture.map(
+              userMediaItems =>
+                MediItemQueryTagResponse(
+                  userMediaItems.mediaItems.values
+                    .filter(mediaItem =>
+                      mediaItem.types.contains(theType))
+                    .filter(mediaItem =>
+                      splitTags.forall(splitTag =>
+                        mediaItem.hasTag(splitTag(0), splitTag(1))))
+                    .toSeq)
+            )
 
-          complete(mediaItemsResponse)
+            complete(mediaItemsResponse)
+          }
         }
       } ~ path("firebase-token-login" / Segment ) { (theToken) =>
         get {

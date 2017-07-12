@@ -4,10 +4,10 @@ import java.util
 
 import akka.actor.{Actor, ActorLogging}
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
+import models.mediaitem
 import spray.json.{DefaultJsonProtocol, NullOptions}
 
 import scala.beans.BeanProperty
-
 import scala.collection.JavaConverters._
 
 case class MediaItem(uid: String, slugs: String, name: String, types: List[String], uris: Map[String, List[String]], tags: Map[String, List[String]]) {
@@ -78,7 +78,8 @@ object Database {
     TypeDescription("recording", "Recording", "type"),
     TypeDescription("genre", "Genre", "type"),
     TypeDescription("era", "Era", "type"),
-    TypeDescription("instrument", "Instrument", "type")
+    TypeDescription("instrument", "Instrument", "type"),
+    TypeDescription("form", "Musical Form", "type")
   ).map(desc => desc.slug -> desc).toMap
 
   val originalMediaItems = Seq(

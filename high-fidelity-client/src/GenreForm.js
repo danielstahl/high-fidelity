@@ -33,7 +33,6 @@ class GenreForm extends Component {
   createGenre(event) {
     event.preventDefault();
 
-
     this.props.user.firebaseUser.getIdToken(false)
       .then((token) => {
         let newMediaItem = {
@@ -76,13 +75,13 @@ class GenreForm extends Component {
             <Modal.Body>
               <h1>Create new Genre</h1>
               <form onSubmit={this.createGenre}>
-                <FormGroup controlId="slugsField">
-                  <ControlLabel>Slugs</ControlLabel>
-                  <FormControl type="text" value={this.state.slug}></FormControl>
-                </FormGroup>
                 <FormGroup controlId="nameField">
                   <ControlLabel>Name</ControlLabel>
                   <FormControl type="text" onChange={this.handleNameChange} value={this.state.name}></FormControl>
+                </FormGroup>
+                <FormGroup controlId="slugsField">
+                  <ControlLabel>Slugs</ControlLabel>
+                  <FormControl type="text" value={this.state.slug}></FormControl>
                 </FormGroup>
                 <Button type="submit">Create</Button>
               </form>

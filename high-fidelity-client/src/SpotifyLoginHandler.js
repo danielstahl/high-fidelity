@@ -28,7 +28,7 @@ class SpotifyLoginHandler extends Component {
                + '&state=' + token
                + '&response_type=code';
 
-        var w = window.location.href = url;
+        window.location.href = url;
         return false;
       });
   };
