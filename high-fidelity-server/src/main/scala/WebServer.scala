@@ -2,6 +2,7 @@
 import akka.actor.{ActorSystem, Props}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshalling.Marshal
+import akka.http.scaladsl.model.HttpMethods.{GET, HEAD, OPTIONS, POST, PUT}
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.{Directives, ExceptionHandler, RejectionHandler, Route}
 import akka.pattern.ask
@@ -13,10 +14,12 @@ import scala.concurrent.duration._
 import scala.io.StdIn
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import ch.megard.akka.http.cors.scaladsl.settings.CorsSettings
-import models.mediaitem._
+import models.mediaitem.{UserMediaItemsActorResponse, _}
 import models.spotify._
 import models.user._
 import service.Firebase
+
+import scala.collection.immutable.Seq
 
 
 /**
@@ -53,7 +56,9 @@ object WebServer extends Directives
 
   val handleErrors = handleRejections(rejectionHandler) & handleExceptions(exceptionHandler)
 
-  val corsSettings = CorsSettings.defaultSettings
+  val corsSettings = CorsSettings.defaultSettings.copy(
+    allowedMethods = Seq(GET, POST, PUT, HEAD, OPTIONS)
+  )
 
   def main(args: Array[String]) = {
 
@@ -90,9 +95,9 @@ object WebServer extends Directives
           }
           complete(response)
         }
-      } ~ path("media-items" / Segment / Segment ) { (theToken, theType) =>
+      } ~ path("media-items" / Segment ) { (theToken) =>
         get {
-          parameters('tag.*) { (tags) =>
+          parameters('type, 'tag.*) { (theType, tags) =>
             val splitTags = tags.map(tag => tag.split(":", 2))
             val userMediaItemsFuture = (userSupervisorActor ? UserMediaItemsRequest(theToken)).mapTo[UserMediaItemsActorResponse]
             val mediaItemsResponse = userMediaItemsFuture.map(
@@ -115,6 +120,19 @@ object WebServer extends Directives
           val user = (userSupervisorActor ? LoginRequest(theToken)).mapTo[User]
 
           complete(user)
+        }
+      } ~ path("media-items" / Segment / Segment) { (theToken, theSlug) =>
+        get {
+
+          val userMediaItemsFuture = (userSupervisorActor ? UserMediaItemsRequest(theToken)).mapTo[UserMediaItemsActorResponse]
+
+          val response = userMediaItemsFuture.map(
+            userMediaItems => userMediaItems.mediaItems.get(theSlug) match {
+              case Some(mediaItem) => Marshal(StatusCodes.OK -> mediaItem).to[HttpResponse]
+              case None => Marshal(StatusCodes.NotFound -> "Media item not found").to[HttpResponse]
+            }
+          )
+          complete(response)
         }
       } ~ path("media-items" / Segment ) { theToken =>
         post {

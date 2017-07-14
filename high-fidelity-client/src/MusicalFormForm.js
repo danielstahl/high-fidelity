@@ -35,7 +35,7 @@ class MusicalFormForm extends Component {
 
   fetchMusicalForms(token) {
     let that = this;
-    fetch('http://localhost:8080/media-items/' + token + '/form?tag=genre:' + this.props.genre.slugs)
+    fetch('http://localhost:8080/media-items/' + token + '?type=form&tag=genre:' + this.props.genre.slugs)
       .then((musicalFormsResult) => {
         return musicalFormsResult.json();
       }).then((musicalFormsJson) => {

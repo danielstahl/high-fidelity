@@ -70,7 +70,7 @@ trait MediaItemJsonSupport extends SprayJsonSupport with DefaultJsonProtocol wit
 object Database {
 
   val typeDescriptions = Seq(
-    TypeDescription("spotify-uri", "Spotify URI", "uri-type"),
+    TypeDescription("spotifyUri", "Spotify URI", "uri-type"),
     TypeDescription("composer", "Composer", "type"),
     TypeDescription("artist", "Artist", "type"),
     TypeDescription("piece", "Piece", "type"),
