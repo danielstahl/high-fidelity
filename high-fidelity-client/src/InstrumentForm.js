@@ -35,7 +35,7 @@ class InstrumentForm extends Component {
 
   fetchInstruments(token) {
     let that = this;
-    fetch('http://localhost:8080/media-items/' + token + '/instrument?tag=genre:' + this.props.genre.slugs)
+    fetch('http://localhost:8080/media-items/' + token + '?type=instrument&tag=genre:' + this.props.genre.slugs)
       .then((instrumentResult) => {
         return instrumentResult.json();
       }).then((instrumentJson) => {

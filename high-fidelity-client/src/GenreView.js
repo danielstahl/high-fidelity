@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 import {
-  Row, Col, Grid, Panel
+  Row, Col, Grid, Panel, Glyphicon, Button
 } from 'react-bootstrap';
 
 import GenreForm from './GenreForm.js';
@@ -9,6 +9,7 @@ import EraForm from './EraForm.js';
 import ComposerForm from './ComposerForm.js';
 import InstrumentForm from './InstrumentForm.js';
 import MusicalFormForm from './MusicalFormForm.js';
+import AddLinkForm from './AddLinkForm.js';
 
 class GenreView extends Component {
   constructor(props) {
@@ -21,7 +22,7 @@ class GenreView extends Component {
 
   fetchGenres(token) {
     let that = this;
-    fetch('http://localhost:8080/media-items/' + token + '/genre')
+    fetch('http://localhost:8080/media-items/' + token + '?type=genre')
       .then((genresResult) => {
         return genresResult.json();
       }).then((genresJson) => {
@@ -182,12 +183,14 @@ class CurrentItem extends Component {
             <li><InstrumentForm genre={this.props.item} user={this.props.user}/></li>
             <li><MusicalFormForm genre={this.props.item} user={this.props.user}/></li>
           </ul>
+          <AddLinkForm tree={this.props.tree} item={this.props.item} user={this.props.user} refresh={this.props.onItemClick}/>
         </Panel>
       );
     } else {
       childForm = (
         <Panel>
           <h1><small>{this.props.item.types[0].name}</small> {this.props.item.name}</h1>
+          <AddLinkForm tree={this.props.tree} item={this.props.item} user={this.props.user} refresh={this.props.onItemClick}/>
         </Panel>
       );
     }
