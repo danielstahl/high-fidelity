@@ -21,7 +21,7 @@ class SpotifyLoginHandler extends Component {
         var CLIENT_ID = '1b24de0b94324459b855aa136d301949';
         var REDIRECT_URI = 'http://localhost:8080/spotify-login-callback';
 
-        var scopes = [];
+        var scopes = ['user-read-playback-state', 'user-modify-playback-state'];
         var url = ACCOUNTS_BASE_URL + '/authorize?client_id=' + CLIENT_ID
                + '&redirect_uri=' + encodeURIComponent(REDIRECT_URI)
                + '&scope=' + encodeURIComponent(scopes.join(' '))

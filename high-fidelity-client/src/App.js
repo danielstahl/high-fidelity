@@ -7,10 +7,9 @@ import {
 } from 'react-router-dom';
 
 import GenreView from './GenreView.js';
-
 import LoginHandler from './LoginHandler.js';
-
 import SpotifyLoginHandler from './SpotifyLoginHandler.js';
+import SpotifyPlaybackStatus from './SpotifyPlaybackStatus.js';
 
 import {
   Row, Col, Grid
@@ -34,10 +33,15 @@ class Main extends Component {
       super(props);
       this.state = {user: undefined, loggedIn: false};
       this.setUser = this.setUser.bind(this);
+      this.setPlaybackStatus = this.setPlaybackStatus.bind(this);
   }
 
   setUser(user) {
     this.setState({user: user, loggedIn: user.loggedIn});
+  }
+
+  setPlaybackStatus(playbackStatus) {
+    this.setState({playbackStatus: playbackStatus});
   }
 
   render() {
@@ -52,12 +56,15 @@ class Main extends Component {
       <div className="container">
         <Grid>
           <Row>
-            <Col md={8}/>
+            <Col md={6}/>
             <Col md={2}>
               <LoginHandler setUser={this.setUser} loggedIn={this.state.loggedIn} user={this.state.user}/>
             </Col>
-            <Col md={2}>
+            <Col md={1}>
               <SpotifyLoginHandler user={this.state.user}/>
+            </Col>
+            <Col md={3}>
+              <SpotifyPlaybackStatus user={this.state.user}ho playbackStatus={this.state.playbackStatus} setPlaybackStatus={this.setPlaybackStatus}/>
             </Col>
           </Row>
         </Grid>
