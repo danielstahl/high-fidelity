@@ -4,7 +4,7 @@ import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import akka.stream.{ActorMaterializer, ActorMaterializerSettings}
 import com.google.firebase.auth.FirebaseToken
 import models.mediaitem.{ADD, UpdateMediaItem, UserMediaItemActor, UserMediaItemsActorRequest}
-import models.spotify.{SearchArtists, SpotifyLoginCallback, SpotifyStatus, SpotifyUserActor}
+import models.spotify._
 import service.Firebase
 
 case class UserRequest(uid: String, requestor: ActorRef)
@@ -27,6 +27,8 @@ class UserActor(var user: User, firebase: Firebase) extends Actor with ActorLogg
       spotifyUserActor ! spotifyLoginCallback
     case searchArtists: SearchArtists =>
       spotifyUserActor ! searchArtists
+    case playbackStatusRequest: PlaybackStatusRequest =>
+      spotifyUserActor ! playbackStatusRequest
   }
 }
 
@@ -84,6 +86,12 @@ class UserSupervisorActor(firebase: Firebase) extends Actor with ActorLogging {
           val userActor = makeUserActor(firebaseToken)
           userActor ! SearchArtists(token, query, requestor)
         })
-
+    case PlaybackStatusRequest(token, _) =>
+      val requestor = sender()
+      firebase.verifyIdToken(token)
+        .foreach(firebaseToken => {
+          val userActor = makeUserActor(firebaseToken)
+          userActor ! PlaybackStatusRequest(token, requestor)
+        })
   }
 }

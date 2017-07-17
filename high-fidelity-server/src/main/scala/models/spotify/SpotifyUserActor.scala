@@ -16,6 +16,8 @@ import scala.util.Failure
 import scala.util.Success
 
 case class ArtistDigest(spotifyUri: String, name: String, imageUrl: Option[String])
+case class TrackDigest(spotifyUri: String, name: String, durationMs: Long, artists: Seq[ArtistDigest])
+case class DeviceDigest(id: String, name: String, theType: String, volumePercent: Int, active: Boolean)
 
 case class SpotifyLoginCallback(token: String, code: String, requestor: ActorRef)
 case class SpotifyStatus(loggedIn: Boolean)
@@ -24,13 +26,23 @@ case class SearchArtists(token: String, query: String, requestor: ActorRef)
 case class ArtistSearchResult(result: Seq[ArtistDigest])
 case class SearchError(query: String, cause: String)
 
+case class PlaybackStatusRequest(token: String, requestor: ActorRef)
+case class PlaybackStatus(track: Option[TrackDigest], device: Option[DeviceDigest], contextUri: Option[String], progressMs: Long, isPlaying: Boolean)
+
+case class SpotifyRequestError(cause: String)
+
 case class AccessToken(access_token: String, token_type: String, scope: Option[String], expires_in: Int, refresh_token: String)
 
 trait SpotifyUserJsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val accessTokenFormat = jsonFormat5(AccessToken)
   implicit val searchErrorFormat = jsonFormat2(SearchError)
   implicit val artistDigestFormat = jsonFormat3(ArtistDigest)
+  implicit val trackDigestFormat = jsonFormat4(TrackDigest)
+  implicit val deviceDigestFormat = jsonFormat5(DeviceDigest)
   implicit val artistSearchResultFormat = jsonFormat1(ArtistSearchResult)
+  implicit val playbackStatusFormat = jsonFormat5(PlaybackStatus)
+  implicit val spotifyRequestErrorFormat = jsonFormat1(SpotifyRequestError)
+
 }
 
 class SpotifyUserActor(userActor: ActorRef, var accessToken: Option[AccessToken]) extends Actor with ActorLogging with SpotifyUserJsonSupport with SpotifyModelJsonSupport {
@@ -67,12 +79,33 @@ class SpotifyUserActor(userActor: ActorRef, var accessToken: Option[AccessToken]
       Option(spotifyArtist.images.last.url)
     }
   }
+
   def spotifySearchResult2ArtistSearchResult(spotifySearchResult: SpotifySearchResult): ArtistSearchResult = {
     val searchResult = spotifySearchResult.artists.map(spotifyArtistResult =>
       spotifyArtistResult.items.map(spotifyArtist =>
         ArtistDigest(spotifyArtist.uri, spotifyArtist.name, getLastImage(spotifyArtist))))
       .getOrElse(Seq())
     ArtistSearchResult(searchResult)
+  }
+
+  def spotifyTrack2TrackDigest(spotifyPlaybackStatus: SpotifyPlaybackStatus): Option[TrackDigest] =
+    spotifyPlaybackStatus.item.map(spotifyTrack =>
+      TrackDigest(spotifyTrack.uri, spotifyTrack.name, spotifyTrack.duration_ms, spotifyTrack.artists.map(spotifyArtist =>
+        ArtistDigest(spotifyArtist.uri, spotifyArtist.name, None))))
+
+  def spotifyDevice2DeviceDigeest(spotifyPlaybackStatus: SpotifyPlaybackStatus): Option[DeviceDigest] = {
+    val device = spotifyPlaybackStatus.device
+    device.id.map(deviceId =>
+      DeviceDigest(deviceId, device.name, device.`type`, device.volume_percent.getOrElse(0), device.is_active))
+  }
+
+
+  def spotifyPlaybackStatus2PlaybackStatus(spotifyPlaybackStatus: SpotifyPlaybackStatus): PlaybackStatus = {
+    PlaybackStatus(
+      spotifyTrack2TrackDigest(spotifyPlaybackStatus),
+      spotifyDevice2DeviceDigeest(spotifyPlaybackStatus),
+      spotifyPlaybackStatus.context.uri,
+      spotifyPlaybackStatus.progress_ms, spotifyPlaybackStatus.is_playing)
   }
 
   def searchArtists(query: String): Future[ArtistSearchResult] = {
@@ -96,6 +129,31 @@ class SpotifyUserActor(userActor: ActorRef, var accessToken: Option[AccessToken]
     spotifySearchFuture.map(spotifySearchResult => spotifySearchResult2ArtistSearchResult(spotifySearchResult))
   }
 
+  def currentPlaybackStatus(): Future[PlaybackStatus] = {
+    val uri = Uri("https://api.spotify.com/v1/me/player")
+        .withQuery(Uri.Query(("market", "SE")))
+    val request = HttpRequest(
+      uri = uri,
+      method = HttpMethods.GET,
+      headers = List(headers.Authorization(OAuth2BearerToken(accessToken.get.access_token)))
+    )
+
+    val responseFuture: Future[HttpResponse] =
+      http.singleRequest(request)
+
+    val spotifyPlaybackStatusFuture =
+      responseFuture.flatMap {
+        case response @ HttpResponse(StatusCodes.OK, _, _, _) =>
+          Unmarshal(response).to[SpotifyPlaybackStatus]
+        case response @ HttpResponse(status, headers, entity , _) =>
+          Unmarshal(entity).to[SpotifyErrorStatus].flatMap(spotifyErrorStatus =>
+            Future.failed(new RuntimeException(s"Status $status: ${spotifyErrorStatus.error.message}")))
+      }
+
+    spotifyPlaybackStatusFuture.map(spotifyPlaybackStatus =>
+      spotifyPlaybackStatus2PlaybackStatus(spotifyPlaybackStatus))
+  }
+
   def receive = {
     case SpotifyLoginCallback(token, code, requestor) =>
       login(code).map {
@@ -113,6 +171,15 @@ class SpotifyUserActor(userActor: ActorRef, var accessToken: Option[AccessToken]
         case Failure(t) =>
           log.error(t, t.getMessage)
           requestor ! SearchError(query, t.getMessage)
+      }
+    case PlaybackStatusRequest(token, requestor) =>
+      val playbackStatusFuture = currentPlaybackStatus()
+      playbackStatusFuture.onComplete {
+        case Success(playbackStatus) =>
+          requestor ! playbackStatus
+        case Failure(t) =>
+          log.error(t, t.getMessage)
+          requestor ! SpotifyRequestError(t.getMessage)
       }
 
   }

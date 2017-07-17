@@ -188,6 +188,17 @@ object WebServer extends Directives
             complete(response)
           }
         }
+      } ~ path("playback" / "status" / Segment ) { (theToken) =>
+        get {
+          val spotifyPlaybackStatusResult = userSupervisorActor ? PlaybackStatusRequest(theToken, null)
+          val response = spotifyPlaybackStatusResult.flatMap {
+            case playbackStatus: PlaybackStatus =>
+              Marshal(StatusCodes.OK -> playbackStatus).to[HttpResponse]
+            case spotifyRequestError: SpotifyRequestError =>
+              Marshal(StatusCodes.InternalServerError -> spotifyRequestError).to[HttpResponse]
+          }
+          complete(response)
+        }
       }
 
     val fullRoute = handleErrors {
