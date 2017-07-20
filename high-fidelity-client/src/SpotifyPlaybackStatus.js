@@ -8,6 +8,10 @@ class SpotifyPlaybackStatus extends Component {
   constructor(props) {
     super(props);
     this.fetchPlaybackStatus = this.fetchPlaybackStatus.bind(this);
+    this.clickPlay = this.clickPlay.bind(this);
+    this.clickPause = this.clickPause.bind(this);
+    this.clickNext = this.clickNext.bind(this);
+    this.clickPrevious = this.clickPrevious.bind(this);
   }
 
   componentDidMount() {
@@ -36,15 +40,35 @@ class SpotifyPlaybackStatus extends Component {
     }
   }
 
+  clickPlay(event) {
+    event.preventDefault();
+    this.props.play();
+  }
+
+  clickPause(event) {
+    event.preventDefault();
+    this.props.pause();
+  }
+
+  clickNext(event) {
+    event.preventDefault();
+    this.props.next();
+  }
+
+  clickPrevious(event) {
+    event.preventDefault();
+    this.props.previous();
+  }
+
   render() {
     let theComponent = null;
 
     if(this.props.user && this.props.user.spotify && this.props.playbackStatus) {
       let player;
       if(this.props.playbackStatus.isPlaying) {
-        player = (<Glyphicon glyph="pause" />);
+        player = (<Button bsStyle="link" onClick={this.clickPause}><Glyphicon glyph="pause" /></Button>);
       } else {
-        player = (<Glyphicon glyph="play" />);
+        player = (<Button bsStyle="link" onClick={this.clickPlay}><Glyphicon glyph="play" /></Button>);
       }
       let progress, trackName, artistName, deviceName;
       if(this.props.playbackStatus.track) {
@@ -58,9 +82,9 @@ class SpotifyPlaybackStatus extends Component {
       theComponent = (
         <Panel>
             <div>
-            <Button bsStyle="link"><Glyphicon glyph="step-backward" /></Button>
-            <Button bsStyle="link">{player}</Button>
-            <Button bsStyle="link"><Glyphicon glyph="step-forward" /></Button>
+            <Button bsStyle="link" onClick={this.clickPrevious}><Glyphicon glyph="step-backward" /></Button>
+            {player}
+            <Button bsStyle="link" onClick={this.clickNext}><Glyphicon glyph="step-forward" /></Button>
           </div>
 
           <ProgressBar now={progress}/>

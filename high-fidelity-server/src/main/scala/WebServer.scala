@@ -199,7 +199,65 @@ object WebServer extends Directives
           }
           complete(response)
         }
+      } ~ path("playback" / "play" / Segment ) { (theToken) =>
+        put {
+          parameters('device.?) { (device) =>
+            entity(as[ExternalPlayRequest]) {
+              case ExternalPlayRequest(uris, position) =>
+                val spotifyPlaybackStatusResult = userSupervisorActor ? PlaybackRequest(theToken, PLAY, device, uris, position, null)
+                val response = spotifyPlaybackStatusResult.flatMap {
+                  case playbackStatus: PlaybackStatus =>
+                    Marshal(StatusCodes.OK -> playbackStatus).to[HttpResponse]
+                  case spotifyRequestError: SpotifyRequestError =>
+                    Marshal(StatusCodes.InternalServerError -> spotifyRequestError).to[HttpResponse]
+                }
+                complete(response)
+            }
+          }
+
+        }
+      } ~ path("playback" / "pause" / Segment ) { (theToken) =>
+        put {
+          parameters('device.?) { (device) =>
+            val spotifyPlaybackStatusResult = userSupervisorActor ? PlaybackRequest(theToken, PAUSE, device, None, None, null)
+            val response = spotifyPlaybackStatusResult.flatMap {
+              case playbackStatus: PlaybackStatus =>
+                Marshal(StatusCodes.OK -> playbackStatus).to[HttpResponse]
+              case spotifyRequestError: SpotifyRequestError =>
+                Marshal(StatusCodes.InternalServerError -> spotifyRequestError).to[HttpResponse]
+            }
+            complete(response)
+          }
+        }
+      } ~ path("playback" / "next" / Segment ) { (theToken) =>
+        put {
+          parameters('device.?) { (device) =>
+            val spotifyPlaybackStatusResult = userSupervisorActor ? PlaybackRequest(theToken, NEXT, device, None, None, null)
+            val response = spotifyPlaybackStatusResult.flatMap {
+              case playbackStatus: PlaybackStatus =>
+                Marshal(StatusCodes.OK -> playbackStatus).to[HttpResponse]
+              case spotifyRequestError: SpotifyRequestError =>
+                Marshal(StatusCodes.InternalServerError -> spotifyRequestError).to[HttpResponse]
+            }
+            complete(response)
+          }
+        }
+      } ~ path("playback" / "previous" / Segment ) { (theToken) =>
+        put {
+          parameters('device.?) { (device) =>
+            val spotifyPlaybackStatusResult = userSupervisorActor ? PlaybackRequest(theToken, PREVIOUS, device, None, None, null)
+            val response = spotifyPlaybackStatusResult.flatMap {
+              case playbackStatus: PlaybackStatus =>
+                Marshal(StatusCodes.OK -> playbackStatus).to[HttpResponse]
+              case spotifyRequestError: SpotifyRequestError =>
+                Marshal(StatusCodes.InternalServerError -> spotifyRequestError).to[HttpResponse]
+            }
+            complete(response)
+          }
+        }
       }
+
+
 
     val fullRoute = handleErrors {
       cors(corsSettings) {

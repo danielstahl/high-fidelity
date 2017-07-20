@@ -64,7 +64,7 @@ class GenreView extends Component {
       if(this.state.main) {
         page = (<GenreMain user={this.props.user} genres={this.state.genres} onItemClick={this.onItemClick} fetchGenres={this.fetchGenres} />);
       } else {
-        page = (<GenreTree user={this.props.user} tree={this.state.tree} item={this.state.item} children={this.state.children} breadCrumbs={this.state.breadCrumbs} onItemClick={this.onItemClick} onGenreMainClick={this.onGenreMainClick}/>)
+        page = (<GenreTree play={this.props.play} user={this.props.user} tree={this.state.tree} item={this.state.item} children={this.state.children} breadCrumbs={this.state.breadCrumbs} onItemClick={this.onItemClick} onGenreMainClick={this.onGenreMainClick}/>)
       }
     return (page);
   }
@@ -153,7 +153,7 @@ class GenreTree extends Component {
     return(
       <div className="container">
         <BreadCrumbsItems tree={this.props.tree} breadCrumbs={this.props.breadCrumbs} item={this.props.item} onItemClick={this.props.onItemClick} onGenreMainClick={this.props.onGenreMainClick}/>
-        <CurrentItem user={this.props.user} tree={this.props.tree} item={this.props.item} onItemClick={this.props.onItemClick}/>
+        <CurrentItem play={this.props.play} user={this.props.user} tree={this.props.tree} item={this.props.item} onItemClick={this.props.onItemClick}/>
         <ChildrenItem user={this.props.user} tree={this.props.tree} item={this.props.item} children={this.props.children} onItemClick={this.props.onItemClick}/>
       </div>
     );
@@ -183,7 +183,7 @@ class CurrentItem extends Component {
             <li><InstrumentForm genre={this.props.item} user={this.props.user}/></li>
             <li><MusicalFormForm genre={this.props.item} user={this.props.user}/></li>
           </ul>
-          <AddLinkForm tree={this.props.tree} item={this.props.item} user={this.props.user} refresh={this.props.onItemClick}/>
+          <AddLinkForm play={this.props.play} tree={this.props.tree} item={this.props.item} user={this.props.user} refresh={this.props.onItemClick}/>
         </Panel>
       );
     } else {

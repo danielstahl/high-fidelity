@@ -83,6 +83,11 @@ case class SpotifyPlaybackStatus(device: SpotifyDevice,
                                  is_playing: Boolean,
                                  item: Option[SpotifyTrack])
 
+
+case class SpotifyPlayContextOffset(position: Option[Int], uri: Option[String])
+
+case class SpotifyPlayContext(context_uri: Option[String], uris: Option[Seq[String]], offset: Option[SpotifyPlayContextOffset])
+
 trait SpotifyModelJsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val spotifyErrorFormat = jsonFormat2(SpotifyError)
   implicit val spotifyErrorStatusFormat = jsonFormat1(SpotifyErrorStatus)
@@ -100,5 +105,6 @@ trait SpotifyModelJsonSupport extends SprayJsonSupport with DefaultJsonProtocol 
   implicit val spotifyDeviceFormat = jsonFormat6(SpotifyDevice)
   implicit val spotifyContextFormat = jsonFormat4(SpotifyContext)
   implicit val spotifyPlaybackStatusFormat = jsonFormat8(SpotifyPlaybackStatus)
-
+  implicit val spotifyPlayContextOffsetFormat = jsonFormat2(SpotifyPlayContextOffset)
+  implicit val spotifyPlayContextFormat = jsonFormat3(SpotifyPlayContext)
 }

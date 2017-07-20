@@ -10,6 +10,9 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.{ActorMaterializer, ActorMaterializerSettings}
 import spray.json.DefaultJsonProtocol
+import spray.json._
+import DefaultJsonProtocol._
+import akka.http.scaladsl.marshalling.Marshal
 
 import scala.concurrent.Future
 import scala.util.Failure
@@ -29,6 +32,15 @@ case class SearchError(query: String, cause: String)
 case class PlaybackStatusRequest(token: String, requestor: ActorRef)
 case class PlaybackStatus(track: Option[TrackDigest], device: Option[DeviceDigest], contextUri: Option[String], progressMs: Long, isPlaying: Boolean)
 
+sealed trait PlaybackCommand
+case object PLAY extends PlaybackCommand
+case object PAUSE extends PlaybackCommand
+case object NEXT extends PlaybackCommand
+case object PREVIOUS extends PlaybackCommand
+
+case class ExternalPlayRequest(uris: Option[Seq[String]], position: Option[Int])
+case class PlaybackRequest(token: String, command: PlaybackCommand, deviceId: Option[String], uris: Option[Seq[String]], position: Option[Int], requestor: ActorRef)
+
 case class SpotifyRequestError(cause: String)
 
 case class AccessToken(access_token: String, token_type: String, scope: Option[String], expires_in: Int, refresh_token: String)
@@ -42,6 +54,7 @@ trait SpotifyUserJsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val artistSearchResultFormat = jsonFormat1(ArtistSearchResult)
   implicit val playbackStatusFormat = jsonFormat5(PlaybackStatus)
   implicit val spotifyRequestErrorFormat = jsonFormat1(SpotifyRequestError)
+  implicit val spotifyExternalPlayRequestFormat = jsonFormat2(ExternalPlayRequest)
 
 }
 
@@ -154,6 +167,109 @@ class SpotifyUserActor(userActor: ActorRef, var accessToken: Option[AccessToken]
       spotifyPlaybackStatus2PlaybackStatus(spotifyPlaybackStatus))
   }
 
+
+  def play(optionalDeviceId: Option[String], optionalUris: Option[Seq[String]], optionalPosition: Option[Int]): Future[PlaybackStatus] = {
+    val (theUris, optionalContextUri) = optionalUris
+        .filter(uris => uris.nonEmpty)
+        .map(uris =>
+          if(uris.forall(_.startsWith("spotify:track")))(Option(uris), None)
+          else (None, Option(uris.head)))
+        .getOrElse((None, None))
+    var uri = Uri("https://api.spotify.com/v1/me/player/play")
+
+    optionalDeviceId.foreach { deviceId =>
+      uri = uri.withQuery(Uri.Query(("device_id", deviceId)))
+    }
+
+    val spotifyPlayContextOffset = optionalPosition.map(position => SpotifyPlayContextOffset(optionalPosition, None))
+    val spotifyPlayContext = SpotifyPlayContext(optionalContextUri, theUris, spotifyPlayContextOffset)
+
+    val responseFuture = Marshal(spotifyPlayContext).to[RequestEntity].flatMap {
+      entity => {
+        val request = HttpRequest(
+          uri = uri,
+          method = HttpMethods.PUT,
+          headers = List(headers.Authorization(OAuth2BearerToken(accessToken.get.access_token))),
+          entity = entity)
+        http.singleRequest(request)
+      }
+    }
+
+    responseFuture.flatMap {
+      case response @ HttpResponse(StatusCodes.NoContent, _, _, _) =>
+        currentPlaybackStatus()
+      case response @ HttpResponse(status, headers, entity , _) =>
+        Unmarshal(entity).to[SpotifyErrorStatus].flatMap(spotifyErrorStatus =>
+          Future.failed(new RuntimeException(s"Status $status: ${spotifyErrorStatus.error.message}")))
+    }
+  }
+
+  def pause(optionalDeviceId: Option[String]): Future[PlaybackStatus] = {
+    var uri = Uri("https://api.spotify.com/v1/me/player/pause")
+
+    optionalDeviceId.foreach { deviceId =>
+      uri = uri.withQuery(Uri.Query(("device_id", deviceId)))
+    }
+
+    val request = HttpRequest(
+      uri = uri,
+      method = HttpMethods.PUT,
+      headers = List(headers.Authorization(OAuth2BearerToken(accessToken.get.access_token))))
+    val responseFuture =  http.singleRequest(request)
+
+    responseFuture.flatMap {
+      case response @ HttpResponse(StatusCodes.NoContent, _, _, _) =>
+        currentPlaybackStatus()
+      case response @ HttpResponse(status, headers, entity , _) =>
+        Unmarshal(entity).to[SpotifyErrorStatus].flatMap(spotifyErrorStatus =>
+          Future.failed(new RuntimeException(s"Status $status: ${spotifyErrorStatus.error.message}")))
+    }
+  }
+
+  def next(optionalDeviceId: Option[String]): Future[PlaybackStatus] = {
+    var uri = Uri("https://api.spotify.com/v1/me/player/next")
+
+    optionalDeviceId.foreach { deviceId =>
+      uri = uri.withQuery(Uri.Query(("device_id", deviceId)))
+    }
+
+    val request = HttpRequest(
+      uri = uri,
+      method = HttpMethods.POST,
+      headers = List(headers.Authorization(OAuth2BearerToken(accessToken.get.access_token))))
+    val responseFuture =  http.singleRequest(request)
+
+    responseFuture.flatMap {
+      case response @ HttpResponse(StatusCodes.NoContent, _, _, _) =>
+        currentPlaybackStatus()
+      case response @ HttpResponse(status, headers, entity , _) =>
+        Unmarshal(entity).to[SpotifyErrorStatus].flatMap(spotifyErrorStatus =>
+          Future.failed(new RuntimeException(s"Status $status: ${spotifyErrorStatus.error.message}")))
+    }
+  }
+
+  def previous(optionalDeviceId: Option[String]): Future[PlaybackStatus] = {
+    var uri = Uri("https://api.spotify.com/v1/me/player/previous")
+
+    optionalDeviceId.foreach { deviceId =>
+      uri = uri.withQuery(Uri.Query(("device_id", deviceId)))
+    }
+
+    val request = HttpRequest(
+      uri = uri,
+      method = HttpMethods.POST,
+      headers = List(headers.Authorization(OAuth2BearerToken(accessToken.get.access_token))))
+    val responseFuture =  http.singleRequest(request)
+
+    responseFuture.flatMap {
+      case response @ HttpResponse(StatusCodes.NoContent, _, _, _) =>
+        currentPlaybackStatus()
+      case response @ HttpResponse(status, headers, entity , _) =>
+        Unmarshal(entity).to[SpotifyErrorStatus].flatMap(spotifyErrorStatus =>
+          Future.failed(new RuntimeException(s"Status $status: ${spotifyErrorStatus.error.message}")))
+    }
+  }
+
   def receive = {
     case SpotifyLoginCallback(token, code, requestor) =>
       login(code).map {
@@ -181,6 +297,48 @@ class SpotifyUserActor(userActor: ActorRef, var accessToken: Option[AccessToken]
           log.error(t, t.getMessage)
           requestor ! SpotifyRequestError(t.getMessage)
       }
+    case PlaybackRequest(token, PLAY, deviceId, uris, position, requestor) =>
+      val playbackStatusFuture = play(deviceId, uris, position)
+      playbackStatusFuture.onComplete {
+        case Success(playbackStatus) =>
+          requestor ! playbackStatus
+        case Failure(t) =>
+          log.error(t, t.getMessage)
+          requestor ! SpotifyRequestError(t.getMessage)
 
+      }
+
+    case PlaybackRequest(token, PAUSE, deviceId, _, _, requestor) =>
+      val playbackStatusFuture = pause(deviceId)
+      playbackStatusFuture.onComplete {
+        case Success(playbackStatus) =>
+          requestor ! playbackStatus
+        case Failure(t) =>
+          log.error(t, t.getMessage)
+          requestor ! SpotifyRequestError(t.getMessage)
+
+      }
+
+    case PlaybackRequest(token, NEXT, deviceId, _, _, requestor) =>
+      val playbackStatusFuture = next(deviceId)
+      playbackStatusFuture.onComplete {
+        case Success(playbackStatus) =>
+          requestor ! playbackStatus
+        case Failure(t) =>
+          log.error(t, t.getMessage)
+          requestor ! SpotifyRequestError(t.getMessage)
+
+      }
+
+    case PlaybackRequest(token, PREVIOUS, deviceId, _, _, requestor) =>
+      val playbackStatusFuture = previous(deviceId)
+      playbackStatusFuture.onComplete {
+        case Success(playbackStatus) =>
+          requestor ! playbackStatus
+        case Failure(t) =>
+          log.error(t, t.getMessage)
+          requestor ! SpotifyRequestError(t.getMessage)
+
+      }
   }
 }

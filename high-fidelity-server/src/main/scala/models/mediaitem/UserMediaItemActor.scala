@@ -21,8 +21,8 @@ case object REMOVE extends DatabaseOperation
 case class UpdateMediaItem(token: String, mediaItem: MediaItem, operation: DatabaseOperation, requestor: ActorRef)
 case class RemoveMediaItem(token: String, slugs: String, requestor: ActorRef)
 case class MediaItemEvent(mediaItem: MediaItem, operation: DatabaseOperation)
-case class MediaItemUpdateSuccess(slugs: String,/*mediaItem: MediaItem, */operation: String)
-case class MediaItemUpdateError(slugs: String,/*mediaItem: MediaItem, */operation: String, cause: String)
+case class MediaItemUpdateSuccess(slugs: String, operation: String)
+case class MediaItemUpdateError(slugs: String, operation: String, cause: String)
 case class MediaItemRemoveSuccess(slugs: String)
 case class MediaItemRemoveError(slugs: String, cause: String)
 
