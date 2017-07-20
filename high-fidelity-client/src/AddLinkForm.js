@@ -8,6 +8,24 @@ import {
   Typeahead
 } from 'react-bootstrap-typeahead';
 
+class PlayButton extends Component {
+
+  constructor(props) {
+    super(props);
+    this.clickPlay = this.clickPlay.bind(this);
+  }
+
+  clickPlay(event) {
+    event.preventDefault();
+    this.props.play(this.props.uris);
+  }
+
+  render() {
+    return (
+      <div>{this.props.name} <Button bsStyle="link" onClick={this.clickPlay}><Glyphicon glyph="play" /></Button></div>);
+  }
+}
+
 class AddLinkForm extends Component {
   constructor(props) {
     super(props);
@@ -109,6 +127,9 @@ class AddLinkForm extends Component {
       var splitWikipediaUrl = theUri.split("/");
       var pageName = splitWikipediaUrl[splitWikipediaUrl.length-1].replace(/_/g, ' ');
       return (<a target="_blank" href={theUri}>{pageName}</a>);
+    } else if(uriType === 'spotifyPlaylist') {
+      let uris = [theUri];
+      return (<PlayButton name={name} play={this.props.play} uris={uris}/>);
     } else {
       return (<a target="_blank" href={theUri}>{name}</a>);
     }

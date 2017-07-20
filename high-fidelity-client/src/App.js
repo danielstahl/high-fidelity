@@ -34,6 +34,10 @@ class Main extends Component {
       this.state = {user: undefined, loggedIn: false};
       this.setUser = this.setUser.bind(this);
       this.setPlaybackStatus = this.setPlaybackStatus.bind(this);
+      this.play = this.play.bind(this);
+      this.pause = this.pause.bind(this);
+      this.next = this.next.bind(this);
+      this.previous = this.previous.bind(this);
   }
 
   setUser(user) {
@@ -44,11 +48,94 @@ class Main extends Component {
     this.setState({playbackStatus: playbackStatus});
   }
 
+  play(uris) {
+    let playRequest;
+    if(uris) {
+      playRequest = { uris: uris };
+    } else {
+      playRequest = {};
+    }
+    let that = this;
+    this.state.user.firebaseUser.getIdToken(false)
+      .then((token) => {
+
+        fetch('http://localhost:8080/playback/play/' + token, {
+          method: 'put',
+          headers: {
+            'Accept': 'application/json, text/plain, */*',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(playRequest)
+        }).then(res => {
+          return res.json();
+        }).then(json => {
+          that.setPlaybackStatus(json);
+        });
+      });
+  }
+
+  pause() {
+    let that = this;
+    this.state.user.firebaseUser.getIdToken(false)
+      .then((token) => {
+
+        fetch('http://localhost:8080/playback/pause/' + token, {
+          method: 'put',
+          headers: {
+            'Accept': 'application/json, text/plain, */*',
+            'Content-Type': 'application/json'
+          }
+        }).then(res => {
+          return res.json();
+        }).then(json => {
+          that.setPlaybackStatus(json);
+        });
+      });
+  }
+
+  next() {
+    let that = this;
+    this.state.user.firebaseUser.getIdToken(false)
+      .then((token) => {
+
+        fetch('http://localhost:8080/playback/next/' + token, {
+          method: 'put',
+          headers: {
+            'Accept': 'application/json, text/plain, */*',
+            'Content-Type': 'application/json'
+          }
+        }).then(res => {
+          return res.json();
+        }).then(json => {
+          that.setPlaybackStatus(json);
+        });
+      });
+  }
+
+  previous() {
+    let that = this;
+    this.state.user.firebaseUser.getIdToken(false)
+      .then((token) => {
+
+        fetch('http://localhost:8080/playback/previous/' + token, {
+          method: 'put',
+          headers: {
+            'Accept': 'application/json, text/plain, */*',
+            'Content-Type': 'application/json'
+          }
+        }).then(res => {
+          return res.json();
+        }).then(json => {
+          that.setPlaybackStatus(json);
+        });
+      });
+  }
+
   render() {
     let mainView;
 
     if(this.state.loggedIn) {
-      mainView = (<GenreView user={this.state.user}/>)
+      mainView = (<GenreView play={this.play} user={this.state.user}/>)
     } else {
       mainView = (<NotLoggedInView/>);
     }
@@ -64,7 +151,7 @@ class Main extends Component {
               <SpotifyLoginHandler user={this.state.user}/>
             </Col>
             <Col md={3}>
-              <SpotifyPlaybackStatus user={this.state.user}ho playbackStatus={this.state.playbackStatus} setPlaybackStatus={this.setPlaybackStatus}/>
+              <SpotifyPlaybackStatus play={this.play} pause={this.pause} next={this.next} previous={this.previous} user={this.state.user} playbackStatus={this.state.playbackStatus} setPlaybackStatus={this.setPlaybackStatus}/>
             </Col>
           </Row>
         </Grid>
