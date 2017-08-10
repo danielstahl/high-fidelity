@@ -6,7 +6,7 @@ import {
   Route
 } from 'react-router-dom';
 
-import GenreView from './GenreView.js';
+import MediaItemGraphView from './mediaitem_graph/MediaItemGraphView.js';
 import LoginHandler from './LoginHandler.js';
 import SpotifyLoginHandler from './SpotifyLoginHandler.js';
 import SpotifyPlaybackStatus from './SpotifyPlaybackStatus.js';
@@ -135,7 +135,7 @@ class Main extends Component {
     let mainView;
 
     if(this.state.loggedIn) {
-      mainView = (<GenreView play={this.play} user={this.state.user}/>)
+      mainView = (<MediaItemGraphView play={this.play} user={this.state.user}/>)
     } else {
       mainView = (<NotLoggedInView/>);
     }

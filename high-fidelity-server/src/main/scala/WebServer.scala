@@ -14,7 +14,7 @@ import scala.concurrent.duration._
 import scala.io.StdIn
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import ch.megard.akka.http.cors.scaladsl.settings.CorsSettings
-import models.mediaitem.{UserMediaItemsActorResponse, _}
+import models.mediaitem.{MediaItemGraphRoute, UserMediaItemsActorResponse, _}
 import models.spotify._
 import models.user._
 import service.Firebase
@@ -59,6 +59,8 @@ object WebServer extends Directives
   val corsSettings = CorsSettings.defaultSettings.copy(
     allowedMethods = Seq(GET, POST, PUT, HEAD, OPTIONS)
   )
+
+  val mediaItemGraphRoute = MediaItemGraphRoute(userSupervisorActor)
 
   def main(args: Array[String]) = {
 
@@ -255,7 +257,7 @@ object WebServer extends Directives
             complete(response)
           }
         }
-      }
+      } ~ mediaItemGraphRoute()
 
 
 

@@ -17,7 +17,8 @@ libraryDependencies ++= Seq(
   "com.google.firebase" % "firebase-admin" % "5.2.0",
   "org.scalatest" %% "scalatest" % "3.0.1" % "test",
   "junit" % "junit" % "4.12" % "test",
-  "com.novocode" % "junit-interface" % "0.11" % "test"
+  "com.novocode" % "junit-interface" % "0.11" % "test",
+  "net.ruippeixotog" %% "scala-scraper" % "2.0.0"
 )
 
 testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")

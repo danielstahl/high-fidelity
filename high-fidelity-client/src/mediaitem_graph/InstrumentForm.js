@@ -7,18 +7,18 @@ import {
 var slug = require('slug');
 slug.defaults.mode = 'rfc3986';
 
-class MusicalFormForm extends Component {
+class InstrumentForm extends Component {
   constructor(props) {
     super(props);
     this.state = { name: '', slug: '', showModal: false };
     this.handleNameChange = this.handleNameChange.bind(this);
     this.open = this.open.bind(this);
     this.close = this.close.bind(this);
-    this.createMusicalForm = this.createMusicalForm.bind(this);
+    this.createInstrument = this.createInstrument.bind(this);
   }
 
   handleNameChange(e) {
-    this.setState({ name: e.target.value, slug: this.props.genre.slugs + ":" + slug(e.target.value) });
+    this.setState({ name: e.target.value, slug: this.props.genre.slugs + ":instrument:" + slug(e.target.value) });
   }
 
   close() {
@@ -28,22 +28,22 @@ class MusicalFormForm extends Component {
   open() {
     this.props.user.firebaseUser.getIdToken(false)
       .then((token) => {
-        this.fetchMusicalForms(token);
+        this.fetchInstruments(token);
       });
     this.setState({ showModal: true });
   }
 
-  fetchMusicalForms(token) {
+  fetchInstruments(token) {
     let that = this;
-    fetch('http://localhost:8080/media-items/' + token + '?type=form&tag=genre:' + this.props.genre.slugs)
-      .then((musicalFormsResult) => {
-        return musicalFormsResult.json();
-      }).then((musicalFormsJson) => {
-        that.setState({forms: musicalFormsJson.mediaItems});
+    fetch('http://localhost:8080/media-items/' + token + '?type=instrument&tag=genre:' + this.props.genre.slugs)
+      .then((instrumentResult) => {
+        return instrumentResult.json();
+      }).then((instrumentJson) => {
+        that.setState({instruments: instrumentJson.mediaItems});
       });
   }
 
-  createMusicalForm(event) {
+  createInstrument(event) {
     event.preventDefault();
 
     this.props.user.firebaseUser.getIdToken(false)
@@ -52,7 +52,7 @@ class MusicalFormForm extends Component {
           uid: '',
           slugs: this.state.slug,
           name: this.state.name,
-          types: ['form'],
+          types: ['instrument'],
           uris: {},
           tags: {genre: [this.props.genre.slugs]}
         };
@@ -66,34 +66,34 @@ class MusicalFormForm extends Component {
         }).then(res => res.json())
         .then(postResult => {
           this.setState({ name: '', slug: ''});
-          this.fetchMusicalForms(token);
+          this.fetchInstruments(token);
         });
       });
   }
 
   render() {
-    let forms;
+    let instruments;
 
-    if(this.state.forms) {
-      forms = (this.state.forms.map((form) =>
-        <li>{form.name}</li>
+    if(this.state.instruments) {
+      instruments = (this.state.instruments.map((instrument) =>
+        <li>{instrument.name}</li>
       ));
     }
 
     return (
       <div>
-        <a href="#" onClick={this.open}>Musical Forms</a>
+        <a href="#" onClick={this.open}>Instruments</a>
         <Modal show={this.state.showModal} onHide={this.close}>
           <Modal.Header closeButton>
-            <Modal.Title>Musical Forms for {this.props.genre.name}</Modal.Title>
+            <Modal.Title>Instruments for {this.props.genre.name}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <h1>Musical Forms</h1>
+            <h1>Instruments</h1>
             <ul className="list-inline">
-              {forms}
+              {instruments}
             </ul>
-            <h2><small>Add Musical Form</small></h2>
-            <form onSubmit={this.createMusicalForm}>
+            <h2><small>Add Instrument</small></h2>
+            <form onSubmit={this.createInstrument}>
               <FormGroup controlId="nameField">
                 <ControlLabel>Name</ControlLabel>
                 <FormControl type="text" onChange={this.handleNameChange} value={this.state.name}></FormControl>
@@ -112,4 +112,4 @@ class MusicalFormForm extends Component {
   }
 }
 
-export default MusicalFormForm;
+export default InstrumentForm;

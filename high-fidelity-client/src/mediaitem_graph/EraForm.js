@@ -7,7 +7,7 @@ import {
 var slug = require('slug');
 slug.defaults.mode = 'rfc3986';
 
-class GenreForm extends Component {
+class EraForm extends Component {
 
   constructor(props) {
     super(props);
@@ -39,9 +39,9 @@ class GenreForm extends Component {
           uid: '',
           slugs: this.state.slug,
           name: this.state.name,
-          types: ['genre'],
+          types: ['era'],
           uris: {},
-          tags: {}
+          tags: {genre: [this.props.genre.slugs]}
         };
         fetch('http://localhost:8080/media-items/' + token, {
           method: 'post',
@@ -52,28 +52,25 @@ class GenreForm extends Component {
           body: JSON.stringify(newMediaItem)
         }).then(res => res.json())
         .then(postResult => {
-          console.log("Post result");
-          console.log(postResult);
-          this.props.fetchGenres(token);
+          this.props.refresh();
+          this.setState({ name: '', slug: ''});
         });
       });
-
 
     this.close();
   }
 
   render() {
-    return(
+    return (
       <div>
-          <h2><small>Add Genre</small></h2>
-          <Button bsStyle="link" onClick={this.open}><Glyphicon glyph="plus" /></Button>
+          <a href="#" onClick={this.open}>Add Era</a>
 
           <Modal show={this.state.showModal} onHide={this.close}>
             <Modal.Header closeButton>
-              <Modal.Title>New Genre</Modal.Title>
+              <Modal.Title>New Era for {this.props.genre.name}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-              <h1>Create new Genre</h1>
+              <h1>Create new Era</h1>
               <form onSubmit={this.createGenre}>
                 <FormGroup controlId="nameField">
                   <ControlLabel>Name</ControlLabel>
@@ -86,12 +83,10 @@ class GenreForm extends Component {
                 <Button type="submit">Create</Button>
               </form>
           </Modal.Body>
-
         </Modal>
-    </div>
-
+      </div>
     );
   }
 }
 
-export default GenreForm;
+export default EraForm;

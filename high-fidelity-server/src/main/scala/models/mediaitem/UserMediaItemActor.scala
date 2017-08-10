@@ -4,14 +4,19 @@ import akka.actor.{Actor, ActorLogging, ActorRef}
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import com.google.firebase.database._
 import models.user.User
+import net.ruippeixotog.scalascraper.browser.JsoupBrowser
+import net.ruippeixotog.scalascraper.dsl.DSL._
+import net.ruippeixotog.scalascraper.dsl.DSL.Extract._
+
 import service.Firebase
 import spray.json.DefaultJsonProtocol
 
 import scala.collection.JavaConverters._
 
+
 case class UserMediaItemsActorRequest(uid: String, requestor: ActorRef)
 
-case class UserMediaItemsActorResponse(mediaItems: Map[String, MediaItem])
+case class UserMediaItemsActorResponse(mediaItems: Map[String, MediaItem], uriInfos: Map[String, UriInfo])
 
 sealed trait DatabaseOperation
 case object CHANGE extends DatabaseOperation
@@ -25,18 +30,23 @@ case class MediaItemUpdateSuccess(slugs: String, operation: String)
 case class MediaItemUpdateError(slugs: String, operation: String, cause: String)
 case class MediaItemRemoveSuccess(slugs: String)
 case class MediaItemRemoveError(slugs: String, cause: String)
+case class UriInfo(uriType: String, uri: String, url: String, name: String)
+case class UpdateUriInfo(mediaItem: MediaItem)
 
 trait UserMediaItemJsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val mediaItemUpdateSuccessFormat = jsonFormat2(MediaItemUpdateSuccess)
   implicit val mediaItemUpdateErrorFormat = jsonFormat3(MediaItemUpdateError)
   implicit val mediaItemRemoveSuccessFormat = jsonFormat1(MediaItemRemoveSuccess)
   implicit val mediaItemRemoveErrorFormat = jsonFormat2(MediaItemRemoveError)
+  implicit val uriInfoFormat = jsonFormat4(UriInfo)
 }
 
 
 class UserMediaItemActor(uid: String, firebase: Firebase) extends Actor with ActorLogging {
 
   var userMediaItems: Map[String, MediaItem] = Map()
+  var userUriInfos: Map[String, UriInfo] = Map()
+  val browser = JsoupBrowser()
 
   var databaseReference: DatabaseReference = null
 
@@ -116,6 +126,34 @@ class UserMediaItemActor(uid: String, firebase: Firebase) extends Actor with Act
       })
   }
 
+  def spotifyUriToUrl(uri: String): String = {
+    val uriParts = uri.split(":")
+    val urlParts = uriParts.drop(1).mkString("/")
+    s"https://open.spotify.com/$urlParts"
+  }
+
+  def uriToUrl(uriType: String, uri: String): String = {
+    uriType match {
+      case "spotifyUri" | "spotifyPlaylist" =>
+        spotifyUriToUrl(uri)
+      case "wikipedia" | "youtube" | _ =>
+        uri
+    }
+  }
+
+  def getUriName(url: String): String = {
+    val htmlDoc = browser.get(url)
+    htmlDoc >> text("title")
+  }
+
+  def updateUriInfo(mediaItem: MediaItem) = {
+    mediaItem.uris.keys.foreach(uriType =>
+      mediaItem.uris(uriType).foreach(uri => {
+        val url = uriToUrl(uriType, uri)
+        userUriInfos += (uri -> UriInfo(uriType, uri, url, getUriName(url)))
+      }))
+  }
+
   def withUid(mediaItem: MediaItem): MediaItem = {
     MediaItem(uid = uid,
       slugs = mediaItem.slugs,
@@ -127,11 +165,13 @@ class UserMediaItemActor(uid: String, firebase: Firebase) extends Actor with Act
 
   def receive = {
     case UserMediaItemsActorRequest(uid, requestor) =>
-      requestor ! UserMediaItemsActorResponse(userMediaItems)
+      requestor ! UserMediaItemsActorResponse(userMediaItems, userUriInfos)
     case MediaItemEvent(mediaItem, ADD) =>
       userMediaItems += (mediaItem.slugs -> mediaItem)
+      self ! UpdateUriInfo(mediaItem)
     case MediaItemEvent(mediaItem, CHANGE) =>
       userMediaItems += (mediaItem.slugs -> mediaItem)
+      self ! UpdateUriInfo(mediaItem)
     case MediaItemEvent(mediaItem, REMOVE) =>
       userMediaItems -= mediaItem.slugs
 
@@ -141,6 +181,7 @@ class UserMediaItemActor(uid: String, firebase: Firebase) extends Actor with Act
       updatedMediaItem(withUid(mediaItem), requestor)
     case RemoveMediaItem(_, slugs, requestor) =>
       removeMediaItem(slugs, requestor)
-
+    case UpdateUriInfo(mediaItem) =>
+      updateUriInfo(mediaItem)
   }
 }

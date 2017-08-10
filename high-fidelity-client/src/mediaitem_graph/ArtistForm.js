@@ -4,37 +4,60 @@ import {
   Button, Glyphicon, Modal, FormGroup, ControlLabel, FormControl
 } from 'react-bootstrap';
 
+import Actions from './MediaItemGraphActions.js';
+
 var slug = require('slug');
 slug.defaults.mode = 'rfc3986';
 
 import {
-  AsyncTypeahead
+  Typeahead, AsyncTypeahead
 } from 'react-bootstrap-typeahead';
 
-class ComposerForm extends Component {
+import 'react-bootstrap-typeahead/css/ClearButton.css';
+import 'react-bootstrap-typeahead/css/Loader.css';
+import 'react-bootstrap-typeahead/css/Token.css';
+import 'react-bootstrap-typeahead/css/Typeahead.css';
+
+class ArtistForm extends Component {
   constructor(props) {
     super(props);
-    this.state = { name: '', slug: '', spotifyUri: '', showModal: false };
+    this.state = { name: '', slug: '', spotifyUri: '', showModal: false,  instruments: [], instrumentChoises: []};
     this.handleNameChange = this.handleNameChange.bind(this);
     this.open = this.open.bind(this);
     this.close = this.close.bind(this);
-    this.createComposer = this.createComposer.bind(this);
+    this.createArtist = this.createArtist.bind(this);
     this.selectArtist = this.selectArtist.bind(this);
+    this.selectInstruments = this.selectInstruments.bind(this);
+    this.fetchInstruments = this.fetchInstruments.bind(this);
   }
 
   handleNameChange(e) {
-    this.setState({ name: e.target.value, slug: slug(e.target.value) });
+    this.setState({ name: e.target.value, slug: slug(e.target.value)});
   }
 
   close() {
     this.setState({ showModal: false });
   }
 
+  fetchInstruments(token) {
+    let that = this;
+    fetch('http://localhost:8080/media-items/' + token + '?type=instrument&tag=genre:' + this.props.genre.slugs)
+      .then((instrumentResult) => {
+        return instrumentResult.json();
+      }).then((instrumentJson) => {
+        that.setState({instrumentChoises: instrumentJson.mediaItems});
+      });
+  }
+
   open() {
+    this.props.user.firebaseUser.getIdToken(false)
+      .then((token) => {
+        this.fetchInstruments(token);
+      });
     this.setState({ showModal: true });
   }
 
-  createComposer(event) {
+  createArtist(event) {
     event.preventDefault();
 
     this.props.user.firebaseUser.getIdToken(false)
@@ -43,9 +66,9 @@ class ComposerForm extends Component {
           uid: '',
           slugs: this.state.slug,
           name: this.state.name,
-          types: ['composer'],
+          types: ['artist'],
           uris: {spotifyUri: [this.state.spotifyUri]},
-          tags: {genre: [this.props.era.tags.genre[0].tag.slugs], era: [this.props.era.slugs]}
+          tags: {genre: [this.props.genre.slugs], instrument: this.state.instruments}
         };
         fetch('http://localhost:8080/media-items/' + token, {
           method: 'post',
@@ -56,8 +79,8 @@ class ComposerForm extends Component {
           body: JSON.stringify(newMediaItem)
         }).then(res => res.json())
         .then(postResult => {
-          this.props.refresh(this.props.tree, "era", this.props.era.slugs);
-          this.setState({ name: '', slug: ''});
+          this.props.refresh();
+          this.setState({ name: '', slug: '', instruments: []});
         });
       });
 
@@ -85,19 +108,23 @@ class ComposerForm extends Component {
     }
   }
 
+  selectInstruments(instruments) {
+    let instrumentSlugs = instruments.map((instrument) => instrument.slugs);
+    this.setState({ instruments: instrumentSlugs});
+  }
+
   render() {
     return (
       <div>
-          <h2><small>Add Composer</small></h2>
-          <Button bsStyle="link" onClick={this.open}><Glyphicon glyph="plus" /></Button>
+          <a href="#" onClick={this.open}>Add Artist</a>
 
           <Modal show={this.state.showModal} onHide={this.close}>
             <Modal.Header closeButton>
-              <Modal.Title>New Composer for {this.props.era.name}</Modal.Title>
+              <Modal.Title>New {this.props.genre.name} Artist</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-              <h1>Create new Composer</h1>
-              <form onSubmit={this.createComposer}>
+              <h1>Create new Artist</h1>
+              <form onSubmit={this.createArtist}>
                 <FormGroup controlId="searchField">
                   <ControlLabel>Search</ControlLabel>
                   <AsyncTypeahead
@@ -117,6 +144,14 @@ class ComposerForm extends Component {
                   <ControlLabel>Name</ControlLabel>
                   <FormControl type="text" onChange={this.handleNameChange} value={this.state.name}></FormControl>
                 </FormGroup>
+                <FormGroup controlId="instrumentsField">
+                  <ControlLabel>Instruments</ControlLabel>
+                  <Typeahead multiple
+                    onChange={this.selectInstruments}
+                    options={this.state.instrumentChoises}
+                    labelKey={option => `${option.name}`}
+                  />
+                </FormGroup>
                 <Button type="submit">Create</Button>
               </form>
           </Modal.Body>
@@ -126,4 +161,4 @@ class ComposerForm extends Component {
   }
 }
 
-export default ComposerForm;
+export default ArtistForm;

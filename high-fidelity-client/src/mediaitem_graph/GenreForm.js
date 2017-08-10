@@ -4,10 +4,12 @@ import {
   Button, Glyphicon, Modal, FormGroup, ControlLabel, FormControl
 } from 'react-bootstrap';
 
+import Actions from './MediaItemGraphActions.js';
+
 var slug = require('slug');
 slug.defaults.mode = 'rfc3986';
 
-class EraForm extends Component {
+class GenreForm extends Component {
 
   constructor(props) {
     super(props);
@@ -39,9 +41,9 @@ class EraForm extends Component {
           uid: '',
           slugs: this.state.slug,
           name: this.state.name,
-          types: ['era'],
+          types: ['genre'],
           uris: {},
-          tags: {genre: [this.props.genre.slugs]}
+          tags: {}
         };
         fetch('http://localhost:8080/media-items/' + token, {
           method: 'post',
@@ -52,8 +54,9 @@ class EraForm extends Component {
           body: JSON.stringify(newMediaItem)
         }).then(res => res.json())
         .then(postResult => {
-          this.props.refresh(this.props.tree, "genre", this.props.genre.slugs);
-          this.setState({ name: '', slug: ''});
+          console.log("Post result");
+          console.log(postResult);
+          Actions.fetchGenres(this.props.user, this.props.setGraph);
         });
       });
 
@@ -61,17 +64,17 @@ class EraForm extends Component {
   }
 
   render() {
-    return (
+    return(
       <div>
-          <h2><small>Add Era</small></h2>
+          <h2><small>Add Genre</small></h2>
           <Button bsStyle="link" onClick={this.open}><Glyphicon glyph="plus" /></Button>
 
           <Modal show={this.state.showModal} onHide={this.close}>
             <Modal.Header closeButton>
-              <Modal.Title>New Era for {this.props.genre.name}</Modal.Title>
+              <Modal.Title>New Genre</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-              <h1>Create new Era</h1>
+              <h1>Create new Genre</h1>
               <form onSubmit={this.createGenre}>
                 <FormGroup controlId="nameField">
                   <ControlLabel>Name</ControlLabel>
@@ -84,10 +87,12 @@ class EraForm extends Component {
                 <Button type="submit">Create</Button>
               </form>
           </Modal.Body>
+
         </Modal>
-      </div>
+    </div>
+
     );
   }
 }
 
-export default EraForm;
+export default GenreForm;
