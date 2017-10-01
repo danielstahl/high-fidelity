@@ -31,6 +31,8 @@ class UserActor(var user: User, firebase: Firebase) extends Actor with ActorLogg
       spotifyUserActor ! playbackStatusRequest
     case playbackRequest: PlaybackRequest =>
       spotifyUserActor ! playbackRequest
+    case fetchAlbumRequest: FetchAlbumRequest =>
+      spotifyUserActor ! fetchAlbumRequest
   }
 }
 
@@ -101,6 +103,14 @@ class UserSupervisorActor(firebase: Firebase) extends Actor with ActorLogging {
         .foreach(firebaseToken => {
           val userActor = makeUserActor(firebaseToken)
           userActor ! PlaybackRequest(token, command, deviceId, uris, position, requestor)
+        })
+
+    case FetchAlbumRequest(token, albumUri, _) =>
+      val requestor = sender()
+      firebase.verifyIdToken(token)
+        .foreach(firebaseToken => {
+          val userActor = makeUserActor(firebaseToken)
+          userActor ! FetchAlbumRequest(token, albumUri, requestor)
         })
   }
 }

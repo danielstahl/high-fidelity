@@ -12,6 +12,9 @@ import PlayButton from '../PlayButton.js';
 import AddLinkForm from './AddLinkForm.js';
 import EraView from './EraView.js';
 import EraForm from './EraForm.js';
+import LinksView from './LinksView.js';
+import ArtistView from './ArtistView.js';
+import AlbumForm from './AlbumForm.js';
 
 class GenreView extends Component {
   constructor(props) {
@@ -46,7 +49,7 @@ class GenreView extends Component {
     if(this.props.genreGraph.artists) {
       artistsWithoutInstruments = (this.props.genreGraph.artists.map((artist) => {
         return (
-          <li><a href="#">{artist.name}</a></li>
+          <ArtistView user={this.props.user} setGraph={this.props.setGraph} artist={artist} digest='true'/>
         );
       }));
     }
@@ -58,7 +61,7 @@ class GenreView extends Component {
           <h3><small>{instrumentGraph.instrument.name}</small></h3>
           <ul className="list-inline">
           {instrumentGraph.artists.map((artist) =>
-            <li><a href="#">{artist.name}</a></li>
+            <ArtistView user={this.props.user} setGraph={this.props.setGraph} artist={artist} digest='true'/>
           )}
         </ul>
       </div>
@@ -73,17 +76,6 @@ class GenreView extends Component {
         );
       }));
     }
-
-    let links;
-    links = this.props.genreGraph.uris.map((theUri) => {
-      if(theUri.uriType === 'spotifyPlaylist') {
-        let uris = [theUri.uri];
-        return (<PlayButton name={theUri.name} play={this.props.play} uris={uris}/>);
-      } else {
-        return (<li><a target="_blank" href={theUri.url}>{theUri.name}</a></li>);
-      }
-
-    });
 
     return (
 
@@ -101,9 +93,7 @@ class GenreView extends Component {
             <Panel>
               <h1><small>genre</small> {this.props.genreGraph.genre.name}</h1>
 
-              <ul className="list-unstyled">
-                {links}
-              </ul>
+              <LinksView item={this.props.genreGraph} play={this.props.play} />
 
               <h2><small>Artists</small> </h2>
               <ul className="list-inline">
@@ -126,6 +116,7 @@ class GenreView extends Component {
                 <li><ArtistForm refresh={this.refresh} user={this.props.user} genre={this.props.genreGraph.genre}/></li>
                 <li><EraForm refresh={this.refresh} user={this.props.user} genre={this.props.genreGraph.genre}/></li>
                 <li><AddLinkForm refresh={this.refresh} user={this.props.user} item={this.props.genreGraph.genre}/></li>
+                <li><AlbumForm refresh={this.refresh} user={this.props.user} genre={this.props.genreGraph.genre}/></li>
               </ul>
             </Panel>
           </Col>

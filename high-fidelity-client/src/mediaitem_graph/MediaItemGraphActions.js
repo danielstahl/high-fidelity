@@ -51,6 +51,19 @@ class Actions {
       });
     });
   }
+
+  static fetchArtistGraph(user, artistSlug, setGraph) {
+    Actions.getIdToken(user)
+    .then((token) => {
+      fetch('http://localhost:8080/artists/' + artistSlug, Actions.fetchInit(token))
+      .then((artistGraphResult) => {
+        return artistGraphResult.json();
+      })
+      .then((artistGraphJson) => {
+        setGraph(artistGraphJson);
+      });
+    });
+  }
 }
 
 export default Actions;

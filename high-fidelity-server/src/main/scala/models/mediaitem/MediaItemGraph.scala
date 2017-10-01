@@ -8,6 +8,7 @@ import akka.http.scaladsl.server.{Directives, Route}
 import models.user.UserMediaItemsRequest
 import akka.pattern.ask
 import akka.util.Timeout
+import models.spotify._
 
 import scala.concurrent.duration._
 import spray.json.{DefaultJsonProtocol, NullOptions}
@@ -49,13 +50,17 @@ case class InstrumentGraph(instrument: Instrument, artists: Seq[Artist], graphTy
 
 case class EraGraph(era: Era, genre: Genre, uris: Seq[Uri], composers: Seq[Composer], graphType: String = "era") extends GraphType
 
-case class ArtistGraph(artist: Artist, genre: Genre, instrument: Instrument, albums: Seq[Album], graphType: String = "artist") extends GraphType
+case class ArtistGraph(artist: Artist, genre: Genre, instrument: Option[Instrument], uris: Seq[Uri], albums: Seq[Album], graphType: String = "artist") extends GraphType
 
 case class ComposerGraph(composer: Composer, era: Era, genre: Genre, albums: Seq[Album], pieces: Seq[Piece], graphType: String = "composer") extends GraphType
 
 case class PieceGraph(piece: Piece, composer: Composer, musicalForms: Seq[MusicalForm], instruments: Seq[Instrument], graphType: String = "piece") extends GraphType
 
 case class AlbumGraph(album: Album, artists: Seq[Artist], composers: Seq[Composer], graphType: String = "album") extends GraphType
+
+case class AlbumArtistInfo(spotifyUri: String, name: String, slugs: Option[String], artistTypes: Seq[String])
+
+case class AlbumInfo(spotifyUri: String, name: String, imageUri: Option[String], artists: Seq[AlbumArtistInfo])
 
 trait MediaItemGraphJsonSupport extends SprayJsonSupport with DefaultJsonProtocol with NullOptions {
   implicit val uriFormat = jsonFormat4(Uri)
@@ -65,10 +70,14 @@ trait MediaItemGraphJsonSupport extends SprayJsonSupport with DefaultJsonProtoco
   implicit val eraFormat = jsonFormat3(Era)
   implicit val artistFormat = jsonFormat4(Artist)
   implicit val composerFormat = jsonFormat3(Composer)
+  implicit val albumFormat = jsonFormat4(Album)
   implicit val rootGraphFormat = jsonFormat2(RootGraph)
   implicit val instrumentGraphFormat = jsonFormat3(InstrumentGraph)
   implicit val genreGraphFormat = jsonFormat6(GenreGraph)
   implicit val eraGraphFormat = jsonFormat5(EraGraph)
+  implicit val artistGraphFormat = jsonFormat6(ArtistGraph)
+  implicit val albumArtistInfoFormat = jsonFormat4(AlbumArtistInfo)
+  implicit val albumInfoFormat = jsonFormat4(AlbumInfo)
 }
 
 case class MediaItemGraphRoute(userSupervisorActor: ActorRef)(implicit ec: ExecutionContext) extends Directives with MediaItemGraphJsonSupport {
@@ -100,6 +109,9 @@ case class MediaItemGraphRoute(userSupervisorActor: ActorRef)(implicit ec: Execu
 
   def toComposer(mediaItem: MediaItem): Composer =
     Composer(mediaItem.slugs, mediaItem.name, mediaItem.getTag("era").head)
+
+  def toAlbum(mediaItem: MediaItem): Album =
+    Album(mediaItem.slugs, mediaItem.name, mediaItem.getTag("artist"), mediaItem.getTag("composer"))
 
   def getEraGraph(userMediaItemsResponse: UserMediaItemsActorResponse, eraSlugs: String): Option[EraGraph] = {
     val userMediaItems = userMediaItemsResponse.mediaItems
@@ -188,6 +200,69 @@ case class MediaItemGraphRoute(userSupervisorActor: ActorRef)(implicit ec: Execu
     )
   }
 
+  def getArtistGraph(userMediaItemsResponse: UserMediaItemsActorResponse, slugs: String): Option[ArtistGraph] = {
+    val userMediaItems = userMediaItemsResponse.mediaItems
+    val uriInfos = userMediaItemsResponse.uriInfos
+
+    val optionalArtist = userMediaItems.get(slugs)
+
+    optionalArtist.map(
+      artist => {
+        val genreSlug = artist.getTag("genre").head
+
+        val genre = userMediaItems(genreSlug)
+
+        val uris = artist.uris.keys.flatMap(uriType =>
+          artist.uris(uriType).map(uri =>
+            uriInfos.get(uri)
+              .map(uriInfo => Uri(uriInfo.uriType, uriInfo.uri, uriInfo.url, uriInfo.name))
+              .getOrElse(Uri(uriType, uri, uri, uri))))
+          .toSeq
+
+        val optionalInstrument = artist.tags.get("instrument")
+          .flatMap(instrument => userMediaItems.get(instrument.head))
+
+        val albums = userMediaItems.values
+          .filter(mediaItem =>
+            mediaItem.types.contains("album") && mediaItem.hasTag("artist", slugs))
+
+        ArtistGraph(
+          artist = toArtist(artist),
+          instrument = optionalInstrument.map(instr => toInstrument(instr)),
+          genre = toGenre(genre),
+          uris = uris,
+          albums = albums.map(album => toAlbum(album)).toSeq
+        )
+      }
+    )
+  }
+
+  def getLastImage(spotifyAlbum: SpotifyAlbum): Option[String] = {
+    if(spotifyAlbum.images.isEmpty) {
+      Option.empty
+    } else {
+      Option(spotifyAlbum.images.last.url)
+    }
+  }
+
+  def getAlbumArtistInfo(userMediaItemsResponse: UserMediaItemsActorResponse, spotifyArtist: SpotifySimpleArtist): AlbumArtistInfo = {
+    val userMediaItems = userMediaItemsResponse.mediaItems
+    val optionalMediaItem =
+      userMediaItems.values.find(mediaItem => mediaItem.hasUri("spotifyUri", spotifyArtist.uri))
+
+    optionalMediaItem match {
+      case Some(mediaItem) =>
+        AlbumArtistInfo(spotifyUri = spotifyArtist.uri, name = mediaItem.name, Option(mediaItem.slugs), mediaItem.types)
+      case None =>
+        AlbumArtistInfo(spotifyUri = spotifyArtist.uri, spotifyArtist.name, Option.empty, Seq.empty)
+    }
+  }
+
+  def getAlbumInfo(userMediaItemsResponse: UserMediaItemsActorResponse, spotifyAlbum: SpotifyAlbum): AlbumInfo = {
+    val albumArtists = spotifyAlbum.artists.map(spotifyArtist => getAlbumArtistInfo(userMediaItemsResponse, spotifyArtist))
+    AlbumInfo(spotifyUri = spotifyAlbum.uri, name = spotifyAlbum.name, imageUri = getLastImage(spotifyAlbum), albumArtists)
+  }
+
   val allGenresRoute = (get & path("genres") & headerValueByName("X-user-token")) {
     userToken => {
       val userMediaItemsFuture = (userSupervisorActor ? UserMediaItemsRequest(userToken)).mapTo[UserMediaItemsActorResponse]
@@ -233,8 +308,35 @@ case class MediaItemGraphRoute(userSupervisorActor: ActorRef)(implicit ec: Execu
     }
   }
 
+  val artistRoute = (get & path("artists" / Segment) & headerValueByName("X-user-token")) {
+    (artistSlug, userToken) => {
+      val userMediaItemsFuture = (userSupervisorActor ? UserMediaItemsRequest(userToken)).mapTo[UserMediaItemsActorResponse]
+      val artistResponse = userMediaItemsFuture.flatMap(
+        userMediaItems => {
+          val optionalArtistGraph = getArtistGraph(userMediaItems, artistSlug)
+          optionalArtistGraph match {
+            case Some(artistGraph) => Marshal(StatusCodes.OK -> artistGraph).to[HttpResponse]
+            case None => Marshal(StatusCodes.NotFound -> s"Era $artistSlug not found").to[HttpResponse]
+          }
+        }
+      )
+      complete(artistResponse)
+    }
+  }
+
+  val albumInfoRoute = (get & path("albums" / "info" / Segment) & headerValueByName("X-user-token")) {
+    (albumUri, userToken) => {
+      val userMediaItemsFuture = (userSupervisorActor ? UserMediaItemsRequest(userToken)).mapTo[UserMediaItemsActorResponse]
+      val spotifyAlbumFuture = (userSupervisorActor ? FetchAlbumRequest(userToken, albumUri, null)).mapTo[FetchAlbumResult]
+      val albumInfo = for {
+        userMediaItems <- userMediaItemsFuture
+        spotifyAlbum <- spotifyAlbumFuture
+      } yield getAlbumInfo(userMediaItems, spotifyAlbum.album)
+      complete(albumInfo)
+    }
+  }
 
   def apply(): Route = {
-    allGenresRoute ~ genreRoute ~ eraRoute
+    allGenresRoute ~ genreRoute ~ eraRoute ~ artistRoute ~ albumInfoRoute
   }
 }

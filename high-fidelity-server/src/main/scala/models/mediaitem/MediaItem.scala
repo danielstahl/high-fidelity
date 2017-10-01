@@ -12,13 +12,19 @@ import scala.collection.JavaConverters._
 
 case class MediaItem(uid: String, slugs: String, name: String, types: List[String], uris: Map[String, List[String]], tags: Map[String, List[String]]) {
 
-  def hasTag(category: String, tag: String): Boolean = {
+  def hasTag(category: String, tag: String): Boolean =
     getTag(category).contains(tag)
-  }
 
-  def getTag(category: String): Seq[String] = {
+
+  def getTag(category: String): Seq[String] =
     tags.getOrElse(category, Seq.empty)
-  }
+
+  def hasUri(uriType: String, uri: String): Boolean =
+    getUri(uriType).contains(uri)
+
+  def getUri(uriType: String): Seq[String] =
+    uris.getOrElse(uriType, Seq.empty)
+
 
   def scalaMapToJavaMap(theMap: Map[String, Seq[String]]): util.Map[String, util.List[String]] = {
     theMap.map {
