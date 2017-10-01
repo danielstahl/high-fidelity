@@ -22,3 +22,15 @@ libraryDependencies ++= Seq(
 )
 
 testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")
+
+enablePlugins(JavaAppPackaging)
+enablePlugins(DockerPlugin)
+dockerBaseImage := "java:openjdk-8-jre"
+dockerExposedPorts := Seq(8080)
+
+import com.typesafe.sbt.packager.docker.Cmd
+
+dockerCommands := dockerCommands.value.flatMap{
+  case cmd@Cmd("FROM",_) => List(cmd,Cmd("RUN", "apt-get -y update && apt-get -y install docker.io"))
+  case other => List(other)
+}

@@ -8,6 +8,8 @@ import Actions from './MediaItemGraphActions.js';
 import PlayButton from '../PlayButton.js';
 import AddLinkForm from './AddLinkForm.js';
 import ComposerForm from './ComposerForm.js';
+import LinksView from './LinksView.js';
+import AlbumForm from './AlbumForm.js';
 
 class EraView extends Component {
   constructor(props) {
@@ -44,16 +46,6 @@ class EraView extends Component {
   }
 
   getEraView() {
-    let links;
-    links = this.props.eraGraph.uris.map((theUri) => {
-      if(theUri.uriType === 'spotifyPlaylist') {
-        let uris = [theUri.uri];
-        return (<PlayButton name={theUri.name} play={this.props.play} uris={uris}/>);
-      } else {
-        return (<li><a target="_blank" href={theUri.url}>{theUri.name}</a></li>);
-      }
-    });
-
     let composers;
     composers = (this.props.eraGraph.composers.map((composer) => {
       return (
@@ -75,9 +67,7 @@ class EraView extends Component {
             <Panel>
               <h1><small>era</small> {this.props.eraGraph.era.name}</h1>
 
-              <ul className="list-unstyled">
-                {links}
-              </ul>
+              <LinksView item={this.props.eraGraph} play={this.props.play} />
 
               <h2><small>Composers</small></h2>
               <ul className="list-inline">

@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import GenresMainView from './GenresMainView.js';
 import GenreView from './GenreView.js';
 import EraView from './EraView.js';
+import ArtistView from './ArtistView.js';
 
 class MediaItemGraphView extends Component {
   constructor(props) {
@@ -25,6 +26,9 @@ class MediaItemGraphView extends Component {
         case 'era':
           graphComponent = (<EraView user={this.props.user} setGraph={this.setGraph} eraGraph={this.state.graph} play={this.props.play} digest='false'/>);
           break;
+          case 'artist':
+            graphComponent = (<ArtistView user={this.props.user} setGraph={this.setGraph} artistGraph={this.state.graph} play={this.props.play} digest='false'/>);
+            break;
         case 'root':
         default:
       }

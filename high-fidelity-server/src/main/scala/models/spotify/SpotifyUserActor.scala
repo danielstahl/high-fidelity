@@ -32,6 +32,9 @@ case class SearchError(query: String, cause: String)
 case class PlaybackStatusRequest(token: String, requestor: ActorRef)
 case class PlaybackStatus(track: Option[TrackDigest], device: Option[DeviceDigest], contextUri: Option[String], progressMs: Long, isPlaying: Boolean)
 
+case class FetchAlbumRequest(token: String, albumUri: String, requestor: ActorRef)
+case class FetchAlbumResult(album: SpotifyAlbum)
+
 sealed trait PlaybackCommand
 case object PLAY extends PlaybackCommand
 case object PAUSE extends PlaybackCommand
@@ -140,6 +143,26 @@ class SpotifyUserActor(userActor: ActorRef, var accessToken: Option[AccessToken]
         Unmarshal(response).to[SpotifySearchResult])
 
     spotifySearchFuture.map(spotifySearchResult => spotifySearchResult2ArtistSearchResult(spotifySearchResult))
+  }
+
+
+  def fetchAlbum(albumUri: String): Future[SpotifyAlbum] = {
+    val uriParts = albumUri.split(":")
+    val albumId = uriParts.last
+
+    val uri = Uri(s"https://api.spotify.com/v1/albums/$albumId")
+
+    val request = HttpRequest(
+      uri = uri,
+      method = HttpMethods.GET,
+      headers = List(headers.Authorization(OAuth2BearerToken(accessToken.get.access_token)))
+    )
+
+    val responseFuture: Future[HttpResponse] =
+      http.singleRequest(request)
+
+    responseFuture.flatMap(response =>
+      Unmarshal(response).to[SpotifyAlbum])
   }
 
   def currentPlaybackStatus(): Future[PlaybackStatus] = {
@@ -335,6 +358,17 @@ class SpotifyUserActor(userActor: ActorRef, var accessToken: Option[AccessToken]
       playbackStatusFuture.onComplete {
         case Success(playbackStatus) =>
           requestor ! playbackStatus
+        case Failure(t) =>
+          log.error(t, t.getMessage)
+          requestor ! SpotifyRequestError(t.getMessage)
+
+      }
+
+    case FetchAlbumRequest(token, albumUri, requestor) =>
+      val fetchAlbumFutureFuture = fetchAlbum(albumUri)
+      fetchAlbumFutureFuture.onComplete {
+        case Success(album) =>
+          requestor ! FetchAlbumResult(album)
         case Failure(t) =>
           log.error(t, t.getMessage)
           requestor ! SpotifyRequestError(t.getMessage)
