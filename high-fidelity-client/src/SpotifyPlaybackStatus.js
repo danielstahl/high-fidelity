@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 import {
-  Button, ButtonGroup, Glyphicon, ProgressBar, Panel
+  Button, Glyphicon, ProgressBar, Panel
 } from 'react-bootstrap';
 
 class SpotifyPlaybackStatus extends Component {

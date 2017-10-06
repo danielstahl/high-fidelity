@@ -60,7 +60,6 @@ class AlbumForm extends Component {
 
   createAlbum(event) {
     event.preventDefault();
-    console.log("create album");
     if(this.state.albumInfo) {
       let artists = this.state.albumInfo.artists
         .filter((artist) => artist.artistTypes.includes('artist'))
@@ -72,7 +71,6 @@ class AlbumForm extends Component {
 
       let name = this.state.albumInfo.name;
       let nameSlug = slug(name, mySlugMode);
-      let genreSlug = this.props.genre.slugs;
       let albumId = artists[0] + ":" + nameSlug;
 
       let newMediaItem = {
@@ -90,7 +88,6 @@ class AlbumForm extends Component {
 
       this.props.user.firebaseUser.getIdToken(false)
         .then((token) => {
-          console.log(newMediaItem);
           fetch('http://localhost:8080/media-items/' + token, {
             method: 'post',
             headers: {
@@ -122,7 +119,7 @@ class AlbumForm extends Component {
     if(this.state.albumInfo) {
       albumInfoView = (
       <div>
-        <h3><img src={this.state.albumInfo.imageUri}/> {this.state.albumInfo.name}</h3>
+        <h3><img alt={this.state.albumInfo.name} src={this.state.albumInfo.imageUri}/> {this.state.albumInfo.name}</h3>
         <ul className="list-inline">
         {this.state.albumInfo.artists.map((artist) =>
           {return this.renderAlbumInfoArtist(artist)}

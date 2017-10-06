@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 import {
-  Row, Col, Grid, Panel, Glyphicon, Button
+  Row, Col, Grid
 } from 'react-bootstrap';
 
 import GenreForm from './GenreForm.js';
@@ -57,24 +57,6 @@ class GenresMainView extends Component {
         </Row>
       </Grid>
     );
-  }
-}
-
-class GenrePanel extends Component {
-  constructor(props) {
-    super(props);
-    this.handleGenreCLick = this.handleGenreCLick.bind(this);
-  }
-
-  handleGenreCLick(e) {
-    e.preventDefault();
-    console.log("Click on genre " + this.props.genre.slugs)
-  }
-
-  render() {
-    return(<Panel onClick={this.handleGenreCLick}>
-      <h2>{this.props.genre.name}</h2>
-    </Panel>);
   }
 }
 

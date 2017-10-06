@@ -1,10 +1,8 @@
 import React, { Component } from 'react';
 
 import {
-  Button, Glyphicon, Modal, FormGroup, ControlLabel, FormControl
+  Button, Modal, FormGroup, ControlLabel, FormControl
 } from 'react-bootstrap';
-
-import Actions from './MediaItemGraphActions.js';
 
 var slug = require('slug');
 slug.defaults.mode = 'rfc3986';

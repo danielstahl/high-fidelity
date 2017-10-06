@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
 
 import {
-  Row, Col, Grid, Panel, Glyphicon, Button
+  Row, Col, Grid, Panel
 } from 'react-bootstrap';
 
 import Actions from './MediaItemGraphActions.js';
-import AlbumForm from './AlbumForm.js';
+import AddLinkForm from './AddLinkForm.js';
+import LinksView from './LinksView.js';
+import AlbumView from './AlbumView.js';
 
 class ArtistView extends Component {
 
@@ -43,7 +45,13 @@ class ArtistView extends Component {
   }
 
   getArtistView() {
-    console.log(this.props.artistGraph);
+    let albums;
+    albums = (this.props.artistGraph.albums.map((album) => {
+      return (
+        <li key={album.slugs}><AlbumView user={this.props.user} albumGraph={album} play={this.props.play} setGraph={this.props.setGraph}/></li>
+      );
+    }))
+
     return (
       <Grid>
         <Row>
@@ -57,13 +65,23 @@ class ArtistView extends Component {
           <Col md={8}>
             <Panel>
               <h1><small>artist</small> {this.props.artistGraph.artist.name}</h1>
+
+              <LinksView item={this.props.artistGraph} play={this.props.play} />
+
+              <h2><small>Albums</small></h2>
+              <ul className="list-unstyled">
+                {albums}
+              </ul>
+            </Panel>
+          </Col>
+          <Col md={4}>
+            <Panel>
+              <ul className="list-unstyled">
+                <li><AddLinkForm refresh={this.refresh} user={this.props.user} item={this.props.artistGraph.artist}/></li>
+              </ul>
             </Panel>
           </Col>
         </Row>
-        <Col md={4}>
-          <Panel>
-          </Panel>
-        </Col>
       </Grid>
     );
   }
@@ -72,7 +90,7 @@ class ArtistView extends Component {
     let component;
     if(this.props.digest === 'true') {
       component = (
-        <li><a href="#" onClick={this.handleArtistCLick}>{this.props.artist.name}</a></li>
+        <li key={this.props.artist.slugs}><a href="#" onClick={this.handleArtistCLick}>{this.props.artist.name}</a></li>
       );
     } else {
       component = this.getArtistView();

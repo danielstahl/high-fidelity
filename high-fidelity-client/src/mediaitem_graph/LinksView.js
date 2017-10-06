@@ -10,7 +10,7 @@ class LinksView extends Component {
         let uris = [theUri.uri];
         return (<PlayButton name={theUri.name} play={this.props.play} uris={uris}/>);
       } else {
-        return (<li><a target="_blank" href={theUri.url}>{theUri.name}</a></li>);
+        return (<li key={theUri.url}><a target="_blank" href={theUri.url}>{theUri.name}</a></li>);
       }
     });
 
