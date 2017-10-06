@@ -13,7 +13,7 @@ import models.spotify._
 import scala.concurrent.duration._
 import spray.json.{DefaultJsonProtocol, NullOptions}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 trait GraphType {
   val graphType: String
@@ -50,13 +50,13 @@ case class InstrumentGraph(instrument: Instrument, artists: Seq[Artist], graphTy
 
 case class EraGraph(era: Era, genre: Genre, uris: Seq[Uri], composers: Seq[Composer], graphType: String = "era") extends GraphType
 
-case class ArtistGraph(artist: Artist, genre: Genre, instrument: Option[Instrument], uris: Seq[Uri], albums: Seq[Album], graphType: String = "artist") extends GraphType
+case class ArtistGraph(artist: Artist, genre: Genre, instrument: Seq[Instrument], uris: Seq[Uri], albums: Seq[AlbumGraph], graphType: String = "artist") extends GraphType
 
 case class ComposerGraph(composer: Composer, era: Era, genre: Genre, albums: Seq[Album], pieces: Seq[Piece], graphType: String = "composer") extends GraphType
 
 case class PieceGraph(piece: Piece, composer: Composer, musicalForms: Seq[MusicalForm], instruments: Seq[Instrument], graphType: String = "piece") extends GraphType
 
-case class AlbumGraph(album: Album, artists: Seq[Artist], composers: Seq[Composer], graphType: String = "album") extends GraphType
+case class AlbumGraph(album: Album, artists: Seq[Artist], composers: Seq[Composer], uris: Seq[Uri], graphType: String = "album") extends GraphType
 
 case class AlbumArtistInfo(spotifyUri: String, name: String, slugs: Option[String], artistTypes: Seq[String])
 
@@ -75,6 +75,7 @@ trait MediaItemGraphJsonSupport extends SprayJsonSupport with DefaultJsonProtoco
   implicit val instrumentGraphFormat = jsonFormat3(InstrumentGraph)
   implicit val genreGraphFormat = jsonFormat6(GenreGraph)
   implicit val eraGraphFormat = jsonFormat5(EraGraph)
+  implicit val albumGraphFormat = jsonFormat5(AlbumGraph)
   implicit val artistGraphFormat = jsonFormat6(ArtistGraph)
   implicit val albumArtistInfoFormat = jsonFormat4(AlbumArtistInfo)
   implicit val albumInfoFormat = jsonFormat4(AlbumInfo)
@@ -113,6 +114,42 @@ case class MediaItemGraphRoute(userSupervisorActor: ActorRef)(implicit ec: Execu
   def toAlbum(mediaItem: MediaItem): Album =
     Album(mediaItem.slugs, mediaItem.name, mediaItem.getTag("artist"), mediaItem.getTag("composer"))
 
+  def toUris(mediaItem: MediaItem, uriInfos: Map[String, UriInfo]): Seq[Uri] =
+    mediaItem.uris.keys.flatMap(uriType =>
+      mediaItem.uris(uriType).map(uri =>
+        uriInfos.get(uri)
+          .map(uriInfo => Uri(uriInfo.uriType, uriInfo.uri, uriInfo.url, uriInfo.name))
+          .getOrElse(Uri(uriType, uri, uri, uri))))
+      .toSeq
+
+  def toAlbumGraph(userMediaItemsResponse: UserMediaItemsActorResponse, mediaItem: MediaItem): AlbumGraph = {
+    val userMediaItems = userMediaItemsResponse.mediaItems
+    val uriInfos = userMediaItemsResponse.uriInfos
+
+    val artists = mediaItem.tags.get("artist")
+        .map(artists =>
+          artists.map(
+            artistSlugs => userMediaItems(artistSlugs))
+          .map(mediaItem => toArtist(mediaItem)))
+          .getOrElse(Seq.empty)
+
+    val composers = mediaItem.tags.get("composer")
+      .map(composers =>
+        composers.map(
+          composerSlugs => userMediaItems(composerSlugs))
+          .map(mediaItem => toComposer(mediaItem)))
+      .getOrElse(Seq.empty)
+
+    val uris = toUris(mediaItem, uriInfos)
+
+    AlbumGraph(
+      album = toAlbum(mediaItem),
+      artists = artists,
+      composers = composers,
+      uris = uris
+    )
+  }
+
   def getEraGraph(userMediaItemsResponse: UserMediaItemsActorResponse, eraSlugs: String): Option[EraGraph] = {
     val userMediaItems = userMediaItemsResponse.mediaItems
     val uriInfos = userMediaItemsResponse.uriInfos
@@ -123,12 +160,7 @@ case class MediaItemGraphRoute(userSupervisorActor: ActorRef)(implicit ec: Execu
 
         val genre = userMediaItems(genreSlug)
 
-        val uris = era.uris.keys.flatMap(uriType =>
-          era.uris(uriType).map(uri =>
-            uriInfos.get(uri)
-              .map(uriInfo => Uri(uriInfo.uriType, uriInfo.uri, uriInfo.url, uriInfo.name))
-              .getOrElse(Uri(uriType, uri, uri, uri))))
-          .toSeq
+        val uris = toUris(era, uriInfos)
 
         val composers = userMediaItems.values
           .filter(mediaItem =>
@@ -182,12 +214,7 @@ case class MediaItemGraphRoute(userSupervisorActor: ActorRef)(implicit ec: Execu
           .map(toArtist)
           .toSeq
 
-        val uris = genre.uris.keys.flatMap(uriType =>
-          genre.uris(uriType).map(uri =>
-            uriInfos.get(uri)
-              .map(uriInfo => Uri(uriInfo.uriType, uriInfo.uri, uriInfo.url, uriInfo.name))
-              .getOrElse(Uri(uriType, uri, uri, uri))))
-          .toSeq
+        val uris = toUris(genre, uriInfos)
 
         GenreGraph(
           genre = toGenre(genre),
@@ -212,15 +239,11 @@ case class MediaItemGraphRoute(userSupervisorActor: ActorRef)(implicit ec: Execu
 
         val genre = userMediaItems(genreSlug)
 
-        val uris = artist.uris.keys.flatMap(uriType =>
-          artist.uris(uriType).map(uri =>
-            uriInfos.get(uri)
-              .map(uriInfo => Uri(uriInfo.uriType, uriInfo.uri, uriInfo.url, uriInfo.name))
-              .getOrElse(Uri(uriType, uri, uri, uri))))
-          .toSeq
+        val uris = toUris(artist, uriInfos)
 
-        val optionalInstrument = artist.tags.get("instrument")
-          .flatMap(instrument => userMediaItems.get(instrument.head))
+        val instruments = artist.tags.get("instrument")
+          .map(instr => instr.map(instrumentSlugs => userMediaItems(instrumentSlugs)))
+          .getOrElse(List.empty)
 
         val albums = userMediaItems.values
           .filter(mediaItem =>
@@ -228,10 +251,10 @@ case class MediaItemGraphRoute(userSupervisorActor: ActorRef)(implicit ec: Execu
 
         ArtistGraph(
           artist = toArtist(artist),
-          instrument = optionalInstrument.map(instr => toInstrument(instr)),
+          instrument = instruments.map(instr => toInstrument(instr)),
           genre = toGenre(genre),
           uris = uris,
-          albums = albums.map(album => toAlbum(album)).toSeq
+          albums = albums.map(album => toAlbumGraph(userMediaItemsResponse, album)).toSeq
         )
       }
     )

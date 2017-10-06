@@ -1,14 +1,13 @@
 import React, { Component } from 'react';
 
 import {
-  Row, Col, Grid, Panel, Glyphicon, Button
+  Row, Col, Grid, Panel
 } from 'react-bootstrap';
 
 import Actions from './MediaItemGraphActions.js';
 import InstrumentForm from './InstrumentForm.js';
 import MusicalFormForm from './MusicalFormForm.js';
 import ArtistForm from './ArtistForm.js';
-import PlayButton from '../PlayButton.js';
 import AddLinkForm from './AddLinkForm.js';
 import EraView from './EraView.js';
 import EraForm from './EraForm.js';

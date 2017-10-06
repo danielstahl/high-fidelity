@@ -1,15 +1,13 @@
 import React, { Component } from 'react';
 
 import {
-  Row, Col, Grid, Panel, Glyphicon, Button
+  Row, Col, Grid, Panel
 } from 'react-bootstrap';
 
 import Actions from './MediaItemGraphActions.js';
-import PlayButton from '../PlayButton.js';
 import AddLinkForm from './AddLinkForm.js';
-import ComposerForm from './ComposerForm.js';
 import LinksView from './LinksView.js';
-import AlbumForm from './AlbumForm.js';
+import ComposerForm from './ComposerForm.js';
 
 class EraView extends Component {
   constructor(props) {

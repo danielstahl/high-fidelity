@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 import {
-  Button, Glyphicon, Modal, FormGroup, ControlLabel, FormControl, Checkbox
+  Button, Modal, FormGroup, ControlLabel, FormControl, Checkbox
 } from 'react-bootstrap';
 
 var slug = require('slug');
