@@ -17,10 +17,4 @@ A MediaItem also has a Map of uris where each uri has type, like `spotifyUri` an
 The MediaItems is stupid. On top of that it is a layer that interpret MediaItems
 and translate them into more domain specific models like Genre, Composer and Artist.
 
-The code for is divided into two parts and git repositories.
-
-The server part is a Akka Http application called [high-fidelity-server](https://github.com/danielstahl/high-fidelity-server).
-It uses firebase to store the MediaItems for each user. It also performs all
-Spotify operations and holds the access-token for each user.
-
-The client part is a React application called [high-fidelity-client](https://github.com/danielstahl/high-fidelity-client).
+It uses firebase to store the MediaItems for each user. 
