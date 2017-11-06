@@ -16,9 +16,9 @@ describe('addMediaItem', () => {
 
 describe('removeMediaItem', () => {
   it('removeMediaItem should create a REMOVE_MEDIA_ITEM action', () => {
-    expect(actions.removeMediaItem(testMediaItem)).toEqual({
+    expect(actions.removeMediaItem('alban-berg')).toEqual({
       type: 'REMOVE_MEDIA_ITEM',
-      mediaItem: testMediaItem
+      slugs: 'alban-berg'
     })
   })
 })

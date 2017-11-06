@@ -4,9 +4,9 @@ export const addMediaItem = (mediaItem) => ({
   mediaItem: mediaItem
 })
 
-export const removeMediaItem = (mediaItem) => ({
+export const removeMediaItem = (slugs) => ({
   type: 'REMOVE_MEDIA_ITEM',
-  mediaItem: mediaItem
+  slugs: slugs
 })
 
 export const updateMediaItem = (mediaItem) => ({

@@ -10,8 +10,7 @@ const mediaItemReducers = (state = [], action) => {
         ...state, action.mediaItem
       ]
     case 'REMOVE_MEDIA_ITEM':
-      return state.filter(mediaItem =>
-        !sameMediaItem(mediaItem, action.mediaItem))
+      return state.filter(mediaItem => mediaItem.slugs !== action.slugs)
     case 'UPDATE_MEDIA_ITEM':
       return state.map(mediaItem =>
         (sameMediaItem(mediaItem, action.mediaItem)) ? action.mediaItem : mediaItem
