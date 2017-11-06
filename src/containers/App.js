@@ -15,6 +15,8 @@ import {
 
 import { withRouter } from 'react-router'
 
+import MediaItemHandler from './MediaItemHandler'
+
 class NotLoggedInView extends Component {
   render() {
     return(
@@ -32,6 +34,7 @@ class LoggedInView extends Component {
         <Row>
           <h1>Welcome to High Fidelity</h1>
           <p>You are logged in.</p>
+          <MediaItemHandler/>
         </Row>
       )
     }

@@ -30,9 +30,7 @@ class LoginHandler extends Component {
           firebaseUser: firebaseUser
         }))
       } else {
-        that.props.dispatch({
-          type: 'UNSET_USER'
-        })
+        that.props.dispatch(actions.unsetUser())
       }
     })
   }

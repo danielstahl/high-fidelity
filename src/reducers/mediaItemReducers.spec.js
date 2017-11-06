@@ -3,14 +3,14 @@ import mediaItemReducers from './mediaItemReducers'
 
 const testMediaItem1 = {
     uid: 'ZlnnPfqyyYZqDxGDAKTPV5yRuBF3',
-    slugs: 'alabin-berg',
+    slugs: 'alban-berg',
     name: 'Alban Berg'
 }
 
 const testMediaItem2 = {
   uid: 'ZlnnPfqyyYZqDxGDAKTPV5yRuBF3',
   slugs: 'anton-webern',
-  name: 'Anton Weber'
+  name: 'Anton Webern'
 }
 
 const updatedTestMediaItem2 = {
@@ -34,7 +34,7 @@ describe('mediaItem reducers', () => {
   it('should handle REMOVE_MEDIA_ITEM', () => {
     expect(mediaItemReducers([testMediaItem1, testMediaItem2], {
       type: 'REMOVE_MEDIA_ITEM',
-      mediaItem: testMediaItem2
+      slugs: testMediaItem2.slugs
     })).toEqual([testMediaItem1])
   })
 
