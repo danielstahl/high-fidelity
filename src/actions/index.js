@@ -31,3 +31,8 @@ export const setSpotifyUser = (spotifyUser) => ({
 export const unsetSpotifyUser = () => ({
   type: 'UNSET_SPOTIFY_USER'
 })
+
+export const setMediaItemGraph = (graph) => ({
+  type: 'SET_MEDIA_ITEM_GRAPH',
+  graph: graph
+})
