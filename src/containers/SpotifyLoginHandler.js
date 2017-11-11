@@ -30,14 +30,22 @@ class SpotifyLoginHandler extends Component {
           Authorization: 'Bearer ' + accessToken
         }
       }).then((result) => {
+        if (!result.ok) {
+          throw result
+        }
         return result.json()
-      }).then((spotifyUser) => {
+      }).then(spotifyUser => {
         that.props.dispatch(actions.setSpotifyUser({
           id: spotifyUser.id,
           displayName: spotifyUser.display_name,
           spotifyLoggedIn: true,
           accessToken: accessToken
         }))
+      }).catch(error => {
+        if(error.status === 401) {
+            that.handlelogin()
+        }
+        console.log(error)
       })
     }
   }

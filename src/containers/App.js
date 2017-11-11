@@ -28,25 +28,13 @@ class NotLoggedInView extends Component {
   }
 }
 
-class LoggedInView extends Component {
-    render() {
-      return(
-        <Row>
-          <h1>Welcome to High Fidelity</h1>
-          <p>You are logged in.</p>
-          <MediaItemHandler/>
-        </Row>
-      )
-    }
-}
-
 class Main extends Component {
 
   render() {
     let mainView;
 
     if(this.props.loggedIn) {
-      mainView = (<LoggedInView/>)
+      mainView = (<MediaItemHandler/>)
     } else {
       mainView = (<NotLoggedInView/>);
     }

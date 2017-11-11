@@ -3,6 +3,7 @@ import React, { Component } from 'react'
 import * as firebase from 'firebase'
 import { connect } from 'react-redux'
 import * as actions from '../actions/index'
+import MediaItemGraphView from './MediaItemGraphView'
 
 class MediaItemHandler extends Component {
 
@@ -25,7 +26,7 @@ class MediaItemHandler extends Component {
 
   render() {
     return (
-      <div>Hello MediaItems</div>
+      <MediaItemGraphView mediaItems={this.props.mediaItems}/>
     )
   }
 }
