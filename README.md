@@ -18,3 +18,5 @@ The MediaItems is stupid. On top of that it is a layer that interpret MediaItems
 and translate them into more domain specific models like Genre, Composer and Artist.
 
 It uses firebase to store the MediaItems for each user. 
+
+[![Build Status](https://travis-ci.org/danielstahl/high-fidelity.svg?branch=master)](https://travis-ci.org/danielstahl/high-fidelity)
