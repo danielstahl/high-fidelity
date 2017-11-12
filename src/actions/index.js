@@ -14,6 +14,11 @@ export const updateMediaItem = (mediaItem) => ({
   mediaItem: mediaItem
 })
 
+export const setUriInfo = (uriInfo) => ({
+  type: 'SET_URI_INFO',
+  uriInfo: uriInfo
+})
+
 export const setUser = (user) => ({
   type: 'SET_USER',
   user: user
