@@ -9,10 +9,16 @@ class MediaItemGraphView extends Component {
   getGraphComponent() {
     switch(this.props.graphType) {
       case 'genre':
-        return (<GenreView genreGraph={this.props.graph} digest='false' mediaItems={this.props.mediaItems} dispatch={this.props.dispatch}/>)
+        return (<GenreView genreGraph={this.props.graph}
+                           digest='false'
+                           mediaItems={this.props.mediaItems}
+                           uriInfos={this.props.uriInfos}
+                           dispatch={this.props.dispatch}/>)
       case 'root':
       default:
-        return (<GenresMainView mediaItems={this.props.mediaItems}/>)
+        return (<GenresMainView
+                  mediaItems={this.props.mediaItems}
+                  uriInfos={this.props.uriInfos}/>)
     }
   }
 
@@ -24,7 +30,8 @@ class MediaItemGraphView extends Component {
 const mapStateToProps = state => {
   return {
     graph: state.mediaItemGraphReducers.graph,
-    graphType: state.mediaItemGraphReducers.graphType
+    graphType: state.mediaItemGraphReducers.graphType,
+    uriInfos: state.uriInfoReducers
   }
 }
 
