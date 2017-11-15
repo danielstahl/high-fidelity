@@ -6,6 +6,9 @@ import {
 import { connect } from 'react-redux'
 import Builders from '../services/Builders'
 import * as actions from '../actions/index'
+import LinksView from './LinksView'
+import ArtistView from './ArtistView'
+import EraView from './EraView'
 
 class GenreView extends Component {
 
@@ -17,7 +20,7 @@ class GenreView extends Component {
 
   handleGenreClick(e) {
     e.preventDefault()
-    var genreGraph = Builders.getGenreGraph(this.props.genre.slugs, this.props.mediaItems)
+    var genreGraph = Builders.getGenreGraph(this.props.genre.slugs, this.props.mediaItems, this.props.uriInfos)
     this.props.dispatch(actions.setMediaItemGraph(genreGraph))
   }
 
@@ -28,6 +31,38 @@ class GenreView extends Component {
   }
 
   getGenreView() {
+    let artistsWithoutInstruments;
+    if(this.props.genreGraph.artists) {
+      artistsWithoutInstruments = this.props.genreGraph.artists.map(artist => {
+        return (
+          <ArtistView artist={artist} digest='true'/>
+        )
+      })
+    }
+
+    let instrumentArtists;
+    instrumentArtists = this.props.genreGraph.instruments.map(instrumentGraph => {
+      return (
+        <div>
+          <h3><small>{instrumentGraph.instrument.name}</small></h3>
+          <ul className="list-inline">
+          {instrumentGraph.artists.map((artist) =>
+            <ArtistView artist={artist} digest='true'/>
+          )}
+        </ul>
+      </div>
+      )
+    })
+
+    let eras;
+    if(this.props.genreGraph.eras) {
+      eras = this.props.genreGraph.eras.map(era => {
+        return (
+          <EraView era={era} digest='true'/>
+        )
+      })
+    }
+
     return (
 
       <Grid>
@@ -43,6 +78,20 @@ class GenreView extends Component {
           <Col md={8}>
             <Panel>
               <h1><small>genre</small> {this.props.genreGraph.genre.name}</h1>
+
+              <LinksView graph={this.props.genreGraph}/>
+
+              <h2><small>Artists</small> </h2>
+              <ul className="list-inline">
+                {artistsWithoutInstruments}
+              </ul>
+
+              {instrumentArtists}
+
+              <h2><small>Eras</small></h2>
+              <ul className="list-inline">
+                {eras}
+              </ul>
             </Panel>
           </Col>
           <Col md={4}>

@@ -27,7 +27,10 @@ class GenresMainView extends Component {
   makeGenreRow(genres, rowIndex) {
     let genresCols = (genres.map((genre) => {
       return (<Col key={genre.slugs} md={4}>
-        <GenreView genre={genre} digest='true' mediaItems={this.props.mediaItems}/>
+        <GenreView genre={genre}
+                   digest='true'
+                   mediaItems={this.props.mediaItems}
+                   uriInfos={this.props.uriInfos}/>
       </Col>);
     }));
 

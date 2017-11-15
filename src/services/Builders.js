@@ -31,6 +31,29 @@ class Builders {
       }
     }
 
+    static toUris(mediaItem, uriInfos) {
+        let theResult = []
+        if(!mediaItem.uris) {
+          return theResult
+        }
+        Object.entries(mediaItem.uris).forEach(([uriType, uris]) => {
+          uris.forEach(uri => {
+            let uriInfo = uriInfos.find(uriInfo => uriInfo.uri === uri)
+            if(!uriInfo) {
+              uriInfo = {
+                uriType: uriType,
+                uri: uri,
+                url: uri,
+                name: uri
+              }
+            }
+            theResult.push(uriInfo)
+          })
+
+        })
+        return theResult
+    }
+
     static getGenresGraph(mediaItems) {
       var genres = mediaItems
         .filter(mediaItem => mediaItem.types.includes('genre'))
@@ -68,7 +91,7 @@ class Builders {
         .map(artistMediaItem => Builders.makeArtist(artistMediaItem))
     }
 
-    static getGenreGraph(slugs, mediaItems) {
+    static getGenreGraph(slugs, mediaItems, uriInfos) {
       var genreMediaItem = mediaItems.find(mediaItem => mediaItem.slugs === slugs)
 
       var instrumentMediaItems = mediaItems
@@ -100,13 +123,15 @@ class Builders {
         .filter(artistMediaItem => !artistMediaItem.tags['instrument'])
         .map(artistMediaItem => Builders.makeArtist(artistMediaItem))
 
+      var uris = Builders.toUris(genreMediaItem, uriInfos)
+
       return {
         graphType: 'genre',
         genre: Builders.makeGenre(genreMediaItem),
         instruments: instruments,
         artists: artistsWithoutInstruments,
         eras: eras,
-
+        uris: uris
       }
 
     }
