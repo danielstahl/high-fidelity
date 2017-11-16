@@ -23,6 +23,23 @@ class Builders {
       }
     }
 
+    static makeComposer(mediaItem) {
+        return {
+          slugs: mediaItem.slugs,
+          name: mediaItem.name,
+          era: Builders.getTagHead(mediaItem, 'era')
+        }
+    }
+
+    static makeAlbum(mediaItem) {
+        return {
+          slugs: mediaItem.slugs,
+          name: mediaItem.name,
+          artists: mediaItem.tags['artist'],
+          composers: mediaItem.tags['composer']
+        }
+    }
+
     static makeEra(mediaItem) {
       return {
         slugs: mediaItem.slugs,
@@ -91,24 +108,84 @@ class Builders {
         .map(artistMediaItem => Builders.makeArtist(artistMediaItem))
     }
 
+    static findBySlugs(slugs, mediaItems) {
+        return mediaItems.find(mediaItem => mediaItem.slugs === slugs)
+    }
+
+    static getAlbumGraph(albumMediaItem, mediaItems, uriInfos) {
+      var artists = albumMediaItem.tags['artist']
+        .map(artistSlug => Builders.findBySlugs(artistSlug, mediaItems))
+        .map(artistMediaItem => Builders.makeArtist(artistMediaItem))
+
+      var composers = albumMediaItem.tags['composer']
+        .map(composerSlug => Builders.findBySlugs(composerSlug, mediaItems))
+        .map(composerMediaItem => Builders.makeComposer(composerMediaItem))
+
+      var uris = Builders.toUris(albumMediaItem, uriInfos)
+
+      return {
+        graphType: 'album',
+        album: Builders.makeAlbum(albumMediaItem),
+        artists: artists,
+        composers: composers,
+        uris: uris
+      }
+    }
+
+    static getArtistGraph(slugs, mediaItems, uriInfos) {
+      var artistMediaItem = Builders.findBySlugs(slugs, mediaItems)
+
+      var genreSlug = Builders.getTagHead(artistMediaItem, 'genre')
+      var genreMediaItem = Builders.findBySlugs(genreSlug, mediaItems)
+
+      var uris = Builders.toUris(artistMediaItem, uriInfos)
+
+      var instrumentSlugs = artistMediaItem.tags['instrument']
+      var instrumentMediaItems
+      if(instrumentSlugs) {
+        instrumentMediaItems = mediaItems
+          .filter(mediaItem =>
+            instrumentSlugs.includes(mediaItem.slugs))
+      } else {
+        instrumentMediaItems = []
+      }
+
+      var albumMediaItems = mediaItems
+        .filter(mediaItem =>
+            mediaItem.types.includes('album') &&
+            Builders.hasTag(mediaItem, 'artist', slugs))
+
+      return {
+        graphType: 'artist',
+        artist: Builders.makeArtist(artistMediaItem),
+        instruments: instrumentMediaItems
+          .map(instrumentMediaItem => Builders.makeInstrument(instrumentMediaItem)),
+        genre: Builders.makeGenre(genreMediaItem),
+        uris: uris,
+        albums: albumMediaItems.map(
+          albumMediaItem =>
+          Builders.getAlbumGraph(albumMediaItem, mediaItems, uriInfos))
+      }
+    }
+
     static getGenreGraph(slugs, mediaItems, uriInfos) {
-      var genreMediaItem = mediaItems.find(mediaItem => mediaItem.slugs === slugs)
+      var genreMediaItem = Builders.findBySlugs(slugs, mediaItems)
 
       var instrumentMediaItems = mediaItems
         .filter(mediaItem =>
           mediaItem.types.includes('instrument') &&
-          this.hasTag(mediaItem, 'genre', slugs))
+          Builders.hasTag(mediaItem, 'genre', slugs))
 
       var eras = mediaItems
         .filter(eraMediaItem =>
           eraMediaItem.types.includes('era') &&
-          this.hasTag(eraMediaItem, 'genre', slugs))
+          Builders.hasTag(eraMediaItem, 'genre', slugs))
         .map(eraMediaItem => Builders.makeEra(eraMediaItem))
 
       var artists = mediaItems
         .filter(mediaItem =>
           mediaItem.types.includes('artist') &&
-          this.hasTag(mediaItem, 'genre', slugs))
+          Builders.hasTag(mediaItem, 'genre', slugs))
 
       var instruments = instrumentMediaItems.map(instrumentMediaItem => {
           return {
