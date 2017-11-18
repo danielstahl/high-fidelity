@@ -51,7 +51,8 @@ class GenreView extends Component {
           <h3><small>{instrumentGraph.instrument.name}</small></h3>
           <ul className="list-inline">
           {instrumentGraph.artists.map(artist =>
-            <ArtistView artist={artist}
+            <ArtistView key={artist.slugs}
+                        artist={artist}
                         digest='true'
                         dispatch={this.props.dispatch}
                         mediaItems={this.props.mediaItems}
@@ -66,7 +67,8 @@ class GenreView extends Component {
     if(this.props.genreGraph.eras) {
       eras = this.props.genreGraph.eras.map(era => {
         return (
-          <EraView era={era}
+          <EraView key={era.slugs}
+                   era={era}
                    digest='true'
                    dispatch={this.props.dispatch}
                    mediaItems={this.props.mediaItems}
