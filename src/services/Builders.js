@@ -168,6 +168,26 @@ class Builders {
       }
     }
 
+    static getEraGraph(slugs, mediaItems, uriInfos) {
+      var eraMediaItem = Builders.findBySlugs(slugs, mediaItems)
+      var genreSlug = Builders.getTagHead(eraMediaItem, 'genre')
+      var genreMediaItem = Builders.findBySlugs(genreSlug, mediaItems)
+      var uris = Builders.toUris(eraMediaItem, uriInfos)
+      var composerMediaItems = mediaItems
+        .filter(mediaItem =>
+            mediaItem.types.includes('composer') &&
+            Builders.hasTag(mediaItem, 'genre', genreSlug) &&
+            Builders.hasTag(mediaItem, 'era', slugs))
+      return {
+        graphType: 'era',
+        era: Builders.makeEra(eraMediaItem),
+        genre: Builders.makeGenre(genreMediaItem),
+        uris: uris,
+        composers: composerMediaItems.map(
+          composerMediaItem => Builders.makeComposer(composerMediaItem))
+      }
+    }
+
     static getGenreGraph(slugs, mediaItems, uriInfos) {
       var genreMediaItem = Builders.findBySlugs(slugs, mediaItems)
 
