@@ -7,9 +7,69 @@ import MediaItemGraphView from './MediaItemGraphView'
 
 class MediaItemHandler extends Component {
 
+  constructor(props) {
+    super(props)
+    this.state = {mediItemsRef: undefined}
+    this.addMediaItem = this.addMediaItem.bind(this)
+    this.updateMediaItem = this.updateMediaItem.bind(this)
+    this.removeMediaItem = this.removeMediaItem.bind(this)
+  }
+
+  addMediaItem(newMediaItem) {
+    let mediaItemsRef = this.state.mediaItemsRef
+    if(mediaItemsRef) {
+      mediaItemsRef.child(newMediaItem.slugs)
+        .set(newMediaItem)
+        .then(() => {
+          console.log("Added new mediaItem: " + newMediaItem.slugs)
+        })
+        .catch(error => {
+          console.log("Add new mediaItem " + newMediaItem.slugs + " failed")
+          console.log(error)
+        })
+    } else {
+      console.log("Could not find a database ref")
+    }
+  }
+
+  updateMediaItem(updatedMediaItem) {
+    let mediaItemsRef = this.state.mediaItemsRef
+    if(mediaItemsRef) {
+      mediaItemsRef.child(updatedMediaItem.slugs)
+        .update(updatedMediaItem)
+        .then(() => {
+          console.log("Updated mediaItem: " + updatedMediaItem.slugs)
+        })
+        .catch(error => {
+          console.log("Update of new mediaItem " + + updatedMediaItem.slugs + " failed")
+          console.log(error)
+        })
+    } else {
+      console.log("Could not find a database ref")
+    }
+  }
+
+  removeMediaItem(mediaItemSlug) {
+    let mediaItemsRef = this.state.mediaItemsRef
+    if(mediaItemsRef) {
+      mediaItemsRef.child(mediaItemSlug)
+        .remove()
+        .then(() => {
+          console.log("Remove of mediaItem: " + mediaItemSlug)
+        })
+        .catch(error => {
+          console.log("Remove of mediaItem " + + mediaItemSlug + " failed")
+          console.log(error)
+        })
+    } else {
+      console.log("Could not find a database ref")
+    }
+  }
+
   componentDidMount() {
     var that = this
     var mediaItemsRef = firebase.database().ref('media-items/' + this.props.user.uid)
+    this.setState({ mediaItemsRef: mediaItemsRef})
 
     mediaItemsRef.on('child_added', function(data) {
       that.props.dispatch(actions.addMediaItem(data.val()))
@@ -76,7 +136,7 @@ class MediaItemHandler extends Component {
 
   render() {
     return (
-      <MediaItemGraphView mediaItems={this.props.mediaItems}/>
+      <MediaItemGraphView mediaItems={this.props.mediaItems} mediaItemHandler={this}/>
     )
   }
 }
@@ -85,7 +145,7 @@ const mapStateToProps = state => {
   return {
     user: state.userStateReducers.user,
     mediaItems: state.mediaItemReducers,
-    uriInfos: state.uriInfoReducers 
+    uriInfos: state.uriInfoReducers
   }
 }
 
