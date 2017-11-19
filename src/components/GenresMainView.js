@@ -28,7 +28,8 @@ class GenresMainView extends Component {
         <GenreView genre={genre}
                    digest='true'
                    mediaItems={this.props.mediaItems}
-                   uriInfos={this.props.uriInfos}/>
+                   uriInfos={this.props.uriInfos}
+                   mediaItemHandler={this.props.mediaItemHandler}/>
       </Col>);
     }));
 
