@@ -32,7 +32,9 @@ class MediaItemGraphView extends Component {
       default:
         return (<GenresMainView
                   mediaItems={this.props.mediaItems}
-                  uriInfos={this.props.uriInfos}/>)
+                  uriInfos={this.props.uriInfos}
+                  user={this.props.user}
+                  mediaItemHandler={this.props.mediaItemHandler}/>)
     }
   }
 
@@ -45,7 +47,8 @@ const mapStateToProps = state => {
   return {
     graph: state.mediaItemGraphReducers.graph,
     graphType: state.mediaItemGraphReducers.graphType,
-    uriInfos: state.uriInfoReducers
+    uriInfos: state.uriInfoReducers,
+    user: state.userStateReducers.user,
   }
 }
 

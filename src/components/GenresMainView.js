@@ -1,13 +1,11 @@
 
 import React, { Component } from 'react'
-
 import {
   Row, Col, Grid
 } from 'react-bootstrap'
-
 import GenreView from './GenreView'
-
 import Builders from '../services/Builders'
+import GenreForm from '../forms/GenreForm'
 
 class GenresMainView extends Component {
 
@@ -50,7 +48,7 @@ class GenresMainView extends Component {
         {genreGroups}
         <Row>
           <Col md={4}>
-
+            <GenreForm mediaItemHandler={this.props.mediaItemHandler}/>
           </Col>
           <Col md={8}></Col>
         </Row>
