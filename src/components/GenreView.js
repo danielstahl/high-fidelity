@@ -9,6 +9,7 @@ import * as actions from '../actions/index'
 import LinksView from './LinksView'
 import ArtistView from './ArtistView'
 import EraView from './EraView'
+import AddLinkForm from '../forms/AddLinkForm'
 
 class GenreView extends Component {
 
@@ -47,7 +48,7 @@ class GenreView extends Component {
     let instrumentArtists;
     instrumentArtists = this.props.genreGraph.instruments.map(instrumentGraph => {
       return (
-        <div>
+        <div key={instrumentGraph.instrument.slugs}>
           <h3><small>{instrumentGraph.instrument.name}</small></h3>
           <ul className="list-inline">
           {instrumentGraph.artists.map(artist =>
@@ -78,7 +79,6 @@ class GenreView extends Component {
     }
 
     return (
-
       <Grid>
 
         <Row>
@@ -111,7 +111,9 @@ class GenreView extends Component {
           <Col md={4}>
             <Panel>
               <ul className="list-unstyled">
-
+                <li><AddLinkForm item={this.props.genreGraph.genre}
+                                 mediaItemHandler={this.props.mediaItemHandler}
+                                 mediaItems={this.props.mediaItems}/></li>
               </ul>
             </Panel>
           </Col>
