@@ -6,6 +6,7 @@ import GenresMainView from '../components/GenresMainView'
 import GenreView from '../components/GenreView'
 import ArtistView from '../components/ArtistView'
 import EraView from '../components/EraView'
+import Builders from '../services/Builders'
 
 class MediaItemGraphView extends Component {
   getGraphComponent() {
@@ -32,10 +33,12 @@ class MediaItemGraphView extends Component {
       case 'root':
       default:
         return (<GenresMainView
+                  graph={this.props.graph}
                   mediaItems={this.props.mediaItems}
                   uriInfos={this.props.uriInfos}
                   user={this.props.user}
-                  mediaItemHandler={this.props.mediaItemHandler}/>)
+                  mediaItemHandler={this.props.mediaItemHandler}
+                  dispatch={this.props.dispatch}/>)
     }
   }
 
@@ -44,9 +47,27 @@ class MediaItemGraphView extends Component {
   }
 }
 
+const getGraph = (graphType, mediaItemSlugs, mediaItems, uriInfos) => {
+  switch(graphType) {
+    case 'genre':
+      return Builders.getGenreGraph(mediaItemSlugs, mediaItems, uriInfos)
+    case 'artist':
+      return Builders.getArtistGraph(mediaItemSlugs, mediaItems, uriInfos)
+    case 'era':
+      return Builders.getEraGraph(mediaItemSlugs, mediaItems, uriInfos)
+    case 'root':
+    default:
+      return Builders.getGenresGraph(mediaItems)
+  }
+}
+
 const mapStateToProps = state => {
+  const graph = getGraph(state.mediaItemGraphReducers.graphType,
+                         state.mediaItemGraphReducers.slugs,
+                         state.mediaItemReducers,
+                         state.uriInfoReducers)
   return {
-    graph: state.mediaItemGraphReducers.graph,
+    graph: graph,
     graphType: state.mediaItemGraphReducers.graphType,
     uriInfos: state.uriInfoReducers,
     user: state.userStateReducers.user,

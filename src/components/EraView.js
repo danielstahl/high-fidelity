@@ -4,7 +4,6 @@ import {
   Row, Col, Grid, Panel, Button
 } from 'react-bootstrap'
 
-import Builders from '../services/Builders'
 import * as actions from '../actions/index'
 import LinksView from './LinksView'
 
@@ -18,20 +17,17 @@ class EraView extends Component {
 
   handleEraClick(e) {
     e.preventDefault()
-    var eraGraph = Builders.getEraGraph(this.props.era.slugs, this.props.mediaItems, this.props.uriInfos)
-    this.props.dispatch(actions.setMediaItemGraph(eraGraph))
+    this.props.dispatch(actions.setMediaItemGraph(this.props.era.slugs, 'era'))
   }
 
   handleGenreCLick(e) {
     e.preventDefault()
-    var genreGraph = Builders.getGenreGraph(this.props.eraGraph.genre.slugs, this.props.mediaItems, this.props.uriInfos)
-    this.props.dispatch(actions.setMediaItemGraph(genreGraph))
+    this.props.dispatch(actions.setMediaItemGraph(this.props.eraGraph.genre.slugs, 'genre'))
   }
 
   handleGenreMainClick(e) {
     e.preventDefault()
-    var genresGraph = Builders.getGenresGraph(this.props.mediaItems)
-    this.props.dispatch(actions.setMediaItemGraph(genresGraph))
+    this.props.dispatch(actions.setMediaItemGraph(undefined, 'root'))
   }
 
   getEraView() {
