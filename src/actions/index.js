@@ -37,7 +37,8 @@ export const unsetSpotifyUser = () => ({
   type: 'UNSET_SPOTIFY_USER'
 })
 
-export const setMediaItemGraph = (graph) => ({
+export const setMediaItemGraph = (slugs, graphType) => ({
   type: 'SET_MEDIA_ITEM_GRAPH',
-  graph: graph
+  slugs: slugs,
+  graphType: graphType
 })

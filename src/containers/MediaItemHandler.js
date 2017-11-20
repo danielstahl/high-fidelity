@@ -73,16 +73,19 @@ class MediaItemHandler extends Component {
 
     mediaItemsRef.on('child_added', function(data) {
       that.props.dispatch(actions.addMediaItem(data.val()))
+      console.log("MediaItem added", data.val())
       that.updateMediaItemUriInfo(data.val())
     })
 
     mediaItemsRef.on('child_changed', function(data) {
-      that.props.dispatch(actions.updateMediaItem(data.val))
+      that.props.dispatch(actions.updateMediaItem(data.val()))
+      console.log("MediaItem updated", data.val())
       that.updateMediaItemUriInfo(data.val())
     })
 
     mediaItemsRef.on('child_removed', function(data) {
       that.props.dispatch(actions.removeMediaItem(data.key))
+      console.log("Media item removed", data.key)
     })
   }
 

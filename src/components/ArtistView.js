@@ -5,7 +5,6 @@ import {
 } from 'react-bootstrap'
 
 import * as actions from '../actions/index'
-import Builders from '../services/Builders'
 import LinksView from './LinksView'
 import AlbumView from './AlbumView'
 
@@ -20,20 +19,17 @@ class ArtistView extends Component {
 
   handleArtistClick(e) {
     e.preventDefault()
-    var artistGraph = Builders.getArtistGraph(this.props.artist.slugs, this.props.mediaItems, this.props.uriInfos)
-    this.props.dispatch(actions.setMediaItemGraph(artistGraph))
+    this.props.dispatch(actions.setMediaItemGraph(this.props.artist.slugs, 'artist'))
   }
 
   handleGenreCLick(e) {
     e.preventDefault()
-    var genreGraph = Builders.getGenreGraph(this.props.artistGraph.genre.slugs, this.props.mediaItems, this.props.uriInfos)
-    this.props.dispatch(actions.setMediaItemGraph(genreGraph))
+    this.props.dispatch(actions.setMediaItemGraph(this.props.artistGraph.genre.slugs, 'genre'))
   }
 
   handleGenreMainClick(e) {
     e.preventDefault()
-    var genresGraph = Builders.getGenresGraph(this.props.mediaItems)
-    this.props.dispatch(actions.setMediaItemGraph(genresGraph))
+    this.props.dispatch(actions.setMediaItemGraph(undefined, 'root'))
   }
 
   getArtistView() {

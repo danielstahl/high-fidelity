@@ -1,10 +1,10 @@
 
-const mediaItemGraphReducers = (state = {graph: undefined, graphType: 'root'}, action) => {
+const mediaItemGraphReducers = (state = {graphType: 'root', slugs: undefined}, action) => {
   switch (action.type) {
     case 'SET_MEDIA_ITEM_GRAPH':
       return {
-        graph: action.graph,
-        graphType: action.graph.graphType
+        slugs: action.slugs,
+        graphType: action.graphType
       }
     default:
       return state
