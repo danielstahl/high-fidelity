@@ -13,7 +13,6 @@ class MediaItemGraphView extends Component {
     switch(this.props.graphType) {
       case 'genre':
         return (<GenreView genreGraph={this.props.graph}
-                           digest='false'
                            mediaItems={this.props.mediaItems}
                            uriInfos={this.props.uriInfos}
                            dispatch={this.props.dispatch}
@@ -26,10 +25,10 @@ class MediaItemGraphView extends Component {
                             dispatch={this.props.dispatch}/>)
       case 'era':
         return (<EraView eraGraph={this.props.graph}
-                         digest='false'
                          mediaItems={this.props.mediaItems}
                          uriInfos={this.props.uriInfos}
-                         dispatch={this.props.dispatch}/>)
+                         dispatch={this.props.dispatch}
+                         mediaItemHandler={this.props.mediaItemHandler}/>)
       case 'root':
       default:
         return (<GenresMainView
