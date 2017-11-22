@@ -7,19 +7,24 @@ import { connect } from 'react-redux'
 import * as actions from '../actions/index'
 import LinksView from './LinksView'
 import ArtistView from './ArtistView'
-import EraView from './EraView'
 import AddLinkForm from '../forms/AddLinkForm'
+import EraForm from '../forms/EraForm'
 
 class GenreView extends Component {
 
   constructor(props) {
     super(props)
     this.handleGenreMainClick = this.handleGenreMainClick.bind(this)
+    this.handleEraClick = this.handleEraClick.bind(this)
   }
 
   handleGenreMainClick(e) {
     e.preventDefault()
     this.props.dispatch(actions.setMediaItemGraph(undefined, 'root'))
+  }
+
+  handleEraClick(eraSlugs) {
+    this.props.dispatch(actions.setMediaItemGraph(eraSlugs, 'era'))
   }
 
   render() {
@@ -59,12 +64,9 @@ class GenreView extends Component {
     if(this.props.genreGraph.eras) {
       eras = this.props.genreGraph.eras.map(era => {
         return (
-          <EraView key={era.slugs}
-                   era={era}
-                   digest='true'
-                   dispatch={this.props.dispatch}
-                   mediaItems={this.props.mediaItems}
-                   uriInfos={this.props.uriInfos}/>
+          <li key={era.slugs}>
+            <Button bsStyle="link" onClick={() => this.handleEraClick(era.slugs)}>{era.name}</Button>
+          </li>
         )
       })
     }
@@ -105,6 +107,8 @@ class GenreView extends Component {
                 <li><AddLinkForm item={this.props.genreGraph.genre}
                                  mediaItemHandler={this.props.mediaItemHandler}
                                  mediaItems={this.props.mediaItems}/></li>
+                <li><EraForm genre={this.props.genreGraph.genre}
+                             mediaItemHandler={this.props.mediaItemHandler}/></li>
               </ul>
             </Panel>
           </Col>

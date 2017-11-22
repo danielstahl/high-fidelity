@@ -6,6 +6,7 @@ import {
 
 import * as actions from '../actions/index'
 import LinksView from './LinksView'
+import AddLinkForm from '../forms/AddLinkForm'
 
 class EraView extends Component {
   constructor(props) {
@@ -30,7 +31,7 @@ class EraView extends Component {
     this.props.dispatch(actions.setMediaItemGraph(undefined, 'root'))
   }
 
-  getEraView() {
+  render() {
     let composers
     composers = this.props.eraGraph.composers.map(composer => {
       return (
@@ -65,27 +66,15 @@ class EraView extends Component {
           <Col md={4}>
             <Panel>
               <ul className="list-unstyled">
-
+                <li><AddLinkForm item={this.props.eraGraph.era}
+                                 mediaItemHandler={this.props.mediaItemHandler}
+                                 mediaItems={this.props.mediaItems}/></li>
               </ul>
             </Panel>
           </Col>
         </Row>
       </Grid>
     )
-  }
-
-  render() {
-    let component
-    if(this.props.digest === 'true') {
-      component = (
-        <li key={this.props.era.slugs}>
-          <Button bsStyle="link" onClick={this.handleEraClick}>{this.props.era.name}</Button>
-        </li>
-      )
-    } else {
-      component = this.getEraView()
-    }
-    return component
   }
 }
 
