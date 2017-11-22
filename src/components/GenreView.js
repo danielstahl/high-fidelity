@@ -9,6 +9,7 @@ import LinksView from './LinksView'
 import ArtistView from './ArtistView'
 import AddLinkForm from '../forms/AddLinkForm'
 import EraForm from '../forms/EraForm'
+import InstrumentForm from '../forms/InstrumentForm.js'
 
 class GenreView extends Component {
 
@@ -109,6 +110,8 @@ class GenreView extends Component {
                                  mediaItems={this.props.mediaItems}/></li>
                 <li><EraForm genre={this.props.genreGraph.genre}
                              mediaItemHandler={this.props.mediaItemHandler}/></li>
+                <li><InstrumentForm genre={this.props.genreGraph.genre}
+                                    mediaItemHandler={this.props.mediaItemHandler}/></li>
               </ul>
             </Panel>
           </Col>
