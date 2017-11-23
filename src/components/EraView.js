@@ -7,6 +7,7 @@ import {
 import * as actions from '../actions/index'
 import LinksView from './LinksView'
 import AddLinkForm from '../forms/AddLinkForm'
+import ComposerForm from '../forms/ComposerForm'
 
 class EraView extends Component {
   constructor(props) {
@@ -69,6 +70,9 @@ class EraView extends Component {
                 <li><AddLinkForm item={this.props.eraGraph.era}
                                  mediaItemHandler={this.props.mediaItemHandler}
                                  mediaItems={this.props.mediaItems}/></li>
+                 <li><ComposerForm era={this.props.eraGraph.era}
+                                   genre={this.props.eraGraph.genre}
+                                   mediaItemHandler={this.props.mediaItemHandler}/></li>
               </ul>
             </Panel>
           </Col>

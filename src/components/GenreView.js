@@ -112,12 +112,13 @@ class GenreView extends Component {
                                  mediaItems={this.props.mediaItems}/></li>
                 <li><EraForm genre={this.props.genreGraph.genre}
                              mediaItemHandler={this.props.mediaItemHandler}/></li>
+                <li><ArtistForm genre={this.props.genreGraph.genre}
+                                mediaItemHandler={this.props.mediaItemHandler}/></li>
                 <li><InstrumentForm genre={this.props.genreGraph.genre}
                                     mediaItemHandler={this.props.mediaItemHandler}/></li>
                 <li><MusicalFormForm genre={this.props.genreGraph.genre}
                                      mediaItemHandler={this.props.mediaItemHandler}/></li>
-                <li><ArtistForm genre={this.props.genreGraph.genre}
-                                mediaItemHandler={this.props.mediaItemHandler}/></li>
+
               </ul>
             </Panel>
           </Col>
