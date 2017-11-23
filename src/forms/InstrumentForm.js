@@ -37,7 +37,6 @@ class InstrumentForm extends Component {
     event.preventDefault();
 
     let newInstrumentMediaItem = {
-      uid: '',
       slugs: this.state.slug,
       name: this.state.name,
       types: ['instrument'],
