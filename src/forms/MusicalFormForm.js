@@ -5,9 +5,7 @@ import {
 } from 'react-bootstrap';
 import Builders from '../services/Builders'
 import { connect } from 'react-redux'
-
-var slug = require('slug');
-slug.defaults.mode = 'rfc3986';
+import Utils from '../services/Utils'
 
 class MusicalFormForm extends Component {
   constructor(props) {
@@ -22,7 +20,7 @@ class MusicalFormForm extends Component {
   handleNameChange(e) {
     this.setState({
       name: e.target.value,
-      slug: this.props.genre.slugs + ":form:" + slug(e.target.value)
+      slug: this.props.genre.slugs + ":form:" + Utils.slug(e.target.value)
     })
   }
 
@@ -55,7 +53,7 @@ class MusicalFormForm extends Component {
   }
 
   render() {
-    let forms;
+    let forms
 
     if(this.props.forms) {
       forms = this.props.forms.map(form =>

@@ -92,6 +92,19 @@ class Builders {
       }
     }
 
+    static hasUri(mediaItem, uriType, uri) {
+      let uris
+      if(mediaItem.uris) {
+          uris = mediaItem.uris[uriType]
+      }
+
+      if(uris) {
+        return uris.includes(uri)
+      } else {
+        return false
+      }
+    }
+
     static getTagHead(mediaItem, tag) {
         var tagValues = mediaItem.tags[tag]
         if(tagValues) {
@@ -117,9 +130,14 @@ class Builders {
         .map(artistSlug => Builders.findBySlugs(artistSlug, mediaItems))
         .map(artistMediaItem => Builders.makeArtist(artistMediaItem))
 
-      var composers = albumMediaItem.tags['composer']
-        .map(composerSlug => Builders.findBySlugs(composerSlug, mediaItems))
-        .map(composerMediaItem => Builders.makeComposer(composerMediaItem))
+      let composers
+      if(albumMediaItem.tags['composer']) {
+        composers = albumMediaItem.tags['composer']
+          .map(composerSlug => Builders.findBySlugs(composerSlug, mediaItems))
+          .map(composerMediaItem => Builders.makeComposer(composerMediaItem))
+      } else {
+        composers = []
+      }
 
       var uris = Builders.toUris(albumMediaItem, uriInfos)
 

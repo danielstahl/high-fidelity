@@ -3,31 +3,40 @@ import React, { Component } from 'react';
 import {
   Button, Modal, FormGroup, ControlLabel, FormControl
 } from 'react-bootstrap';
-
-var slug = require('slug');
-slug.defaults.mode = 'rfc3986';
+import Utils from '../services/Utils'
 
 class EraForm extends Component {
 
   constructor(props) {
-    super(props);
-    this.state = { name: '', slug: '', showModal: false };
-    this.handleNameChange = this.handleNameChange.bind(this);
-    this.open = this.open.bind(this);
-    this.close = this.close.bind(this);
-    this.createEra = this.createEra.bind(this);
+    super(props)
+    this.state = {
+      name: '',
+      slug: '',
+      showModal: false
+    }
+    this.handleNameChange = this.handleNameChange.bind(this)
+    this.open = this.open.bind(this)
+    this.close = this.close.bind(this)
+    this.createEra = this.createEra.bind(this)
   }
 
   handleNameChange(e) {
-    this.setState({ name: e.target.value, slug: slug(e.target.value) });
+    this.setState({
+      name: e.target.value,
+      slug: Utils.slug(e.target.value)
+    })
   }
 
   close() {
-    this.setState({ showModal: false });
+    this.setState({
+      showModal: false
+    })
   }
 
   open() {
-    this.setState({ showModal: true });
+    this.setState({
+      showModal: true
+    })
   }
 
   createEra(event) {
@@ -38,7 +47,9 @@ class EraForm extends Component {
       name: this.state.name,
       types: ['era'],
       uris: {},
-      tags: {genre: [this.props.genre.slugs]}
+      tags: {
+        genre: [this.props.genre.slugs]
+      }
     }
     this.props.mediaItemHandler.addMediaItem(newEraMediaItem)
     this.close()
