@@ -4,9 +4,8 @@ import {
   Button, Modal, FormGroup, ControlLabel, FormControl
 } from 'react-bootstrap';
 import Builders from '../services/Builders'
+import Utils from '../services/Utils'
 import { connect } from 'react-redux'
-var slug = require('slug');
-slug.defaults.mode = 'rfc3986';
 
 class InstrumentForm extends Component {
   constructor(props) {
@@ -21,7 +20,7 @@ class InstrumentForm extends Component {
   handleNameChange(e) {
     this.setState({
       name: e.target.value,
-      slug: this.props.genre.slugs + ":instrument:" + slug(e.target.value)
+      slug: this.props.genre.slugs + ":instrument:" + Utils.slug(e.target.value)
     })
   }
 

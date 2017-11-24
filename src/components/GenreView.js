@@ -12,6 +12,7 @@ import EraForm from '../forms/EraForm'
 import InstrumentForm from '../forms/InstrumentForm'
 import MusicalFormForm from '../forms/MusicalFormForm'
 import ArtistForm from '../forms/ArtistForm'
+import AlbumForm from '../forms/AlbumForm'
 
 class GenreView extends Component {
 
@@ -114,6 +115,9 @@ class GenreView extends Component {
                              mediaItemHandler={this.props.mediaItemHandler}/></li>
                 <li><ArtistForm genre={this.props.genreGraph.genre}
                                 mediaItemHandler={this.props.mediaItemHandler}/></li>
+                <li><AlbumForm genre={this.props.genreGraph.genre}
+                               mediaItemHandler={this.props.mediaItemHandler}
+                               mediaItems={this.props.mediaItems}/></li>
                 <li><InstrumentForm genre={this.props.genreGraph.genre}
                                     mediaItemHandler={this.props.mediaItemHandler}/></li>
                 <li><MusicalFormForm genre={this.props.genreGraph.genre}

@@ -4,16 +4,13 @@ import {
   Button, Modal, FormGroup, ControlLabel, FormControl, Checkbox
 } from 'react-bootstrap';
 import Builders from '../services/Builders'
+import Utils from '../services/Utils'
 import { connect } from 'react-redux'
 import {
   Typeahead, AsyncTypeahead
 } from 'react-bootstrap-typeahead';
 
 import 'react-bootstrap-typeahead/css/Typeahead.css';
-
-var slug = require('slug');
-slug.defaults.mode = 'rfc3986';
-
 
 class ComposerForm extends Component {
   constructor(props) {
@@ -41,7 +38,7 @@ class ComposerForm extends Component {
   handleNameChange(e) {
     this.setState({
       name: e.target.value,
-      slug: slug(e.target.value)
+      slug: Utils.slug(e.target.value)
     })
   }
 
@@ -146,7 +143,7 @@ class ComposerForm extends Component {
     if(artist[0]) {
       this.setState({
         name: artist[0].name,
-        slug: slug(artist[0].name),
+        slug: Utils.slug(artist[0].name),
         spotifyUri: artist[0].uri
       })
     }
