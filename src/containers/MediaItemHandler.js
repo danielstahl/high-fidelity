@@ -21,14 +21,13 @@ class MediaItemHandler extends Component {
       mediaItemsRef.child(newMediaItem.slugs)
         .set(newMediaItem)
         .then(() => {
-          console.log("Added new mediaItem: " + newMediaItem.slugs)
+          console.log("Added new mediaItem", newMediaItem)
         })
         .catch(error => {
-          console.log("Add new mediaItem " + newMediaItem.slugs + " failed")
-          console.log(error)
+          console.errorlog("Add new mediaItem " + newMediaItem.slugs + " failed", error)
         })
     } else {
-      console.log("Could not find a database ref")
+      console.error("Could not find a database ref")
     }
   }
 
@@ -38,14 +37,13 @@ class MediaItemHandler extends Component {
       mediaItemsRef.child(updatedMediaItem.slugs)
         .update(updatedMediaItem)
         .then(() => {
-          console.log("Updated mediaItem: " + updatedMediaItem.slugs)
+          console.log("Updated mediaItem", updatedMediaItem)
         })
         .catch(error => {
-          console.log("Update of new mediaItem " + + updatedMediaItem.slugs + " failed")
-          console.log(error)
+          console.log("Update of new mediaItem " + + updatedMediaItem.slugs + " failed", error)
         })
     } else {
-      console.log("Could not find a database ref")
+      console.error("Could not find a database ref")
     }
   }
 
@@ -58,8 +56,7 @@ class MediaItemHandler extends Component {
           console.log("Remove of mediaItem: " + mediaItemSlug)
         })
         .catch(error => {
-          console.log("Remove of mediaItem " + + mediaItemSlug + " failed")
-          console.log(error)
+          console.log("Remove of mediaItem " + + mediaItemSlug + " failed", error)
         })
     } else {
       console.log("Could not find a database ref")
@@ -73,19 +70,16 @@ class MediaItemHandler extends Component {
 
     mediaItemsRef.on('child_added', function(data) {
       that.props.dispatch(actions.addMediaItem(data.val()))
-      console.log("MediaItem added", data.val())
       that.updateMediaItemUriInfo(data.val())
     })
 
     mediaItemsRef.on('child_changed', function(data) {
       that.props.dispatch(actions.updateMediaItem(data.val()))
-      console.log("MediaItem updated", data.val())
       that.updateMediaItemUriInfo(data.val())
     })
 
     mediaItemsRef.on('child_removed', function(data) {
       that.props.dispatch(actions.removeMediaItem(data.key))
-      console.log("Media item removed", data.key)
     })
   }
 
