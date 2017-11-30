@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 
 import LoginHandler from './LoginHandler'
 import SpotifyLoginHandler from './SpotifyLoginHandler'
+import SpotifyPlaybackStatus from './SpotifyPlaybackStatus'
 import { connect } from 'react-redux'
 
 import {
@@ -31,12 +32,12 @@ class NotLoggedInView extends Component {
 class Main extends Component {
 
   render() {
-    let mainView;
+    let mainView
 
     if(this.props.loggedIn) {
       mainView = (<MediaItemHandler/>)
     } else {
-      mainView = (<NotLoggedInView/>);
+      mainView = (<NotLoggedInView/>)
     }
 
     return(
@@ -51,7 +52,7 @@ class Main extends Component {
               <SpotifyLoginHandler location={this.props.location}/>
             </Col>
             <Col md={3}>
-
+              <SpotifyPlaybackStatus/>
             </Col>
           </Row>
         </Grid>
