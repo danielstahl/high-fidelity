@@ -4,10 +4,10 @@ import PlayButton from './PlayButton'
 
 class LinksView extends Component {
   render() {
-    let links;
-    links = this.props.graph.uris.map(theUri => {
+    const links = this.props.graph.uris.map(theUri => {
       if(theUri.uriType === 'spotifyPlaylist') {
-        return (<li key={theUri.uri}><PlayButton name={theUri.name}/></li>)
+        const uris = [theUri.uri]
+        return (<li key={theUri.uri}><PlayButton name={theUri.name} uris={uris}/></li>)
       } else {
         return (<li key={theUri.uri}><a target="_blank" href={theUri.url}>{theUri.name}</a></li>)
       }

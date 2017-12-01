@@ -4,6 +4,7 @@ import ArtistView from './ArtistView.js'
 import {
   Button
 } from 'react-bootstrap'
+import PlayButton from './PlayButton'
 
 class AlbumView extends Component {
 
@@ -31,7 +32,14 @@ class AlbumView extends Component {
     })
 
     let nameComponent
-    nameComponent = (<div>{this.props.albumGraph.album.name}</div>)
+    const spotifyUri = this.props.albumGraph.uris.find(uri => uri.uriType === 'spotifyUri')
+
+    if(spotifyUri) {
+      let uris = [spotifyUri.uri];
+      nameComponent = (<PlayButton name={this.props.albumGraph.album.name} uris={uris}/>)
+    } else {
+      nameComponent = (<div>{this.props.albumGraph.album.name}</div>)
+    }
 
     return (
       <div>
