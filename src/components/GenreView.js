@@ -6,7 +6,6 @@ import {
 import { connect } from 'react-redux'
 import * as actions from '../actions/index'
 import LinksView from './LinksView'
-import ArtistView from './ArtistView'
 import AddLinkForm from '../forms/AddLinkForm'
 import EraForm from '../forms/EraForm'
 import InstrumentForm from '../forms/InstrumentForm'
@@ -20,6 +19,7 @@ class GenreView extends Component {
     super(props)
     this.handleGenreMainClick = this.handleGenreMainClick.bind(this)
     this.handleEraClick = this.handleEraClick.bind(this)
+    this.handleArtistClick = this.handleArtistClick.bind(this)
   }
 
   handleGenreMainClick(e) {
@@ -31,40 +31,39 @@ class GenreView extends Component {
     this.props.dispatch(actions.setMediaItemGraph(eraSlugs, 'era'))
   }
 
+  handleArtistClick(artistSlugs) {
+    this.props.dispatch(actions.setMediaItemGraph(artistSlugs, 'artist'))
+  }
+
   render() {
     let artistsWithoutInstruments;
     if(this.props.genreGraph.artists) {
       artistsWithoutInstruments = this.props.genreGraph.artists.map(artist => {
         return (
-          <ArtistView artist={artist}
-                      digest='true'
-                      dispatch={this.props.dispatch}
-                      mediaItems={this.props.mediaItems}
-                      uriInfos={this.props.uriInfos}/>
+          <li key={artist.slugs}>
+            <Button bsStyle="link" onClick={() => this.handleArtistClick(artist.slugs)}>{artist.name}</Button>
+          </li>
         )
       })
     }
 
-    let instrumentArtists;
+    let instrumentArtists
     instrumentArtists = this.props.genreGraph.instruments.map(instrumentGraph => {
       return (
         <div key={instrumentGraph.instrument.slugs}>
           <h3><small>{instrumentGraph.instrument.name}</small></h3>
           <ul className="list-inline">
           {instrumentGraph.artists.map(artist =>
-            <ArtistView key={artist.slugs}
-                        artist={artist}
-                        digest='true'
-                        dispatch={this.props.dispatch}
-                        mediaItems={this.props.mediaItems}
-                        uriInfos={this.props.uriInfos}/>
+            <li key={artist.slugs}>
+              <Button bsStyle="link" onClick={() => this.handleArtistClick(artist.slugs)}>{artist.name}</Button>
+            </li>
           )}
         </ul>
       </div>
       )
     })
 
-    let eras;
+    let eras
     if(this.props.genreGraph.eras) {
       eras = this.props.genreGraph.eras.map(era => {
         return (

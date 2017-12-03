@@ -32,7 +32,7 @@ class ArtistView extends Component {
     this.props.dispatch(actions.setMediaItemGraph(undefined, 'root'))
   }
 
-  getArtistView() {
+  render() {
     let albums
     albums = this.props.artistGraph.albums.map(album => {
       return (
@@ -78,20 +78,6 @@ class ArtistView extends Component {
       </Grid>
     )
 
-  }
-
-  render() {
-    let component
-    if(this.props.digest === 'true') {
-      component = (
-        <li key={this.props.artist.slugs}>
-          <Button bsStyle="link" onClick={this.handleArtistClick}>{this.props.artist.name}</Button>
-        </li>
-      )
-    } else {
-      component = this.getArtistView()
-    }
-    return component
   }
 }
 
