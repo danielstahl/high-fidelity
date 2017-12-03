@@ -12,19 +12,18 @@ import ComposerForm from '../forms/ComposerForm'
 class EraView extends Component {
   constructor(props) {
     super(props)
-    this.handleEraClick = this.handleEraClick.bind(this)
     this.handleGenreCLick = this.handleGenreCLick.bind(this)
     this.handleGenreMainClick = this.handleGenreMainClick.bind(this)
-  }
-
-  handleEraClick(e) {
-    e.preventDefault()
-    this.props.dispatch(actions.setMediaItemGraph(this.props.era.slugs, 'era'))
+    this.handleComposerClick = this.handleComposerClick.bind(this)
   }
 
   handleGenreCLick(e) {
     e.preventDefault()
     this.props.dispatch(actions.setMediaItemGraph(this.props.eraGraph.genre.slugs, 'genre'))
+  }
+
+  handleComposerClick(composerSlugs) {
+    this.props.dispatch(actions.setMediaItemGraph(composerSlugs, 'composer'))
   }
 
   handleGenreMainClick(e) {
@@ -36,7 +35,9 @@ class EraView extends Component {
     let composers
     composers = this.props.eraGraph.composers.map(composer => {
       return (
-        <li key={composer.slugs}><Button bsStyle="link">{composer.name}</Button></li>
+        <li key={composer.slugs}>
+          <Button bsStyle="link" onClick={() => this.handleComposerClick(composer.slugs)}>{composer.name}</Button>
+        </li>
       )
     })
 

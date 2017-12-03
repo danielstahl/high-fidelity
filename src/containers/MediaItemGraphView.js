@@ -6,6 +6,7 @@ import GenresMainView from '../components/GenresMainView'
 import GenreView from '../components/GenreView'
 import ArtistView from '../components/ArtistView'
 import EraView from '../components/EraView'
+import ComposerView from '../components/ComposerView'
 import Builders from '../services/Builders'
 
 class MediaItemGraphView extends Component {
@@ -28,6 +29,12 @@ class MediaItemGraphView extends Component {
                          uriInfos={this.props.uriInfos}
                          dispatch={this.props.dispatch}
                          mediaItemHandler={this.props.mediaItemHandler}/>)
+      case 'composer':
+        return (<ComposerView composerGraph={this.props.graph}
+                              mediaItems={this.props.mediaItems}
+                              uriInfos={this.props.uriInfos}
+                              dispatch={this.props.dispatch}
+                              mediaItemHandler={this.props.mediaItemHandler}/>)
       case 'root':
       default:
         return (<GenresMainView
@@ -53,6 +60,8 @@ const getGraph = (graphType, mediaItemSlugs, mediaItems, uriInfos) => {
       return Builders.getArtistGraph(mediaItemSlugs, mediaItems, uriInfos)
     case 'era':
       return Builders.getEraGraph(mediaItemSlugs, mediaItems, uriInfos)
+    case 'composer':
+      return Builders.getComposerGraph(mediaItemSlugs, mediaItems, uriInfos)
     case 'root':
     default:
       return Builders.getGenresGraph(mediaItems)
