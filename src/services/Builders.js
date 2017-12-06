@@ -96,7 +96,7 @@ class Builders {
   static hasUri(mediaItem, uriType, uri) {
     let uris
     if(mediaItem.uris) {
-        uris = mediaItem.uris[uriType]
+      uris = mediaItem.uris[uriType]
     }
 
     if(uris) {
@@ -107,12 +107,21 @@ class Builders {
   }
 
   static getTagHead(mediaItem, tag) {
-      var tagValues = mediaItem.tags[tag]
-      if(tagValues) {
-        return tagValues[0]
-      } else {
-        return undefined
-      }
+    const tagValues = mediaItem.tags[tag]
+    if(tagValues) {
+      return tagValues[0]
+    } else {
+      return undefined
+    }
+  }
+
+  static getUriHead(mediaItem, uriType) {
+    const uriValues = mediaItem.uris[uriType]
+    if(uriValues) {
+      return uriValues[0]
+    } else {
+      return undefined
+    }
   }
 
   static makeInstrumentArtists(instrumentSlugs, artistMediaItems) {
@@ -124,6 +133,39 @@ class Builders {
 
   static findBySlugs(slugs, mediaItems) {
       return mediaItems.find(mediaItem => mediaItem.slugs === slugs)
+  }
+
+  static getGenreSlugs(graphType, graphSlugs, mediaItems) {
+    if(graphType === 'genre') {
+      return graphSlugs
+    } else if(graphType === 'era' || graphType === 'composer') {
+      const mediaItem = Builders.findBySlugs(graphSlugs, mediaItems)
+      return Builders.getTagHead(mediaItem, 'genre')
+    } else {
+      return undefined
+    }
+  }
+
+  static getInstruments(mediaItems, graphType, graphSlugs) {
+    const genreSlugs = Builders.getGenreSlugs(graphType, graphSlugs, mediaItems)
+    if(genreSlugs) {
+      return mediaItems.filter(mediaItem =>
+        mediaItem.types.includes('instrument') &&
+        Builders.hasTag(mediaItem, 'genre', genreSlugs))
+    } else {
+      return []
+    }
+  }
+
+  static getForms(mediaItems, graphType, graphSlugs) {
+    const genreSlugs = Builders.getGenreSlugs(graphType, graphSlugs, mediaItems)
+    if(genreSlugs) {
+      return mediaItems.filter(mediaItem =>
+        mediaItem.types.includes('form') &&
+        Builders.hasTag(mediaItem, 'genre', genreSlugs))
+    } else {
+      return []
+    }
   }
 
   static getAlbumGraph(albumMediaItem, mediaItems, uriInfos) {

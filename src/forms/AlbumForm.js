@@ -5,8 +5,9 @@ import {
 } from 'react-bootstrap';
 
 import Utils from '../services/Utils'
-import Builders from '../services/Builders'
+import SpotifyBuilders from '../services/SpotifyBuilders'
 import { connect } from 'react-redux'
+
 
 class AlbumForm extends Component {
 
@@ -44,42 +45,13 @@ class AlbumForm extends Component {
     })
   }
 
-  getLastUrl(images) {
-    if(images && images.length) {
-      return images.slice(-1)[0].url
-    } else {
-      return ''
-    }
-  }
-
-  makeAlbumArtistInfo(spotifyArtist, mediaItems) {
-    const optionalArtistMediaItem =
-      mediaItems.find(mediaItem => Builders.hasUri(mediaItem, 'spotifyUri', spotifyArtist.uri))
-    if(optionalArtistMediaItem) {
-      //AlbumArtistInfo(spotifyUri = spotifyArtist.uri, name = mediaItem.name, Option(mediaItem.slugs), mediaItem.types)
-      return {
-        spotifyUri: spotifyArtist.uri,
-        name: optionalArtistMediaItem.name,
-        slugs: optionalArtistMediaItem.slugs,
-        artistTypes: optionalArtistMediaItem.types
-      }
-    } else {
-      return {
-        spotifyUri: spotifyArtist.uri,
-        name: spotifyArtist.name,
-        slugs: undefined,
-        artistTypes: []
-      }
-    }
-  }
-
   makeAlbumInfo(spotifyAlbum, mediaItems) {
     const albumArtistInfos = spotifyAlbum.artists
-      .map(spotifyArtist => this.makeAlbumArtistInfo(spotifyArtist, mediaItems))
+      .map(spotifyArtist => SpotifyBuilders.makeSpotifyAlbumArtistInfo(spotifyArtist, mediaItems))
     return {
       spotifyUri: spotifyAlbum.uri,
       name: spotifyAlbum.name,
-      imageUri: this.getLastUrl(spotifyAlbum.images) ,
+      imageUri: Utils.getLastUrl(spotifyAlbum.images),
       artists: albumArtistInfos
     }
   }
@@ -165,8 +137,8 @@ class AlbumForm extends Component {
         {this.state.albumInfo.artists.map(artist =>
           {return this.renderAlbumInfoArtist(artist)}
         )}
-      </ul>
-      </div>);
+        </ul>
+      </div>)
 
       createAlbumForm = (
         <Form inline onSubmit={this.createAlbum}>

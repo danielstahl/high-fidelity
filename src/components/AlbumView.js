@@ -17,6 +17,10 @@ class AlbumView extends Component {
     this.props.dispatch(actions.setMediaItemGraph(artistSlugs, 'artist'))
   }
 
+  handleComposerClick(composerSlugs) {
+    this.props.dispatch(actions.setMediaItemGraph(composerSlugs, 'composer'))
+  }
+
   getSpotifyUri(uris) {
     return uris.find(uri => uri.uriType === 'spotifyUri')
   }
@@ -25,7 +29,9 @@ class AlbumView extends Component {
     let composers
     composers = this.props.albumGraph.composers.map(composer => {
       return (
-        <li key={composer.slugs}><Button bsStyle="link">{composer.name}</Button></li>
+        <li key={composer.slugs}>
+          <Button bsStyle="link" onClick={() => this.handleComposerClick(composer.slugs)} ><span className="text-muted"><i>composer</i></span> {composer.name}</Button>
+        </li>
       )
     })
 
@@ -33,7 +39,7 @@ class AlbumView extends Component {
     artists = this.props.albumGraph.artists.map(artist => {
       return (
         <li key={artist.slugs}>
-          <Button bsStyle="link" onClick={() => this.handleArtistClick(artist.slugs)}>{artist.name}</Button>
+          <Button bsStyle="link" onClick={() => this.handleArtistClick(artist.slugs)}><span className="text-muted"><i>artist</i></span> {artist.name}</Button>
         </li>
       )
     })
