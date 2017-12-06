@@ -21,7 +21,8 @@ class ArtistForm extends Component {
       spotifyUri: '',
       showModal: false,
       isLoading: false,
-      options: []
+      options: [],
+      instruments: []
     }
     this.handleNameChange = this.handleNameChange.bind(this)
     this.open = this.open.bind(this)
@@ -37,7 +38,7 @@ class ArtistForm extends Component {
     this.setState({
       name: e.target.value,
       slug: Utils.slug(e.target.value)
-    });
+    })
   }
 
   close() {
@@ -47,7 +48,8 @@ class ArtistForm extends Component {
       slug: '',
       spotifyUri: '',
       isLoading: false,
-      options: []
+      options: [],
+      instruments: []
     })
   }
 
@@ -177,22 +179,11 @@ class ArtistForm extends Component {
   }
 }
 
-const getInstruments = (mediaItems, graphType, genreSlugs) => {
-  if(graphType === 'genre') {
-    return mediaItems.filter(mediaItem =>
-      mediaItem.types.includes('instrument') &&
-      Builders.hasTag(mediaItem, 'genre', genreSlugs))
-  } else {
-    return []
-  }
-}
-
 const mapStateToProps = state => {
-  const instruments = getInstruments(state.mediaItemReducers,
-                                     state.mediaItemGraphReducers.graphType,
-                                     state.mediaItemGraphReducers.slugs)
   return {
-    instrumentChoises: instruments,
+    instrumentChoises: Builders.getInstruments(state.mediaItemReducers,
+                                               state.mediaItemGraphReducers.graphType,
+                                               state.mediaItemGraphReducers.slugs),
     spotifyUser: state.spotifyStateReducers.spotifyUser
   }
 }

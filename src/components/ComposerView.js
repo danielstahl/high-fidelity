@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 
 import {
   Row, Col, Grid, Panel, Button
@@ -7,6 +7,7 @@ import {
 import * as actions from '../actions/index'
 import LinksView from './LinksView'
 import AddLinkForm from '../forms/AddLinkForm'
+import PieceForm from '../forms/PieceForm'
 
 class ComposerView extends Component {
 
@@ -47,7 +48,7 @@ class ComposerView extends Component {
         <Row>
           <Col md={8}>
             <Panel>
-              <h1><small>era</small> {this.props.composerGraph.composer.name}</h1>
+              <h1><small>composer</small> {this.props.composerGraph.composer.name}</h1>
 
               <LinksView graph={this.props.composerGraph} />
 
@@ -57,6 +58,9 @@ class ComposerView extends Component {
           <Col md={4}>
             <Panel>
               <ul className="list-unstyled">
+                <li><PieceForm composerGraph={this.props.composerGraph}
+                               mediaItemHandler={this.props.mediaItemHandler}
+                               mediaItems={this.props.mediaItems}/></li>
                 <li><AddLinkForm item={this.props.composerGraph.era}
                                  mediaItemHandler={this.props.mediaItemHandler}
                                  mediaItems={this.props.mediaItems}/></li>
