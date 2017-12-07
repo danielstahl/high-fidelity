@@ -106,7 +106,7 @@ class PieceForm extends Component {
         composer: [this.props.composerGraph.composer.slugs],
         pieceMovements: this.state.pieceMovements,
         instruments: this.state.instruments,
-        forms: this.state.forms
+        form: this.state.forms
       }
     }
     console.log("newPieceMediaItem", newPieceMediaItem)
