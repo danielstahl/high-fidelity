@@ -26,8 +26,7 @@ class AlbumView extends Component {
   }
 
   render() {
-    let composers
-    composers = this.props.albumGraph.composers.map(composer => {
+    const composers = this.props.albumGraph.composers.map(composer => {
       return (
         <li key={composer.slugs}>
           <Button bsStyle="link" onClick={() => this.handleComposerClick(composer.slugs)} ><span className="text-muted"><i>composer</i></span> {composer.name}</Button>
@@ -35,8 +34,7 @@ class AlbumView extends Component {
       )
     })
 
-    let artists
-    artists = this.props.albumGraph.artists.map(artist => {
+    const artists = this.props.albumGraph.artists.map(artist => {
       return (
         <li key={artist.slugs}>
           <Button bsStyle="link" onClick={() => this.handleArtistClick(artist.slugs)}><span className="text-muted"><i>artist</i></span> {artist.name}</Button>

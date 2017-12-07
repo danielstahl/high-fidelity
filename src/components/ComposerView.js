@@ -8,6 +8,7 @@ import * as actions from '../actions/index'
 import LinksView from './LinksView'
 import AddLinkForm from '../forms/AddLinkForm'
 import PieceForm from '../forms/PieceForm'
+import AlbumView from './AlbumView'
 
 class ComposerView extends Component {
 
@@ -35,6 +36,32 @@ class ComposerView extends Component {
 
 
   render() {
+    const formPieces = this.props.composerGraph.form.map(formGraph => {
+      return (
+        <div key={formGraph.form.slugs}>
+          <h3><small>{formGraph.form.name}</small></h3>
+          <ul className="list-inline">
+          {formGraph.pieces.map(piece =>
+            <li key={piece.slugs}>
+              <Button bsStyle="link">{piece.name}</Button>
+            </li>
+          )}
+        </ul>
+      </div>
+      )
+    })
+
+    const albums = this.props.composerGraph.albums.map(album => {
+      return (
+        <li key={album.album.slugs}>
+          <AlbumView albumGraph={album}
+                     mediaItems={this.props.mediaItems}
+                     dispatch={this.props.dispatch}
+                     uriInfos={this.props.uriInfos}/>
+        </li>
+      )
+    })
+
     return (
       <Grid>
         <Row>
@@ -52,6 +79,13 @@ class ComposerView extends Component {
 
               <LinksView graph={this.props.composerGraph} />
 
+              <h2><small>Albums</small></h2>
+              <ul className="list-unstyled">
+                {albums}
+              </ul>
+
+              <h2><small>Pieces</small> </h2>
+              {formPieces}
             </Panel>
           </Col>
 
