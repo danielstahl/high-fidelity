@@ -318,6 +318,11 @@ class Builders {
     return pieceMediaItems
       .filter(pieceMediaItem =>
         Builders.hasTag(pieceMediaItem, 'form', formSlugs))
+      .filter(pieceMediaItem =>
+        !((formSlugs === 'classical-music:form:chamber-music' ||
+           formSlugs === 'classical-music:form:orchestral-music') &&
+            pieceMediaItem.tags['form'].length > 1)
+      )
       .map(pieceMediaItem => Builders.makePiece(pieceMediaItem))
   }
 
