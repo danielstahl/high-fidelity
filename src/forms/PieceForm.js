@@ -24,7 +24,8 @@ class PieceForm extends Component {
       pieceName: '',
       pieceMovements: [],
       instruments: [],
-      forms: []
+      forms: [],
+      artists: []
     }
     this.open = this.open.bind(this)
     this.close = this.close.bind(this)
@@ -59,12 +60,14 @@ class PieceForm extends Component {
     })
   }
 
-
-
-  makeAlbumTrackInfo(spotifyTrack) {
+  makeAlbumTrackInfo(spotifyTrack, mediaItems) {
+    const albumTrackArtists = spotifyTrack.artists
+      .map(spotifyArtist =>
+        SpotifyBuilders.makeSpotifyAlbumArtistInfo(spotifyArtist, mediaItems))
     return {
       uri: spotifyTrack.uri,
-      name: spotifyTrack.name
+      name: spotifyTrack.name,
+      artists: albumTrackArtists
     }
   }
 
@@ -77,7 +80,7 @@ class PieceForm extends Component {
 
     const albumTrackInfos = spotifyAlbum.tracks.items
       .filter(spotifyTrack => spotifyTrack.artists.some(artist => artist.uri === spotifyArtistUri))
-      .map(spotifyTrack => this.makeAlbumTrackInfo(spotifyTrack))
+      .map(spotifyTrack => this.makeAlbumTrackInfo(spotifyTrack, mediaItems))
     return {
       spotifyUri: spotifyAlbum.uri,
       name: spotifyAlbum.name,
@@ -89,9 +92,9 @@ class PieceForm extends Component {
 
   createPiece = (e) => {
     e.preventDefault()
-    const artists = this.state.albumInfo.artists
-      .filter((artist) => artist.artistTypes.includes('artist'))
-      .map((artist) => artist.slugs)
+    const artists = this.state.artists
+      .filter(artist => artist.artistTypes.includes('artist'))
+      .map(artist => artist.slugs)
 
     const pieceSlug = 'piece:' + uuidBase62.v4()
 
@@ -153,7 +156,8 @@ class PieceForm extends Component {
     }).then(spotifyAlbumResult => {
       const albumInfo = this.makeAlbumInfo(spotifyAlbumResult, this.props.mediaItems)
       this.setState({
-        albumInfo: albumInfo
+        albumInfo: albumInfo,
+        artists: albumInfo.artists
       })
     }).catch(error => {
       if(error.status === 401) {
@@ -189,10 +193,25 @@ class PieceForm extends Component {
       reducedPieceTrackNames = []
     }
 
+    let newArtists = this.state.artists
+    this.state.albumInfo.tracks
+      .filter(track => {
+        return newPieceTracks.includes(track.uri)
+      })
+      .forEach(track => {
+        track.artists.forEach(trackArtist => {
+          if(!newArtists.some(newArtist =>
+              newArtist.spotifyUri === trackArtist.spotifyUri)) {
+            newArtists.push(trackArtist)
+          }
+        })
+      })
+    
     this.setState({
       pieceTracks: newPieceTracks,
       pieceName: pieceName,
-      pieceMovements: reducedPieceTrackNames
+      pieceMovements: reducedPieceTrackNames,
+      artists: newArtists
     })
   }
 
@@ -203,9 +222,6 @@ class PieceForm extends Component {
                   onChange={() => this.handleCheckTrackPiece(track.uri)}>{track.name}</Checkbox>
       </li>)
   }
-
-  // https://goshakkk.name/array-form-inputs/
-
 
   handleNameChange(e) {
     e.preventDefault()
@@ -276,7 +292,7 @@ class PieceForm extends Component {
         <div>
           <h3><img alt={this.state.albumInfo.name} src={this.state.albumInfo.imageUri}/> {this.state.albumInfo.name}</h3>
           <ul className="list-inline">
-            {this.state.albumInfo.artists.map(artist =>
+            {this.state.artists.map(artist =>
               {return this.renderAlbumInfoArtist(artist)}
             )}
           </ul>
