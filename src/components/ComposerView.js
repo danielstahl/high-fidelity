@@ -40,7 +40,7 @@ class ComposerView extends Component {
       return (
         <div key={formGraph.form.slugs}>
           <h3><small>{formGraph.form.name}</small></h3>
-          <ul className="list-inline">
+          <ul className="list-unstyled">
           {formGraph.pieces.map(piece =>
             <li key={piece.slugs}>
               <Button bsStyle="link">{piece.name}</Button>
