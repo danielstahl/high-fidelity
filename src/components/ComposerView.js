@@ -8,7 +8,9 @@ import * as actions from '../actions/index'
 import LinksView from './LinksView'
 import AddLinkForm from '../forms/AddLinkForm'
 import PieceForm from '../forms/PieceForm'
-import AlbumView from './AlbumView'
+import AlbumForm from '../forms/AlbumForm'
+import AlbumDigestView from './AlbumDigestView'
+import PieceDigestView from './PieceDigestView'
 
 class ComposerView extends Component {
 
@@ -42,9 +44,7 @@ class ComposerView extends Component {
           <h3><small>{formGraph.form.name}</small></h3>
           <ul className="list-unstyled">
           {formGraph.pieces.map(piece =>
-            <li key={piece.slugs}>
-              <Button bsStyle="link">{piece.name}</Button>
-            </li>
+            <PieceDigestView pieceGraph={piece}/>
           )}
         </ul>
       </div>
@@ -54,10 +54,10 @@ class ComposerView extends Component {
     const albums = this.props.composerGraph.albums.map(album => {
       return (
         <li key={album.album.slugs}>
-          <AlbumView albumGraph={album}
-                     mediaItems={this.props.mediaItems}
-                     dispatch={this.props.dispatch}
-                     uriInfos={this.props.uriInfos}/>
+          <AlbumDigestView albumGraph={album}
+                           mediaItems={this.props.mediaItems}
+                           dispatch={this.props.dispatch}
+                           uriInfos={this.props.uriInfos}/>
         </li>
       )
     })
@@ -98,6 +98,9 @@ class ComposerView extends Component {
                 <li><AddLinkForm item={this.props.composerGraph.era}
                                  mediaItemHandler={this.props.mediaItemHandler}
                                  mediaItems={this.props.mediaItems}/></li>
+                <li><AlbumForm genre={this.props.composerGraph.genre}
+                               mediaItemHandler={this.props.mediaItemHandler}
+                               mediaItems={this.props.mediaItems}/></li>
               </ul>
             </Panel>
           </Col>

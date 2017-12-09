@@ -61,6 +61,18 @@ class Builders {
     }
   }
 
+  static makeRecording(recordingMediaItem) {
+    return {
+      slugs: recordingMediaItem.slugs,
+      name: recordingMediaItem.slugs,
+      genre: Builders.getTagHead(recordingMediaItem, 'genre'),
+      era: Builders.getTagHead(recordingMediaItem, 'era'),
+      composers: recordingMediaItem.tags['composer'],
+      artists: recordingMediaItem.tags['form'],
+      uris: recordingMediaItem.uris.spotifyUri
+    }
+  }
+
   static makeForm(formMediaItem) {
     return {
       slugs: formMediaItem.slugs,
@@ -314,7 +326,20 @@ class Builders {
     }
   }
 
-  static makeFormPieces(formSlugs, pieceMediaItems) {
+  static makePieceGraph(pieceMediaItem, mediaItems, uriInfos) {
+    const recordings = mediaItems
+      .filter(mediaItem =>
+        mediaItem.types.includes('recording') &&
+        Builders.hasTag(mediaItem, 'piece', pieceMediaItem.slugs))
+      .map(recordingMediaItem => Builders.makeRecording(recordingMediaItem))
+    return {
+      graphType: 'piece',
+      piece: Builders.makePiece(pieceMediaItem),
+      recordings: recordings
+    }
+  }
+
+  static makeFormPieces(formSlugs, pieceMediaItems, mediaItems, uriInfos) {
     return pieceMediaItems
       .filter(pieceMediaItem =>
         Builders.hasTag(pieceMediaItem, 'form', formSlugs))
@@ -323,7 +348,7 @@ class Builders {
            formSlugs === 'classical-music:form:orchestral-music') &&
             pieceMediaItem.tags['form'].length > 1)
       )
-      .map(pieceMediaItem => Builders.makePiece(pieceMediaItem))
+      .map(pieceMediaItem => Builders.makePieceGraph(pieceMediaItem, mediaItems, uriInfos))
   }
 
   static getComposerGraph(slugs, mediaItems, uriInfos) {
@@ -348,7 +373,7 @@ class Builders {
       return {
         graphType: 'form',
         form: Builders.makeForm(formMediaItem),
-        pieces: Builders.makeFormPieces(formMediaItem.slugs, pieceMediaItems),
+        pieces: Builders.makeFormPieces(formMediaItem.slugs, pieceMediaItems, mediaItems, uriInfos),
       }
     })
     .filter(form => form.pieces && form.pieces.length > 0)

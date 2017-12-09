@@ -6,7 +6,8 @@ import {
 
 import * as actions from '../actions/index'
 import LinksView from './LinksView'
-import AlbumView from './AlbumView'
+import AlbumDigestView from './AlbumDigestView'
+import AlbumForm from '../forms/AlbumForm'
 
 class ArtistView extends Component {
 
@@ -37,10 +38,10 @@ class ArtistView extends Component {
     albums = this.props.artistGraph.albums.map(album => {
       return (
         <li key={album.slugs}>
-          <AlbumView albumGraph={album}
-                     mediaItems={this.props.mediaItems}
-                     dispatch={this.props.dispatch}
-                     uriInfos={this.props.uriInfos}/>
+          <AlbumDigestView albumGraph={album}
+                           mediaItems={this.props.mediaItems}
+                           dispatch={this.props.dispatch}
+                           uriInfos={this.props.uriInfos}/>
         </li>
       )
     })
@@ -70,7 +71,9 @@ class ArtistView extends Component {
           <Col md={4}>
             <Panel>
               <ul className="list-unstyled">
-
+                <li><AlbumForm genre={this.props.artistGraph.genre}
+                               mediaItemHandler={this.props.mediaItemHandler}
+                               mediaItems={this.props.mediaItems}/></li>
               </ul>
             </Panel>
           </Col>
