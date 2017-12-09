@@ -22,7 +22,8 @@ class MediaItemGraphView extends Component {
         return (<ArtistView artistGraph={this.props.graph}
                             mediaItems={this.props.mediaItems}
                             uriInfos={this.props.uriInfos}
-                            dispatch={this.props.dispatch}/>)
+                            dispatch={this.props.dispatch}
+                            mediaItemHandler={this.props.mediaItemHandler}/>)
       case 'era':
         return (<EraView eraGraph={this.props.graph}
                          mediaItems={this.props.mediaItems}

@@ -6,7 +6,7 @@ import {
 import PlayButton from './PlayButton'
 import * as actions from '../actions/index'
 
-class AlbumView extends Component {
+class AlbumDigestView extends Component {
 
   constructor(props) {
     super(props)
@@ -64,4 +64,4 @@ class AlbumView extends Component {
   }
 }
 
-export default AlbumView
+export default AlbumDigestView
