@@ -119,10 +119,11 @@ class PieceForm extends Component {
 
     let newRecordingMediaItem = {
       slugs: recordingSlug,
-      name: this.state.pieceName,
+      name: this.state.albumInfo.name,
       types: ['recording'],
       uris: {
-        spotifyUri: this.state.pieceTracks
+        spotifyUri: [this.state.albumInfo.spotifyUri],
+        recordingUri: this.state.pieceTracks
       },
       tags: {
         genre: [this.props.composerGraph.genre.slugs],
@@ -206,7 +207,7 @@ class PieceForm extends Component {
           }
         })
       })
-    
+
     this.setState({
       pieceTracks: newPieceTracks,
       pieceName: pieceName,

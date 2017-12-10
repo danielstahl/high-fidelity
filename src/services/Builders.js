@@ -64,12 +64,12 @@ class Builders {
   static makeRecording(recordingMediaItem) {
     return {
       slugs: recordingMediaItem.slugs,
-      name: recordingMediaItem.slugs,
+      name: recordingMediaItem.name,
       genre: Builders.getTagHead(recordingMediaItem, 'genre'),
       era: Builders.getTagHead(recordingMediaItem, 'era'),
       composers: recordingMediaItem.tags['composer'],
       artists: recordingMediaItem.tags['form'],
-      uris: recordingMediaItem.uris.spotifyUri
+      uris: recordingMediaItem.uris
     }
   }
 
@@ -326,16 +326,50 @@ class Builders {
     }
   }
 
+  static getPieceGraph(slugs, mediaItems, uriInfos) {
+    const pieceMediaItem = Builders.findBySlugs(slugs, mediaItems)
+    return Builders.makePieceGraph(pieceMediaItem, mediaItems, uriInfos)
+  }
+
   static makePieceGraph(pieceMediaItem, mediaItems, uriInfos) {
+    const uris = Builders.toUris(pieceMediaItem, uriInfos)
+
+    const genreSlug = Builders.getTagHead(pieceMediaItem, 'genre')
+    const genreMediaItem = Builders.findBySlugs(genreSlug, mediaItems)
+    const eraSlug = Builders.getTagHead(pieceMediaItem, 'era')
+    const eraMediaItem = Builders.findBySlugs(eraSlug, mediaItems)
+    const composerSlug = Builders.getTagHead(pieceMediaItem, 'composer')
+    const composerMediaItem = Builders.findBySlugs(composerSlug, mediaItems)
+
     const recordings = mediaItems
       .filter(mediaItem =>
         mediaItem.types.includes('recording') &&
         Builders.hasTag(mediaItem, 'piece', pieceMediaItem.slugs))
-      .map(recordingMediaItem => Builders.makeRecording(recordingMediaItem))
+      .map(recordingMediaItem => Builders.makeRecordingGraph(recordingMediaItem, mediaItems, uriInfos))
     return {
       graphType: 'piece',
       piece: Builders.makePiece(pieceMediaItem),
-      recordings: recordings
+      composer: Builders.makeComposer(composerMediaItem),
+      genre: Builders.makeGenre(genreMediaItem),
+      era: Builders.makeEra(eraMediaItem),
+      recordings: recordings,
+      uris: uris
+    }
+  }
+
+  static makeRecordingGraph(recordingMediaItem, mediaItems, uriInfos) {
+    const uris = Builders.toUris(recordingMediaItem, uriInfos)
+
+    const artists = recordingMediaItem.tags['artist']
+      .map(artistSlug => Builders.findBySlugs(artistSlug, mediaItems))
+      .map(artistMediaItem => Builders.makeArtist(artistMediaItem))
+
+    return {
+      graphType: 'recording',
+      recording: Builders.makeRecording(recordingMediaItem),
+      artists: artists,
+      uris: uris
+
     }
   }
 
