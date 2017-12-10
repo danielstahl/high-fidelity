@@ -43,9 +43,13 @@ class PlayButton extends Component {
   }
 
   render() {
-    return (
-      <div>{this.props.name} <Button bsStyle="link" onClick={this.clickPlay}><Glyphicon glyph="play" /></Button></div>
-    )
+    let result
+    if(this.props.action) {
+      result = (<div><Button bsStyle="link" onClick={this.props.action}>{this.props.name}</Button> <Button bsStyle="link" onClick={this.clickPlay}><Glyphicon glyph="play" /></Button></div>)
+    } else {
+      result = (<div>{this.props.name} <Button bsStyle="link" onClick={this.clickPlay}><Glyphicon glyph="play" /></Button></div>)
+    }
+    return result
   }
 }
 

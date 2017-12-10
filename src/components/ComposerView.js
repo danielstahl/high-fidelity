@@ -44,7 +44,8 @@ class ComposerView extends Component {
           <h3><small>{formGraph.form.name}</small></h3>
           <ul className="list-unstyled">
           {formGraph.pieces.map(piece =>
-            <PieceDigestView pieceGraph={piece}/>
+            <PieceDigestView pieceGraph={piece}
+                             dispatch={this.props.dispatch}/>
           )}
         </ul>
       </div>
