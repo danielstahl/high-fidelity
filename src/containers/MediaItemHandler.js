@@ -116,8 +116,8 @@ class MediaItemHandler extends Component {
 
   updateMediaItemUriInfo(mediaItem) {
     if(mediaItem.uris) {
-      Object.entries(mediaItem.uris).forEach(([uriType, uris]) => {
-        uris.forEach((uri) => {
+      Object.entries(mediaItem.uris).forEach(([uriType, theUris]) => {
+        theUris.forEach(uri => {
           var url = this.getUrl(uri, uriType)
           var name = this.getName(uriType, mediaItem)
           this.props.dispatch(actions.setUriInfo({

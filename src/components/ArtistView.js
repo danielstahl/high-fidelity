@@ -8,6 +8,7 @@ import * as actions from '../actions/index'
 import LinksView from './LinksView'
 import AlbumDigestView from './AlbumDigestView'
 import AlbumForm from '../forms/AlbumForm'
+import AddLinkForm from '../forms/AddLinkForm'
 
 class ArtistView extends Component {
 
@@ -74,6 +75,9 @@ class ArtistView extends Component {
                 <li><AlbumForm genre={this.props.artistGraph.genre}
                                mediaItemHandler={this.props.mediaItemHandler}
                                mediaItems={this.props.mediaItems}/></li>
+                <li><AddLinkForm item={this.props.artistGraph.artist}
+                                 mediaItemHandler={this.props.mediaItemHandler}
+                                 mediaItems={this.props.mediaItems}/></li>
               </ul>
             </Panel>
           </Col>

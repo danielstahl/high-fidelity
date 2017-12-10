@@ -96,7 +96,7 @@ class ComposerView extends Component {
                 <li><PieceForm composerGraph={this.props.composerGraph}
                                mediaItemHandler={this.props.mediaItemHandler}
                                mediaItems={this.props.mediaItems}/></li>
-                <li><AddLinkForm item={this.props.composerGraph.era}
+                <li><AddLinkForm item={this.props.composerGraph.composer}
                                  mediaItemHandler={this.props.mediaItemHandler}
                                  mediaItems={this.props.mediaItems}/></li>
                 <li><AlbumForm genre={this.props.composerGraph.genre}
