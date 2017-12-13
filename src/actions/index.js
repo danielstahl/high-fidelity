@@ -66,3 +66,8 @@ export const setSpotifyPlaybackDevice = deviceId => ({
   type: 'SET_SPOTIFY_PLAYBACK_DEVICE',
   deviceId: deviceId
 })
+
+export const setSpotifyUriContent = spotifyUriContent => ({
+  type: 'SET_SPOTIFY_URI_CONTENT',
+  spotifyUriContent: spotifyUriContent
+})

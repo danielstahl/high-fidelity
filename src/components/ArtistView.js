@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 import {
-  Row, Col, Grid, Panel, Button
+  Row, Col, Grid, Panel, Button, Image
 } from 'react-bootstrap'
 
 import * as actions from '../actions/index'
@@ -9,6 +9,10 @@ import LinksView from './LinksView'
 import AlbumDigestView from './AlbumDigestView'
 import AlbumForm from '../forms/AlbumForm'
 import AddLinkForm from '../forms/AddLinkForm'
+import { connect } from 'react-redux'
+import Builders from '../services/Builders'
+import Utils from '../services/Utils'
+import Spotify from '../services/Spotify'
 
 class ArtistView extends Component {
 
@@ -34,18 +38,51 @@ class ArtistView extends Component {
     this.props.dispatch(actions.setMediaItemGraph(undefined, 'root'))
   }
 
+  getSpotifyUriContent(spotifyUri) {
+    return Spotify.getSpotifyUriContent(spotifyUri, this.props.spotifyUser, this.props.dispatch, this.props.spotifyUriContent)
+  }
+
+  getArtistImage(artist) {
+    const spotifyArtistUri = Builders.getUriHead(artist, 'spotifyUri')
+    const spotifyArtistUriContent = this.getSpotifyUriContent(spotifyArtistUri)
+    let artistImage
+    if(spotifyArtistUriContent) {
+      artistImage = spotifyArtistUriContent.content.images[2].url
+    }
+    return artistImage
+  }
+
+  getAlbumThumbnail(album) {
+    const spotifyAlbumUri = Builders.getUriHead(album, 'spotifyUri')
+
+    const spotifyAlbumUriContent = this.getSpotifyUriContent(spotifyAlbumUri)
+    let albumImage
+    if(spotifyAlbumUriContent) {
+      albumImage = Utils.getLastUrl(spotifyAlbumUriContent.content.images)
+    }
+    return albumImage
+  }
+
   render() {
     let albums
     albums = this.props.artistGraph.albums.map(album => {
+      const albumThumbnail = this.getAlbumThumbnail(album.album)
       return (
         <li key={album.slugs}>
           <AlbumDigestView albumGraph={album}
                            mediaItems={this.props.mediaItems}
                            dispatch={this.props.dispatch}
-                           uriInfos={this.props.uriInfos}/>
+                           uriInfos={this.props.uriInfos}
+                           thumbnail={albumThumbnail}/>
         </li>
       )
     })
+
+    const artistImage = this.getArtistImage(this.props.artistGraph.artist)
+    let artistImageCompoent
+    if(artistImage) {
+      artistImageCompoent = (<Image src={artistImage} rounded />)
+    }
 
     return (
       <Grid>
@@ -59,6 +96,7 @@ class ArtistView extends Component {
         <Row>
           <Col md={8}>
             <Panel>
+              {artistImageCompoent}
               <h1><small>artist</small> {this.props.artistGraph.artist.name}</h1>
 
               <LinksView graph={this.props.artistGraph} />
@@ -88,4 +126,10 @@ class ArtistView extends Component {
   }
 }
 
-export default ArtistView
+const mapStateToProps = state => {
+  return {
+    spotifyUser: state.spotifyStateReducers.spotifyUser
+  }
+}
+
+export default connect(mapStateToProps)(ArtistView)

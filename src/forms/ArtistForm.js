@@ -31,7 +31,6 @@ class ArtistForm extends Component {
     this.selectArtist = this.selectArtist.bind(this)
     this.selectInstruments = this.selectInstruments.bind(this)
     this.remoteSearch = this.remoteSearch.bind(this)
-    this.getLastUrl = this.getLastUrl.bind(this)
   }
 
   handleNameChange(e) {
@@ -77,14 +76,6 @@ class ArtistForm extends Component {
     this.close()
   }
 
-  getLastUrl(images) {
-    if(images && images.length) {
-      return images.slice(-1)[0].url
-    } else {
-      return ''
-    }
-  }
-
   remoteSearch(query) {
     this.setState({isLoading: true})
     var accessToken = this.props.spotifyUser.accessToken
@@ -103,7 +94,7 @@ class ArtistForm extends Component {
         return {
           uri: artist.uri,
           name: artist.name,
-          imageUrl: this.getLastUrl(artist.images)
+          imageUrl: Utils.getLastUrl(artist.images)
         }
       })
       this.setState({isLoading: false, options: artistChoises})
