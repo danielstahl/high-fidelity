@@ -47,7 +47,12 @@ class ArtistView extends Component {
     const spotifyArtistUriContent = this.getSpotifyUriContent(spotifyArtistUri)
     let artistImage
     if(spotifyArtistUriContent) {
-      artistImage = spotifyArtistUriContent.content.images[2].url
+      const nrImages = spotifyArtistUriContent.content.images.length
+      if(nrImages >= 3) {
+          artistImage = spotifyArtistUriContent.content.images[nrImages - 2].url
+      } else {
+        artistImage = Utils.getLastUrl(spotifyArtistUriContent.content.images)
+      }
     }
     return artistImage
   }

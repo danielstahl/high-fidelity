@@ -49,7 +49,13 @@ class ComposerView extends Component {
     const spotifyComposerUriContent = this.getSpotifyUriContent(spotifyComposerUri)
     let composerImage
     if(spotifyComposerUriContent) {
-      composerImage = spotifyComposerUriContent.content.images[2].url
+      const nrImages = spotifyComposerUriContent.content.images.length
+      if(nrImages >= 3) {
+          composerImage = spotifyComposerUriContent.content.images[nrImages - 2].url
+      } else {
+        composerImage = Utils.getLastUrl(spotifyComposerUriContent.content.images)
+      }
+
     }
     return composerImage
   }
