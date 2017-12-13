@@ -7,6 +7,7 @@ import mediaItemGraphReducers from './mediaItemGraphReducers'
 import uriInfoReducers from './uriInfoReducers'
 import spotifyPlayerReducers from './spotifyPlayerReducers'
 import spotifyPlaybackStatusReducers from './spotifyPlaybackStatusReducers'
+import spotifyUriContentReducers from './spotifyUriContentReducers'
 
 const highFidelityReducers = combineReducers({
   mediaItemReducers,
@@ -15,7 +16,8 @@ const highFidelityReducers = combineReducers({
   mediaItemGraphReducers,
   uriInfoReducers,
   spotifyPlayerReducers,
-  spotifyPlaybackStatusReducers
+  spotifyPlaybackStatusReducers,
+  spotifyUriContentReducers
 })
 
 export default highFidelityReducers

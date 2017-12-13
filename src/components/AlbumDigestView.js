@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 
 import {
-  Button
+  Button, Image
 } from 'react-bootstrap'
 import PlayButton from './PlayButton'
 import * as actions from '../actions/index'
@@ -52,13 +52,19 @@ class AlbumDigestView extends Component {
       nameComponent = (<div>{this.props.albumGraph.album.name}</div>)
     }
 
+    let thumbnailComponent
+    if(this.props.thumbnail) {
+      thumbnailComponent = (<Image src={this.props.thumbnail} rounded />)
+    }
     return (
       <div>
+        {thumbnailComponent}
         {nameComponent}
         <ul className="list-inline">
           {composers}
           {artists}
         </ul>
+        <br/>
       </div>
     )
   }

@@ -3,14 +3,16 @@ class Builders {
   static makeGenre(mediaItem) {
     return {
       slugs: mediaItem.slugs,
-      name: mediaItem.name
+      name: mediaItem.name,
+      uris: mediaItem.uris
     }
   }
 
   static makeInstrument(mediaItem) {
     return {
       slugs: mediaItem.slugs,
-      name: mediaItem.name
+      name: mediaItem.name,
+      uris: mediaItem.uris
     }
   }
 
@@ -19,16 +21,18 @@ class Builders {
       slugs: mediaItem.slugs,
       name: mediaItem.name,
       instrument: Builders.getTagHead(mediaItem, 'instrument'),
-      genre: Builders.getTagHead(mediaItem, 'genre')
+      genre: Builders.getTagHead(mediaItem, 'genre'),
+      uris: mediaItem.uris
     }
   }
 
   static makeAlbum(mediaItem) {
-    return {
+    return  {
       slugs: mediaItem.slugs,
       name: mediaItem.name,
       artists: mediaItem.tags['artist'],
-      composers: mediaItem.tags['composer']
+      composers: mediaItem.tags['composer'],
+      uris: mediaItem.uris
     }
   }
 
@@ -36,7 +40,8 @@ class Builders {
     return {
       slugs: mediaItem.slugs,
       name: mediaItem.name,
-      genre: Builders.getTagHead(mediaItem, 'genre')
+      genre: Builders.getTagHead(mediaItem, 'genre'),
+      uris: mediaItem.uris
     }
   }
 
@@ -45,7 +50,8 @@ class Builders {
       slugs: mediaItem.slugs,
       name: mediaItem.name,
       genre: Builders.getTagHead(mediaItem, 'genre'),
-      era: Builders.getTagHead(mediaItem, 'era')
+      era: Builders.getTagHead(mediaItem, 'era'),
+      uris: mediaItem.uris
     }
   }
 
@@ -57,7 +63,8 @@ class Builders {
       genre: Builders.getTagHead(pieceMediaItem, 'genre'),
       era: Builders.getTagHead(pieceMediaItem, 'era'),
       composers: pieceMediaItem.tags['composer'],
-      form: pieceMediaItem.tags['form']
+      form: pieceMediaItem.tags['form'],
+      uris: pieceMediaItem.uris
     }
   }
 
@@ -77,7 +84,8 @@ class Builders {
     return {
       slugs: formMediaItem.slugs,
       name: formMediaItem.name,
-      genre: Builders.getTagHead(formMediaItem, 'genre')
+      genre: Builders.getTagHead(formMediaItem, 'genre'),
+      uris: formMediaItem.uris
     }
   }
 

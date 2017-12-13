@@ -18,13 +18,15 @@ class MediaItemGraphView extends Component {
                            mediaItems={this.props.mediaItems}
                            uriInfos={this.props.uriInfos}
                            dispatch={this.props.dispatch}
-                           mediaItemHandler={this.props.mediaItemHandler}/>)
+                           mediaItemHandler={this.props.mediaItemHandler}
+                           spotifyUriContent={this.props.spotifyUriContent}/>)
       case 'artist':
         return (<ArtistView artistGraph={this.props.graph}
                             mediaItems={this.props.mediaItems}
                             uriInfos={this.props.uriInfos}
                             dispatch={this.props.dispatch}
-                            mediaItemHandler={this.props.mediaItemHandler}/>)
+                            mediaItemHandler={this.props.mediaItemHandler}
+                            spotifyUriContent={this.props.spotifyUriContent}/>)
       case 'era':
         return (<EraView eraGraph={this.props.graph}
                          mediaItems={this.props.mediaItems}
@@ -36,7 +38,8 @@ class MediaItemGraphView extends Component {
                               mediaItems={this.props.mediaItems}
                               uriInfos={this.props.uriInfos}
                               dispatch={this.props.dispatch}
-                              mediaItemHandler={this.props.mediaItemHandler}/>)
+                              mediaItemHandler={this.props.mediaItemHandler}
+                              spotifyUriContent={this.props.spotifyUriContent}/>)
       case 'piece':
         return (<PieceView pieceGraph={this.props.graph}
                            mediaItems={this.props.mediaItems}
@@ -88,6 +91,7 @@ const mapStateToProps = state => {
     graphType: state.mediaItemGraphReducers.graphType,
     uriInfos: state.uriInfoReducers,
     user: state.userStateReducers.user,
+    spotifyUriContent: state.spotifyUriContentReducers
   }
 }
 
