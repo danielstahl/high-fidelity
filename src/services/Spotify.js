@@ -6,7 +6,8 @@ class Spotify {
   static handlelogin() {
     var ACCOUNTS_BASE_URL = 'https://accounts.spotify.com'
     var CLIENT_ID = '1b24de0b94324459b855aa136d301949'
-    var REDIRECT_URI = process.env.REACT_APP_REDIRECT_URI.trim
+    var REDIRECT_URI = process.env.REACT_APP_REDIRECT_URI.trim()
+    console.log('"' + REDIRECT_URI + '"')
     var scopes = [
       'user-read-playback-state',
       'user-modify-playback-state',
