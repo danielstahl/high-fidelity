@@ -46,8 +46,18 @@ class AlbumForm extends Component {
   }
 
   makeAlbumInfo(spotifyAlbum, mediaItems) {
-    const albumArtistInfos = spotifyAlbum.artists
+    let albumArtistInfos = spotifyAlbum.artists
       .map(spotifyArtist => SpotifyBuilders.makeSpotifyAlbumArtistInfo(spotifyArtist, mediaItems))
+
+    spotifyAlbum.tracks.items.forEach(track => {
+      track.artists.forEach(trackArtist => {
+
+        if(!albumArtistInfos.some(albumArtistInfo => albumArtistInfo.spotifyUri === trackArtist.uri)) {
+          albumArtistInfos.push(SpotifyBuilders.makeSpotifyAlbumArtistInfo(trackArtist, mediaItems))
+        }
+      })
+    })
+
     return {
       spotifyUri: spotifyAlbum.uri,
       name: spotifyAlbum.name,
@@ -90,12 +100,12 @@ class AlbumForm extends Component {
     event.preventDefault()
     if(this.state.albumInfo) {
       let artists = this.state.albumInfo.artists
-        .filter((artist) => artist.artistTypes.includes('artist'))
-        .map((artist) => artist.slugs)
+        .filter(artist => artist.artistTypes.includes('artist'))
+        .map(artist => artist.slugs)
 
       let composers = this.state.albumInfo.artists
-        .filter((artist) => artist.artistTypes.includes('composer'))
-        .map((artist) => artist.slugs)
+        .filter(artist => artist.artistTypes.includes('composer'))
+        .map(artist => artist.slugs)
 
       let name = this.state.albumInfo.name
       let nameSlug = Utils.slug(name)
