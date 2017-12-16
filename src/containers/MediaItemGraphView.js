@@ -45,7 +45,8 @@ class MediaItemGraphView extends Component {
                            mediaItems={this.props.mediaItems}
                            uriInfos={this.props.uriInfos}
                            dispatch={this.props.dispatch}
-                           mediaItemHandler={this.props.mediaItemHandler}/>)
+                           mediaItemHandler={this.props.mediaItemHandler}
+                           spotifyUriContent={this.props.spotifyUriContent}/>)
       case 'root':
       default:
         return (<GenresMainView
