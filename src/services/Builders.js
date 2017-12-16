@@ -209,9 +209,15 @@ class Builders {
   }
 
   static getAlbumGraph(albumMediaItem, mediaItems, uriInfos) {
-    const artists = albumMediaItem.tags['artist']
-      .map(artistSlug => Builders.findBySlugs(artistSlug, mediaItems))
-      .map(artistMediaItem => Builders.makeArtist(artistMediaItem))
+    let artists
+    if(albumMediaItem.tags['artist']) {
+      artists = albumMediaItem.tags['artist']
+        .map(artistSlug => Builders.findBySlugs(artistSlug, mediaItems))
+        .map(artistMediaItem => Builders.makeArtist(artistMediaItem))
+    } else {
+      artists = []
+    }
+
 
     let composers
     if(albumMediaItem.tags['composer']) {
@@ -376,7 +382,7 @@ class Builders {
     } else {
       artists = []
     }
-    
+
     return {
       graphType: 'recording',
       recording: Builders.makeRecording(recordingMediaItem),
