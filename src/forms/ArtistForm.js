@@ -143,6 +143,17 @@ class ArtistForm extends Component {
                     onSearch={this.remoteSearch}
                     labelKey={option => `${option.name}`}
                     options={this.state.options}
+                    renderMenuItemChildren={(option, props) => (
+                      <div>
+                        <img src={option.imageUrl} alt={option.name}
+                          style={{
+                             height: '24px',
+                             marginRight: '10px',
+                             width: '24px',
+                           }}/>
+                           <span>{option.name}</span>
+                        </div>
+                    )}
                   />
                 </FormGroup>
                 <FormGroup controlId="slugsField">
