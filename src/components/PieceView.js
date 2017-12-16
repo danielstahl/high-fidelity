@@ -1,13 +1,17 @@
 import React, { Component } from 'react'
 
 import {
-  Row, Col, Grid, Panel, Button
+  Row, Col, Grid, Panel, Button, Image
 } from 'react-bootstrap'
 
 import * as actions from '../actions/index'
 import LinksView from './LinksView'
 import AddLinkForm from '../forms/AddLinkForm'
 import PlayButton from './PlayButton'
+import Utils from '../services/Utils'
+import Builders from '../services/Builders'
+import Spotify from '../services/Spotify'
+import { connect } from 'react-redux'
 
 class PieceView extends Component {
 
@@ -45,6 +49,21 @@ class PieceView extends Component {
     this.props.dispatch(actions.setMediaItemGraph(artistSlugs, 'artist'))
   }
 
+  getAlbumThumbnail(recording) {
+    const spotifyAlbumUri = Builders.getUriHead(recording, 'spotifyUri')
+
+    const spotifyAlbumUriContent = this.getSpotifyUriContent(spotifyAlbumUri)
+    let albumImage
+    if(spotifyAlbumUriContent) {
+      albumImage = Utils.getLastUrl(spotifyAlbumUriContent.content.images)
+    }
+    return albumImage
+  }
+
+  getSpotifyUriContent(spotifyUri) {
+    return Spotify.getSpotifyUriContent(spotifyUri, this.props.spotifyUser, this.props.dispatch, this.props.spotifyUriContent)
+  }
+
   getRecordingView(piece, recordingGraph) {
     const artists = recordingGraph.artists.map(artist => {
       return (
@@ -54,8 +73,23 @@ class PieceView extends Component {
       )
     })
 
+    let movements
+    if(piece.movements) {
+      movements = piece.movements.map((movement, idx) => {
+        return (
+          <li key={movement}>
+            <PlayButton name={movement}
+                        uris={[recordingGraph.recording.uris.recordingUri[idx]]}/></li>
+        )
+      })
+    }
+
+    const albumThumbnail = this.getAlbumThumbnail(recordingGraph.recording)
+    const thumbnailComponent = (<Image src={albumThumbnail} rounded />)
+
     return (
       <div key={recordingGraph.recording.slugs}>
+        {thumbnailComponent}
         <PlayButton name={recordingGraph.recording.name}
                     uris={recordingGraph.recording.uris.recordingUri}/>
 
@@ -64,16 +98,27 @@ class PieceView extends Component {
         </ul>
 
         <ul className="list-unstyled">
-          {piece.movements.map((movement, idx) =>
-            <li key={movement}><PlayButton name={movement}
-                        uris={[recordingGraph.recording.uris.recordingUri[idx]]}/></li>
-          )}
+          {movements}
         </ul>
       </div>
     )
   }
 
   render() {
+
+    let movements
+    if(this.props.pieceGraph.piece.movements) {
+      movements = (
+        <div>
+          <h2><small>Movements</small></h2>
+          <ul className="list-unstyled">
+            {this.props.pieceGraph.piece.movements.map(movement =>
+              <li key={movement}>{movement}</li>
+            )}
+          </ul>
+        </div>
+      )
+    }
 
     return (
       <Grid>
@@ -94,12 +139,7 @@ class PieceView extends Component {
 
               <LinksView graph={this.props.pieceGraph} />
 
-              <h2><small>Movements</small></h2>
-              <ul className="list-unstyled">
-                {this.props.pieceGraph.piece.movements.map(movement =>
-                  <li key={movement}>{movement}</li>
-                )}
-              </ul>
+              {movements}
 
               <h2><small>Recordings</small></h2>
 
@@ -124,4 +164,10 @@ class PieceView extends Component {
   }
 }
 
-export default PieceView
+const mapStateToProps = state => {
+  return {
+    spotifyUser: state.spotifyStateReducers.spotifyUser
+  }
+}
+
+export default connect(mapStateToProps)(PieceView)

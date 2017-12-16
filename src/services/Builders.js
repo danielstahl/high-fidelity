@@ -368,10 +368,15 @@ class Builders {
   static makeRecordingGraph(recordingMediaItem, mediaItems, uriInfos) {
     const uris = Builders.toUris(recordingMediaItem, uriInfos)
 
-    const artists = recordingMediaItem.tags['artist']
-      .map(artistSlug => Builders.findBySlugs(artistSlug, mediaItems))
-      .map(artistMediaItem => Builders.makeArtist(artistMediaItem))
-
+    let artists
+    if(recordingMediaItem.tags['artist']) {
+      artists = recordingMediaItem.tags['artist']
+        .map(artistSlug => Builders.findBySlugs(artistSlug, mediaItems))
+        .map(artistMediaItem => Builders.makeArtist(artistMediaItem))
+    } else {
+      artists = []
+    }
+    
     return {
       graphType: 'recording',
       recording: Builders.makeRecording(recordingMediaItem),
