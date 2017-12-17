@@ -15,6 +15,7 @@ import Builders from '../services/Builders'
 import Spotify from '../services/Spotify'
 import { connect } from 'react-redux'
 import Utils from '../services/Utils'
+import Wikipedia from '../services/Wikipedia'
 
 class ComposerView extends Component {
 
@@ -42,6 +43,10 @@ class ComposerView extends Component {
 
   getSpotifyUriContent(spotifyUri) {
     return Spotify.getSpotifyUriContent(spotifyUri, this.props.spotifyUser, this.props.dispatch, this.props.spotifyUriContent)
+  }
+
+  getWikipediaUrlContent(wikipediaUrl) {
+    return Wikipedia.getWikipediaUrlContent(wikipediaUrl, this.props.dispatch, this.props.wikipediaUrlContent)
   }
 
   getComposerImage(composer) {
@@ -106,6 +111,16 @@ class ComposerView extends Component {
       composerImageCompoent = (<Image src={composerImage} rounded />)
     }
 
+    let wikiComponent
+
+    const wikipediaComposerUri = Builders.getUriHead(this.props.composerGraph.composer, 'wikipedia')
+    if(wikipediaComposerUri) {
+      const content = this.getWikipediaUrlContent(wikipediaComposerUri)
+      if(content) {
+        wikiComponent = (<div dangerouslySetInnerHTML={{__html: content.extract}}></div>)
+      }
+    }
+
     return (
       <Grid>
         <Row>
@@ -121,6 +136,8 @@ class ComposerView extends Component {
             <Panel>
               {composerImageCompoent}
               <h1><small>composer</small> {this.props.composerGraph.composer.name}</h1>
+
+              {wikiComponent}
 
               <LinksView graph={this.props.composerGraph} />
 

@@ -13,11 +13,13 @@ import { connect } from 'react-redux'
 import Builders from '../services/Builders'
 import Utils from '../services/Utils'
 import Spotify from '../services/Spotify'
+import Wikipedia from '../services/Wikipedia'
 
 class ArtistView extends Component {
 
   constructor(props) {
     super(props)
+    this.state = { wikipediaContent: undefined}
     this.handleArtistClick = this.handleArtistClick.bind(this)
     this.handleGenreCLick = this.handleGenreCLick.bind(this)
     this.handleGenreMainClick = this.handleGenreMainClick.bind(this)
@@ -40,6 +42,10 @@ class ArtistView extends Component {
 
   getSpotifyUriContent(spotifyUri) {
     return Spotify.getSpotifyUriContent(spotifyUri, this.props.spotifyUser, this.props.dispatch, this.props.spotifyUriContent)
+  }
+
+  getWikipediaUrlContent(wikipediaUrl) {
+    return Wikipedia.getWikipediaUrlContent(wikipediaUrl, this.props.dispatch, this.props.wikipediaUrlContent)
   }
 
   getArtistImage(artist) {
@@ -89,6 +95,16 @@ class ArtistView extends Component {
       artistImageCompoent = (<Image src={artistImage} rounded />)
     }
 
+    let wikiComponent
+
+    const wikipediaArtistUri = Builders.getUriHead(this.props.artistGraph.artist, 'wikipedia')
+    if(wikipediaArtistUri) {
+      const content = this.getWikipediaUrlContent(wikipediaArtistUri)
+      if(content) {
+        wikiComponent = (<div dangerouslySetInnerHTML={{__html: content.extract}}></div>)
+      }
+    }
+
     return (
       <Grid>
         <Row>
@@ -103,6 +119,8 @@ class ArtistView extends Component {
             <Panel>
               {artistImageCompoent}
               <h1><small>artist</small> {this.props.artistGraph.artist.name}</h1>
+
+              {wikiComponent}
 
               <LinksView graph={this.props.artistGraph} />
 

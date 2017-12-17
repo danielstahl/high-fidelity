@@ -156,6 +156,9 @@ class Builders {
   }
 
   static getUriHead(mediaItem, uriType) {
+    if(!mediaItem.uris) {
+      return undefined
+    }
     const uriValues = mediaItem.uris[uriType]
     if(uriValues) {
       return uriValues[0]

@@ -71,3 +71,8 @@ export const setSpotifyUriContent = spotifyUriContent => ({
   type: 'SET_SPOTIFY_URI_CONTENT',
   spotifyUriContent: spotifyUriContent
 })
+
+export const setWikipediaUrlContent = wikipediaUrlContent => ({
+  type: 'SET_WIKIPEDIA_URL_CONTENT',
+  wikipediaUrlContent: wikipediaUrlContent
+})

@@ -12,6 +12,8 @@ import InstrumentForm from '../forms/InstrumentForm'
 import MusicalFormForm from '../forms/MusicalFormForm'
 import ArtistForm from '../forms/ArtistForm'
 import AlbumForm from '../forms/AlbumForm'
+import Wikipedia from '../services/Wikipedia'
+import Builders from '../services/Builders'
 
 class GenreView extends Component {
 
@@ -33,6 +35,10 @@ class GenreView extends Component {
 
   handleArtistClick(artistSlugs) {
     this.props.dispatch(actions.setMediaItemGraph(artistSlugs, 'artist'))
+  }
+
+  getWikipediaUrlContent(wikipediaUrl) {
+    return Wikipedia.getWikipediaUrlContent(wikipediaUrl, this.props.dispatch, this.props.wikipediaUrlContent)
   }
 
   render() {
@@ -74,6 +80,16 @@ class GenreView extends Component {
       })
     }
 
+    let wikiComponent
+
+    const wikipediaGenreUri = Builders.getUriHead(this.props.genreGraph.genre, 'wikipedia')
+    if(wikipediaGenreUri) {
+      const content = this.getWikipediaUrlContent(wikipediaGenreUri)
+      if(content) {
+        wikiComponent = (<div dangerouslySetInnerHTML={{__html: content.extract}}></div>)
+      }
+    }
+
     return (
       <Grid>
 
@@ -88,6 +104,8 @@ class GenreView extends Component {
           <Col md={8}>
             <Panel>
               <h1><small>genre</small> {this.props.genreGraph.genre.name}</h1>
+
+              {wikiComponent}
 
               <LinksView graph={this.props.genreGraph}/>
 

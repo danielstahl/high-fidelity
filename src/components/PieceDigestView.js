@@ -18,7 +18,7 @@ class PieceDigestView extends Component {
     return (
       <li key={this.props.pieceGraph.piece.slugs}>
         <PlayButton name={this.props.pieceGraph.piece.name}
-                    uris={this.props.pieceGraph.recordings[0].recording.uris.recordingUri.uri}
+                    uris={this.props.pieceGraph.recordings[0].recording.uris.recordingUri}
                     action={this.handlePieceCLick}/>
       </li>
     )

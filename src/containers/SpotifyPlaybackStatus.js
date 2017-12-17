@@ -50,8 +50,8 @@ class SpotifyPlaybackStatus extends Component {
         trackName = this.props.playbackStatus.state.track_window.current_track.name
         artistName = this.props.playbackStatus.state.track_window.current_track.artists[0].name;
       }
-      if(this.props.playbackStatus.state.context) {
-        contextName = this.props.playbackStatus.state.context.metadata.context_description
+      if(this.props.playbackStatus.state.context && this.props.playbackStatus.state.context.metadata.context_description) {
+        contextName = (<div>From this.props.playbackStatus.state.context.metadata.context_description</div>)
       }
       theComponent = (
         <Panel>
@@ -63,7 +63,7 @@ class SpotifyPlaybackStatus extends Component {
 
           <ProgressBar now={progress}/>
           <div>{trackName} by {artistName}</div>
-          <div>From {contextName}</div>
+          {contextName}
         </Panel>
       )
     }
