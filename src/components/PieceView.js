@@ -12,6 +12,7 @@ import Utils from '../services/Utils'
 import Builders from '../services/Builders'
 import Spotify from '../services/Spotify'
 import { connect } from 'react-redux'
+import Wikipedia from '../services/Wikipedia'
 
 class PieceView extends Component {
 
@@ -62,6 +63,10 @@ class PieceView extends Component {
 
   getSpotifyUriContent(spotifyUri) {
     return Spotify.getSpotifyUriContent(spotifyUri, this.props.spotifyUser, this.props.dispatch, this.props.spotifyUriContent)
+  }
+
+  getWikipediaUrlContent(wikipediaUrl) {
+    return Wikipedia.getWikipediaUrlContent(wikipediaUrl, this.props.dispatch, this.props.wikipediaUrlContent)
   }
 
   getRecordingView(piece, recordingGraph) {
@@ -120,6 +125,16 @@ class PieceView extends Component {
       )
     }
 
+    let wikiComponent
+
+    const wikipediaPieceUri = Builders.getUriHead(this.props.pieceGraph.piece, 'wikipedia')
+    if(wikipediaPieceUri) {
+      const content = this.getWikipediaUrlContent(wikipediaPieceUri)
+      if(content) {
+        wikiComponent = (<div dangerouslySetInnerHTML={{__html: content.extract}}></div>)
+      }
+    }
+
     return (
       <Grid>
         <Row>
@@ -136,6 +151,8 @@ class PieceView extends Component {
             <Panel>
               <h1>{this.props.pieceGraph.composer.name}</h1>
               <h2><small>piece</small> {this.props.pieceGraph.piece.name}</h2>
+
+              {wikiComponent}
 
               <LinksView graph={this.props.pieceGraph} />
 

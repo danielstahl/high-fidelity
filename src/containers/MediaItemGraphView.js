@@ -19,34 +19,39 @@ class MediaItemGraphView extends Component {
                            uriInfos={this.props.uriInfos}
                            dispatch={this.props.dispatch}
                            mediaItemHandler={this.props.mediaItemHandler}
-                           spotifyUriContent={this.props.spotifyUriContent}/>)
+                           spotifyUriContent={this.props.spotifyUriContent}
+                           wikipediaUrlContent={this.props.wikipediaUrlContent}/>)
       case 'artist':
         return (<ArtistView artistGraph={this.props.graph}
                             mediaItems={this.props.mediaItems}
                             uriInfos={this.props.uriInfos}
                             dispatch={this.props.dispatch}
                             mediaItemHandler={this.props.mediaItemHandler}
-                            spotifyUriContent={this.props.spotifyUriContent}/>)
+                            spotifyUriContent={this.props.spotifyUriContent}
+                            wikipediaUrlContent={this.props.wikipediaUrlContent}/>)
       case 'era':
         return (<EraView eraGraph={this.props.graph}
                          mediaItems={this.props.mediaItems}
                          uriInfos={this.props.uriInfos}
                          dispatch={this.props.dispatch}
-                         mediaItemHandler={this.props.mediaItemHandler}/>)
+                         mediaItemHandler={this.props.mediaItemHandler}
+                         wikipediaUrlContent={this.props.wikipediaUrlContent}/>)
       case 'composer':
         return (<ComposerView composerGraph={this.props.graph}
                               mediaItems={this.props.mediaItems}
                               uriInfos={this.props.uriInfos}
                               dispatch={this.props.dispatch}
                               mediaItemHandler={this.props.mediaItemHandler}
-                              spotifyUriContent={this.props.spotifyUriContent}/>)
+                              spotifyUriContent={this.props.spotifyUriContent}
+                              wikipediaUrlContent={this.props.wikipediaUrlContent}/>)
       case 'piece':
         return (<PieceView pieceGraph={this.props.graph}
                            mediaItems={this.props.mediaItems}
                            uriInfos={this.props.uriInfos}
                            dispatch={this.props.dispatch}
                            mediaItemHandler={this.props.mediaItemHandler}
-                           spotifyUriContent={this.props.spotifyUriContent}/>)
+                           spotifyUriContent={this.props.spotifyUriContent}
+                           wikipediaUrlContent={this.props.wikipediaUrlContent}/>)
       case 'root':
       default:
         return (<GenresMainView
@@ -92,7 +97,8 @@ const mapStateToProps = state => {
     graphType: state.mediaItemGraphReducers.graphType,
     uriInfos: state.uriInfoReducers,
     user: state.userStateReducers.user,
-    spotifyUriContent: state.spotifyUriContentReducers
+    spotifyUriContent: state.spotifyUriContentReducers,
+    wikipediaUrlContent: state.wikipediaUrlContentReducers
   }
 }
 

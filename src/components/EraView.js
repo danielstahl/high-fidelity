@@ -8,6 +8,8 @@ import * as actions from '../actions/index'
 import LinksView from './LinksView'
 import AddLinkForm from '../forms/AddLinkForm'
 import ComposerForm from '../forms/ComposerForm'
+import Wikipedia from '../services/Wikipedia'
+import Builders from '../services/Builders'
 
 class EraView extends Component {
   constructor(props) {
@@ -31,6 +33,10 @@ class EraView extends Component {
     this.props.dispatch(actions.setMediaItemGraph(undefined, 'root'))
   }
 
+  getWikipediaUrlContent(wikipediaUrl) {
+    return Wikipedia.getWikipediaUrlContent(wikipediaUrl, this.props.dispatch, this.props.wikipediaUrlContent)
+  }
+
   render() {
     let composers
     composers = this.props.eraGraph.composers.map(composer => {
@@ -40,6 +46,16 @@ class EraView extends Component {
         </li>
       )
     })
+
+    let wikiComponent
+
+    const wikipediaEraUri = Builders.getUriHead(this.props.eraGraph.era, 'wikipedia')
+    if(wikipediaEraUri) {
+      const content = this.getWikipediaUrlContent(wikipediaEraUri)
+      if(content) {
+        wikiComponent = (<div dangerouslySetInnerHTML={{__html: content.extract}}></div>)
+      }
+    }
 
     return (
       <Grid>
@@ -55,6 +71,7 @@ class EraView extends Component {
             <Panel>
               <h1><small>era</small> {this.props.eraGraph.era.name}</h1>
 
+              {wikiComponent}
               <LinksView graph={this.props.eraGraph} />
 
               <h2><small>Composers</small></h2>

@@ -55,7 +55,6 @@ class Spotify {
     }
   }
 
-
   static setupPlayer(dispatch, accessToken) {
     window.onSpotifyPlayerAPIReady = () => {
       const player = new window.Spotify.Player({
@@ -99,7 +98,6 @@ class Spotify {
       dispatch(actions.setSpotifyPlayer(player))
     }
     window.onSpotifyPlayerAPIReady()
-
   }
 
   static getSpotifyFetchUrl(spotifyUri) {
