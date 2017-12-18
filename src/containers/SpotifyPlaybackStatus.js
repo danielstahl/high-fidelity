@@ -4,6 +4,7 @@ import {
   Button, Glyphicon, ProgressBar, Panel
 } from 'react-bootstrap';
 import { connect } from 'react-redux'
+import Utils from '../services/Utils'
 
 class SpotifyPlaybackStatus extends Component {
 
@@ -13,6 +14,8 @@ class SpotifyPlaybackStatus extends Component {
     this.clickPause = this.clickPause.bind(this)
     this.clickNext = this.clickNext.bind(this)
     this.clickPrevious = this.clickPrevious.bind(this)
+    this.setCurrentProgress = this.setCurrentProgress.bind(this)
+    this.state = {progress: undefined}
   }
 
   clickPlay(event) {
@@ -35,6 +38,35 @@ class SpotifyPlaybackStatus extends Component {
     this.props.player.previousTrack()
   }
 
+  componentDidMount() {
+    this.timeoutID = setTimeout(this.setCurrentProgress, 2000)
+    this.intervalID = setInterval(this.setCurrentProgress, 2000)
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this.timeoutID)
+    clearInterval(this.intervalID)
+  }
+
+  setCurrentProgress() {
+    if(this.props.loggedIn && this.props.spotifyLoggedIn && this.props.playbackStatus.state) {
+      this.setState({ progress: this.getCurrentProgress()})
+    }
+  }
+
+  getCurrentProgress() {
+
+    let position
+    if(!this.props.playbackStatus.state.paused) {
+      const now = Utils.currentTimeMillis()
+      position = now - this.props.playbackStatus.currentTimeMillis + this.props.playbackStatus.state.position
+    } else {
+      position = this.props.playbackStatus.state.position
+    }
+
+    return (position / this.props.playbackStatus.state.duration) * 100;
+  }
+
   render() {
     let theComponent = null
     if(this.props.loggedIn && this.props.spotifyLoggedIn && this.props.playbackStatus.state) {
@@ -46,12 +78,13 @@ class SpotifyPlaybackStatus extends Component {
       }
       let progress, trackName, artistName, contextName;
       if(this.props.playbackStatus.state) {
-        progress = (this.props.playbackStatus.state.position / this.props.playbackStatus.state.duration) * 100;
+        progress = this.state.progress
         trackName = this.props.playbackStatus.state.track_window.current_track.name
         artistName = this.props.playbackStatus.state.track_window.current_track.artists[0].name;
       }
+    
       if(this.props.playbackStatus.state.context && this.props.playbackStatus.state.context.metadata.context_description) {
-        contextName = (<div>From this.props.playbackStatus.state.context.metadata.context_description</div>)
+        contextName = (<div><span className="text-muted"><i>from</i></span> {this.props.playbackStatus.state.context.metadata.context_description}</div>)
       }
       theComponent = (
         <Panel>
@@ -62,7 +95,8 @@ class SpotifyPlaybackStatus extends Component {
           </div>
 
           <ProgressBar now={progress}/>
-          <div>{trackName} by {artistName}</div>
+          <div>{trackName}</div>
+          <div><span className="text-muted"><i>by </i></span>{artistName}</div>
           {contextName}
         </Panel>
       )
