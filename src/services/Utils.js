@@ -33,6 +33,11 @@ class Utils {
       return ''
     }
   }
+
+  static currentTimeMillis() {
+    const currentDate = new Date()
+    return currentDate.getTime()
+  }
 }
 
 export default Utils
