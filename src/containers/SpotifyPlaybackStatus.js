@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 import {
-  Button, Glyphicon, ProgressBar, Panel
+  Button, Glyphicon, ProgressBar, Panel, Image
 } from 'react-bootstrap';
 import { connect } from 'react-redux'
 import Utils from '../services/Utils'
@@ -67,6 +67,16 @@ class SpotifyPlaybackStatus extends Component {
     return (position / this.props.playbackStatus.state.duration) * 100;
   }
 
+  getSmallestAlbumImage(images) {
+    return images.reduce((prev, next) => {
+      if(prev.height < next.height) {
+        return prev
+      } else {
+        return next
+      }
+    })
+  }
+
   render() {
     let theComponent = null
     if(this.props.loggedIn && this.props.spotifyLoggedIn && this.props.playbackStatus.state) {
@@ -76,13 +86,19 @@ class SpotifyPlaybackStatus extends Component {
       } else {
         player = (<Button bsStyle="link" onClick={this.clickPlay}><Glyphicon glyph="play" /></Button>)
       }
-      let progress, trackName, artistName, contextName;
+      let progress, trackName, artistName, contextName, albumImage
       if(this.props.playbackStatus.state) {
         progress = this.state.progress
         trackName = this.props.playbackStatus.state.track_window.current_track.name
-        artistName = this.props.playbackStatus.state.track_window.current_track.artists[0].name;
+        artistName = this.props.playbackStatus.state.track_window.current_track.artists[0].name
+        albumImage =  this.getSmallestAlbumImage(this.props.playbackStatus.state.track_window.current_track.album.images).url
       }
-    
+
+      let thumbnailComponent
+      if(albumImage) {
+        thumbnailComponent = (<Image src={albumImage} rounded />)
+      }
+
       if(this.props.playbackStatus.state.context && this.props.playbackStatus.state.context.metadata.context_description) {
         contextName = (<div><span className="text-muted"><i>from</i></span> {this.props.playbackStatus.state.context.metadata.context_description}</div>)
       }
@@ -95,7 +111,7 @@ class SpotifyPlaybackStatus extends Component {
           </div>
 
           <ProgressBar now={progress}/>
-          <div>{trackName}</div>
+          <div>{thumbnailComponent} {trackName}</div>
           <div><span className="text-muted"><i>by </i></span>{artistName}</div>
           {contextName}
         </Panel>

@@ -79,7 +79,7 @@ class ArtistView extends Component {
     albums = this.props.artistGraph.albums.map(album => {
       const albumThumbnail = this.getAlbumThumbnail(album.album)
       return (
-        <li key={album.slugs}>
+        <li key={album.album.slugs}>
           <AlbumDigestView albumGraph={album}
                            mediaItems={this.props.mediaItems}
                            dispatch={this.props.dispatch}
