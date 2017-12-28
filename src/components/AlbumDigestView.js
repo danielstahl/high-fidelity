@@ -11,6 +11,7 @@ class AlbumDigestView extends Component {
   constructor(props) {
     super(props)
     this.handleArtistClick = this.handleArtistClick.bind(this)
+    this.handleAlbumClick = this.handleAlbumClick.bind(this)
   }
 
   handleArtistClick(artistSlugs) {
@@ -19,6 +20,10 @@ class AlbumDigestView extends Component {
 
   handleComposerClick(composerSlugs) {
     this.props.dispatch(actions.setMediaItemGraph(composerSlugs, 'composer'))
+  }
+
+  handleAlbumClick(albumSlugs) {
+    this.props.dispatch(actions.setMediaItemGraph(albumSlugs, 'album'))
   }
 
   getSpotifyUri(uris) {
@@ -47,9 +52,9 @@ class AlbumDigestView extends Component {
 
     if(spotifyUri) {
       let uris = [spotifyUri.uri];
-      nameComponent = (<PlayButton name={this.props.albumGraph.album.name} uris={uris}/>)
+      nameComponent = (<PlayButton action={() => this.handleAlbumClick(this.props.albumGraph.album.slugs)} name={this.props.albumGraph.album.name} uris={uris}/>)
     } else {
-      nameComponent = (<div>{this.props.albumGraph.album.name}</div>)
+      nameComponent = (<Button bsStyle="link" onCLick={() => this.handleAlbumClick(this.props.albumGraph.album.slugs)}>{this.props.albumGraph.album.name}</Button>)
     }
 
     let thumbnailComponent

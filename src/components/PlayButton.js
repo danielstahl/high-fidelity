@@ -20,8 +20,17 @@ class PlayButton extends Component {
     let body
     if(this.props.uris[0].startsWith('spotify:track')) {
       body = {uris: this.props.uris}
+    } else if(this.props.offset) {
+      body = {
+        context_uri: this.props.uris[0],
+        offset: {
+          position: this.props.offset
+        }
+      }
     } else {
-      body = {context_uri: this.props.uris[0]}
+      body = {
+        context_uri: this.props.uris[0]
+      }
     }
     fetch("https://api.spotify.com/v1/me/player/play?device_id=" + deviceId, {
       method: "put",
@@ -46,8 +55,10 @@ class PlayButton extends Component {
     let result
     if(this.props.action) {
       result = (<div><Button bsStyle="link" onClick={this.props.action}>{this.props.name}</Button> <Button bsStyle="link" onClick={this.clickPlay}><Glyphicon glyph="play" /></Button></div>)
-    } else {
+    } else if(this.props.name) {
       result = (<div>{this.props.name} <Button bsStyle="link" onClick={this.clickPlay}><Glyphicon glyph="play" /></Button></div>)
+    } else {
+      result = (<Button bsStyle="link" onClick={this.clickPlay}><Glyphicon glyph="play" /></Button>)
     }
     return result
   }
