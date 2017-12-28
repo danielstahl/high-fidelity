@@ -211,7 +211,12 @@ class Builders {
     }
   }
 
-  static getAlbumGraph(albumMediaItem, mediaItems, uriInfos) {
+  static getAlbumGraph(slugs, mediaItems, uriInfos) {
+    const albumMediaItem = Builders.findBySlugs(slugs, mediaItems)
+    return Builders.makeAlbumGraph(albumMediaItem, mediaItems, uriInfos)
+  }
+
+  static makeAlbumGraph(albumMediaItem, mediaItems, uriInfos) {
     let artists
     if(albumMediaItem.tags['artist']) {
       artists = albumMediaItem.tags['artist']
@@ -220,7 +225,6 @@ class Builders {
     } else {
       artists = []
     }
-
 
     let composers
     if(albumMediaItem.tags['composer']) {
@@ -231,6 +235,9 @@ class Builders {
       composers = []
     }
 
+    const genreSlug = Builders.getTagHead(albumMediaItem, 'genre')
+    const genreMediaItem = Builders.findBySlugs(genreSlug, mediaItems)
+
     const uris = Builders.toUris(albumMediaItem, uriInfos)
 
     return {
@@ -238,6 +245,7 @@ class Builders {
       album: Builders.makeAlbum(albumMediaItem),
       artists: artists,
       composers: composers,
+      genre: Builders.makeGenre(genreMediaItem),
       uris: uris
     }
   }
@@ -274,7 +282,7 @@ class Builders {
       uris: uris,
       albums: albumMediaItems.map(
         albumMediaItem =>
-        Builders.getAlbumGraph(albumMediaItem, mediaItems, uriInfos))
+        Builders.makeAlbumGraph(albumMediaItem, mediaItems, uriInfos))
     }
   }
 
@@ -447,7 +455,7 @@ class Builders {
       uris: uris,
       albums: albumMediaItems.map(
         albumMediaItem =>
-        Builders.getAlbumGraph(albumMediaItem, mediaItems, uriInfos)),
+        Builders.makeAlbumGraph(albumMediaItem, mediaItems, uriInfos)),
       form: forms
     }
   }
