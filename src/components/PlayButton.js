@@ -52,11 +52,22 @@ class PlayButton extends Component {
   }
 
   render() {
+    let currentTrack
+    let theStyle
+    if(this.props.playbackStatus && this.props.playbackStatus.state && this.props.playbackStatus.state.track_window) {
+      currentTrack = this.props.playbackStatus.state.track_window.current_track.uri
+      if(currentTrack === this.props.uris[0]) {
+        theStyle = "text-primary"
+      } else {
+        theStyle = "text-dark"
+      }
+    }
+
     let result
     if(this.props.action) {
-      result = (<div><Button bsStyle="link" onClick={this.props.action}>{this.props.name}</Button> <Button bsStyle="link" onClick={this.clickPlay}><Glyphicon glyph="play" /></Button></div>)
+      result = (<div className={theStyle}><Button bsStyle="link" onClick={this.props.action}>{this.props.name}</Button> <Button bsStyle="link" onClick={this.clickPlay}><Glyphicon glyph="play" /></Button></div>)
     } else if(this.props.name) {
-      result = (<div>{this.props.name} <Button bsStyle="link" onClick={this.clickPlay}><Glyphicon glyph="play" /></Button></div>)
+      result = (<div className={theStyle}>{this.props.name} <Button bsStyle="link" onClick={this.clickPlay}><Glyphicon glyph="play" /></Button></div>)
     } else {
       result = (<Button bsStyle="link" onClick={this.clickPlay}><Glyphicon glyph="play" /></Button>)
     }

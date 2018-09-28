@@ -3,19 +3,19 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "bootstrap": "3",
+    "bootstrap": "^3.3.7",
     "dompurify": "^1.0.3",
-    "firebase": "^4.6.1",
-    "query-string": "^5.0.1",
-    "react": "^16.0.0",
-    "react-bootstrap": "^0.31.5",
-    "react-bootstrap-typeahead": "^2.0.0",
+    "firebase": "^5.5.2",
+    "query-string": "^6.1.0",
+    "react": "^16.5.0",
+    "react-bootstrap": "^0.32.4",
+    "react-bootstrap-typeahead": "^3.2.3",
     "react-dom": "^16.0.0",
     "react-redux": "^5.0.6",
     "react-router-dom": "^4.2.2",
-    "react-scripts": "1.0.17",
+    "react-scripts": "2.0.1",
     "reactfire": "^1.0.0",
-    "redux": "^3.7.2",
+    "redux": "^4.0.0",
     "redux-thunk": "^2.2.0",
     "slug": "^0.9.1",
     "uuid-base62": "^0.1.0"
@@ -25,5 +25,11 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
-  }
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
 }
