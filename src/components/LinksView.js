@@ -9,7 +9,7 @@ class LinksView extends Component {
         const uris = [theUri.uri]
         return (<li key={theUri.uri}><PlayButton name={theUri.name} uris={uris}/></li>)
       } else {
-        return (<li key={theUri.uri}><a target="_blank" href={theUri.url}>{theUri.name}</a></li>)
+        return (<li key={theUri.uri}><a target="_blank" rel="noopener noreferrer" href={theUri.url}>{theUri.name}</a></li>)
       }
     })
 
